@@ -1,0 +1,6 @@
+# tex files
+*.aux
+*.dvi
+*.log
+*.out
+*.pdf
