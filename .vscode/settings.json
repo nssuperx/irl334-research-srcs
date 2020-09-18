@@ -1,0 +1,31 @@
+{
+    "latex-workshop.latex.autoBuild.run":"onSave",
+    "latex-workshop.latex.autoClean.run": "onBuilt",
+    "latex-workshop.intellisense.package.enabled": true,
+    "latex-workshop.latex.recipes": [
+        {
+            "name": "platex+dvipdfmx",
+            "tools": [
+                "platex",
+                "dvipdfmx"
+            ]
+        }
+    ],
+    "latex-workshop.latex.tools": [
+        {
+            "name": "platex",
+            "command": "platex",
+            "args": [
+                "-interaction=nonstopmode",
+                "%DOC%"
+            ]
+        },
+        {
+            "name": "dvipdfmx",
+            "command": "dvipdfmx",
+            "args": [
+                "%DOC%"
+            ]
+        }
+    ]
+}
