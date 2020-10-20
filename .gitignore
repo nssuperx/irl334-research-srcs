@@ -9,3 +9,6 @@
 
 # image files
 *.png
+
+# python env
+env
