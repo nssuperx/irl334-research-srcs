@@ -29,33 +29,42 @@ def main():
 
     # ここからグラフ作成
     sample_num = 5
-    sample_list = np.random.randint(0, m, size=sample_num)
+    sample_index_list = np.random.randint(0, m, size=sample_num)
     figrow_master = sample_num + 1
-    figcol_master = r + 1
-    fig = plt.figure(figsize=(figrow_master, figcol_master))
+    figcol_master = r + 2
+    fig = plt.figure()
     plt.rcParams['axes.xmargin'] = 0
     gs_master = GridSpec(nrows=figrow_master, ncols=figcol_master)
 
     # 選択したオリジナル画像
     gs_1 = GridSpecFromSubplotSpec(nrows=sample_num, ncols=1, subplot_spec=gs_master[0:sample_num, 0])
     for i in range(0, sample_num):
-        img = V[:, sample_list[i]].reshape(28, 28)
+        img = V[:, sample_index_list[i]].reshape(28, 28)
         ax = fig.add_subplot(gs_1[i, :])
         ax.axes.xaxis.set_visible(False)
         ax.axes.yaxis.set_visible(False)
         ax.imshow(img)
 
     # 棒グラフ
-    gs_2 = GridSpecFromSubplotSpec(nrows=sample_num, ncols=r, subplot_spec=gs_master[0:sample_num, 1:figcol_master])
+    gs_2 = GridSpecFromSubplotSpec(nrows=sample_num, ncols=r, subplot_spec=gs_master[0:sample_num, 1:figcol_master-1])
     for i in range(0, sample_num):
         ax = fig.add_subplot(gs_2[i, :])
         ax.axes.xaxis.set_visible(False)
-        ax.bar(range(r), H[:, sample_list[i]])
+        ax.bar(range(r), H[:, sample_index_list[i]])
+
+    # 復元画像
+    gs_3 = GridSpecFromSubplotSpec(nrows=sample_num, ncols=1, subplot_spec=gs_master[0:sample_num, figcol_master-1])
+    for i in range(0, sample_num):
+        img = np.dot(W, H[:, sample_index_list[i]]).reshape(28, 28)
+        ax = fig.add_subplot(gs_3[i, :])
+        ax.axes.xaxis.set_visible(False)
+        ax.axes.yaxis.set_visible(False)
+        ax.imshow(img)
 
     # 基底画像
-    gs_3 = GridSpecFromSubplotSpec(nrows=1, ncols=r, subplot_spec=gs_master[sample_num, 1:figcol_master])
+    gs_4 = GridSpecFromSubplotSpec(nrows=1, ncols=r, subplot_spec=gs_master[sample_num, 1:figcol_master-1])
     for i in range(0, r):
-        ax = fig.add_subplot(gs_3[:, i])
+        ax = fig.add_subplot(gs_4[:, i])
         ax.axes.xaxis.set_visible(False)
         ax.axes.yaxis.set_visible(False)
         ax.imshow(W_image[i])
