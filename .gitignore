@@ -10,5 +10,8 @@
 # image files
 *.png
 
+# figure directory
+figs
+
 # python env
 env
