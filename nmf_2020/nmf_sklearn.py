@@ -8,6 +8,10 @@ from sklearn.decomposition import NMF
 # http://yann.lecun.com/exdb/mnist/
 # The training set contains 60000 examples, and the test set 10000 examples.
 
+# ValueError: Key backend: 'qtagg' is not a valid value for backend; supported values are
+# ['GTK3Agg', 'GTK3Cairo', 'MacOSX', 'nbAgg', 'Qt4Agg', 'Qt4Cairo', 'Qt5Agg', 'Qt5Cairo', 'TkAgg', 'TkCairo', 'WebAgg',
+# 'WX', 'WXAgg', 'WXCairo', 'agg', 'cairo', 'pdf', 'pgf', 'ps', 'svg', 'template']
+
 n = 28 * 28 # 画素数
 m = 10000    # 画像数
 r = 10
