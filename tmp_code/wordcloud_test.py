@@ -6,8 +6,9 @@ from wordcloud import WordCloud
 def create_wordcloud(text):
     fontpath = 'NotoSansCJK-Regular.ttc'
     stop_words_en = [u'am', u'is', u'of', u'and', u'the', u'to', u'it', \
-                  u'for', u'in', u'as', u'or', u'are', u'be', u'this', u'that', \
-                  u'H', u'W', u'by', u'will', u'there', u'was', u'a', u'an', u'Fig']
+                    u'for', u'in', u'as', u'or', u'are', u'be', u'this', u'that', \
+                    u'H', u'W', u'by', u'will', u'there', u'was', u'a', u'an', \
+                    u'Fig', u'from', u'about', u'two']
 
     wordcloud = WordCloud(background_color="white",
                           font_path=fontpath,
