@@ -11,29 +11,37 @@ n = 300 # 語彙数
 m = 100 # 記事数
 r = 200 # 基底
 
+article_number = 0 # 記事番号
+w_num = 10 # 頻度の高いwを，いくつ表示したいか
+h_num = 5 # hをいくつ表示したいか
+
 def main():
+    # データを準備
     news = fetch_20newsgroups(data_home="newsgroups", subset="test", remove=("headers", "footers", "quotes"))
     X, X_test, label, label_test = train_test_split(news.data, news.target, train_size=m, random_state=0, shuffle=True)
 
+    # bag of words を作成
     countVectorizer = CountVectorizer(stop_words="english", min_df=2, preprocessor=remove_number, max_features=n)
     bags = countVectorizer.fit_transform(X)
 
+    # 語彙を取得
     features = countVectorizer.get_feature_names()
-    # df = pd.DataFrame(bags.toarray(), columns=features)
-    # print(df.head())
-    print("bags shape:" + str(bags.shape))
 
+    print("bags shape:" + str(bags.shape))
+    
+    # 論文と揃えるため，転置する
     V = bags.T
+
+    # NMF
     nmf = NMF(n_components=r, max_iter=400, random_state=2)
     W = nmf.fit_transform(V)
     H = nmf.components_
+
     print("W shape:" + str(W.shape))
     print("H shape:" + str(H.shape))
-    
-    df = pd.DataFrame(W.T, columns=features)
-    print(df.head())
 
-
+    # 気合で行列を整形
+    # タプルにしてソートしてる
     W_sorted = []
     for i in range(r):
         tmp_list = []
@@ -50,16 +58,22 @@ def main():
         tmp_list.sort(key=lambda x: x[0], reverse=True)
         H_sorted.append(tmp_list)
     
-    for i in range(8):
-        print("%.2f %s" % (W_sorted[0][i][0], W_sorted[0][i][1]))
+    # ここで表を作成
+    words_list = []
+    for i in range(w_num):
+        tmp_horizontal_list = []
+        for j in range(h_num):
+            tmp_horizontal_list.append(W_sorted[H_sorted[article_number][j][1]][i][1])
+        words_list.append(tmp_horizontal_list)
 
-    for i in range(20):
-        print(H_sorted[0][i])
+    hidden_values = []
+    for i in range(h_num):
+        hidden_values.append(H_sorted[article_number][i][0])
 
-    for i in range(8):
-        print("%.2f %s %.2f %s %.2f %s %.2f %s " % (W_sorted[167][i][0], W_sorted[167][i][1], W_sorted[181][i][0], W_sorted[181][i][1], W_sorted[50][i][0], W_sorted[50][i][1], W_sorted[18][i][0], W_sorted[18][i][1]))
+    df = pd.DataFrame(words_list, columns=hidden_values)
+    print(df)
 
-    print(X[0])
+    print(X[article_number])
     
 
 def remove_number(tokens):
