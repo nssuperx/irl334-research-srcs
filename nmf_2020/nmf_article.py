@@ -7,17 +7,17 @@ from sklearn.decomposition import NMF
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 
-n = 300 # 語彙数
-m = 100 # 記事数
+n = 15000 # 語彙数
+m = 10000 # 記事数
 r = 200 # 基底
 
-article_number = 0 # 記事番号
+article_number = 1 # 記事番号
 w_num = 10 # 頻度の高いwを，いくつ表示したいか
 h_num = 5 # hをいくつ表示したいか
 
 def main():
     # データを準備
-    news = fetch_20newsgroups(data_home="newsgroups", subset="test", remove=("headers", "footers", "quotes"))
+    news = fetch_20newsgroups(data_home="newsgroups", subset="all", remove=("headers", "footers", "quotes"))
     X, X_test, label, label_test = train_test_split(news.data, news.target, train_size=m, random_state=0, shuffle=True)
 
     # bag of words を作成
