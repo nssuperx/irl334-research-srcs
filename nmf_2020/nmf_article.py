@@ -7,7 +7,7 @@ from sklearn.decomposition import NMF
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 
-N = 150 # 語彙数
+N = 30000 # 語彙数
 M = 100 # 記事数
 r = 200 # 基底
 
@@ -18,12 +18,12 @@ h_num = 5 # hをいくつ表示したいか
 def main():
     # データを準備
     news = fetch_20newsgroups(data_home="newsgroups", subset="all", remove=("headers", "footers", "quotes"))
-    X, X_test, label, label_test = train_test_split(news.data, news.target, train_size=M, random_state=0, shuffle=True)
-    # X, X_test, label, label_test = train_test_split(news.data, news.target, train_size=0.999, random_state=0, shuffle=True)
+    # X, X_test, label, label_test = train_test_split(news.data, news.target, train_size=M, random_state=0, shuffle=True)
+    X, X_test, label, label_test = train_test_split(news.data, news.target, train_size=0.999, random_state=0, shuffle=True)
 
     # bag of words を作成
-    # countVectorizer = CountVectorizer(stop_words="english", min_df=2, preprocessor=remove_number, max_features=N)
-    countVectorizer = CountVectorizer(stop_words="english", preprocessor=remove_number, max_features=None)
+    countVectorizer = CountVectorizer(stop_words="english", min_df=2, preprocessor=remove_number, max_features=N)
+    # countVectorizer = CountVectorizer(stop_words="english", preprocessor=remove_number, max_features=None)
     # countVectorizer = CountVectorizer(min_df=2, preprocessor=remove_number, max_features=None)
     bags = countVectorizer.fit_transform(X)
 
@@ -94,7 +94,7 @@ def main():
     fig, ax =plt.subplots()
     tb = ax.table(cellText=words_list, colLabels=hidden_values, loc='center')
     for i in range(len(hidden_values)):
-        tb[0,i].set_facecolor('#252525')
+        tb[0,i].set_facecolor('#555555')
         tb[0,i].set_text_props(color='w')
     tb.auto_set_font_size(False)
     tb.set_fontsize(14)
