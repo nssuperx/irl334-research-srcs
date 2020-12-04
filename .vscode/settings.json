@@ -2,15 +2,48 @@
     "latex-workshop.latex.autoBuild.run":"onSave",
     "latex-workshop.latex.autoClean.run": "onBuilt",
     "latex-workshop.intellisense.package.enabled": true,
+    "latex-workshop.latex.clean.fileTypes": [
+        "*.aux",
+        "*.bbl",
+        "*.blg",
+        "*.idx",
+        "*.ind",
+        "*.lof",
+        "*.lot",
+        "*.out",
+        "*.toc",
+        "*.acn",
+        "*.acr",
+        "*.alg",
+        "*.glg",
+        "*.glo",
+        "*.gls",
+        "*.ist",
+        "*.fls",
+        "*.log",
+        "*.fdb_latexmk",
+        "*.snm",
+        "*.nav",
+        "*.dvi",
+        "*.synctex.gz"
+    ],
     "latex-workshop.latex.recipes": [
+        {
+            "name": "latexmk",
+            "tools": [
+                "latexmk"
+            ]
+        },
         {
             "name": "platex+dvipdfmx",
             "tools": [
                 "platex",
+                "pbibtex",
+                "platex",
                 "platex",
                 "dvipdfmx"
             ]
-        }
+        },
     ],
     "latex-workshop.latex.tools": [
         {
@@ -27,6 +60,30 @@
             "args": [
                 "%DOC%"
             ]
-        }
+        },
+        {
+            "name": "bibtex",
+            "command": "bibtex",
+            "args": [
+                "%DOCFILE%"
+            ]
+        },
+        {
+            "name": "pbibtex",
+            "command": "pbibtex",
+            "args": [
+                "-kanji=utf8",
+                "%DOCFILE%"
+            ]
+        },
+        {
+            "name": "latexmk",
+            "command": "latexmk",
+            "args": [
+                "-silent",
+                "-outdir=%OUTDIR%",
+                "%DOC%"
+            ],
+        },
     ]
 }
