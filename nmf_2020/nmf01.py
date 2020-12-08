@@ -16,7 +16,7 @@ n = 28 * 28 # 画素数
 m = 1000    # 画像数
 r = 10
 
-iteration = 10
+iteration = 50
 
 def main():
     mnist_image, labels = setup_mnist()
@@ -80,14 +80,13 @@ def update(V, W, H):
             #     tmp_sum += (V[i][mu] / WH[i][mu]) * H[a][mu]
             W[i][a] = W[i][a] * tmp_sum
 
+    W_tmp = np.copy(W) # 大事
     for i in range(n):
-        W_col_sum = np.sum(W[i]) + epsilon
-        # for a in range(r):
-        #     tmp_sum = 0
+        for a in range(r):
+            tmp_sum = np.sum(W_tmp[:,a]) + epsilon
         #     for j in range(m):
         #         tmp_sum += W[j][a]
-        #     W[i][a] = W[i][a] / tmp_sum
-        W[i] = W[i] / W_col_sum
+            W[i][a] = W[i][a] / tmp_sum
 
     WH = np.dot(W, H) + epsilon
     for a in range(r):
@@ -97,8 +96,8 @@ def update(V, W, H):
             #     tmp_sum += W[i][a] * V[i][mu] / WH[i][mu]
             H[a][mu] = H[a][mu] * tmp_sum
 
-    # W = W * np.dot(V, H) / np.dot(np.dot(W, H.T), H)
-    # H = H * np.dot(W.T, V).T / np.dot(W.T, np.dot(W, H.T)).T
+    # W = W * np.dot(V, H.T) / np.dot(np.dot(W, H) + epsilon, H.T)
+    # H = H * np.dot(W.T, V) / np.dot(W.T, np.dot(W, H)) + epsilon
     return W, H
 
 
