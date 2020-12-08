@@ -9,16 +9,23 @@ from torchvision.datasets import MNIST
 # http://yann.lecun.com/exdb/mnist/
 # The training set contains 60000 examples, and the test set 10000 examples.
 
+# EPSILON = np.finfo(np.float32).eps
+epsilon = 1e-7
+
 n = 28 * 28 # 画素数
 m = 1000    # 画像数
 r = 10
 
 def main():
-    V, labels = setup_mnist()
-    # V = np.dot(V, 256)
+    mnist_image, labels = setup_mnist()
+    V = mnist_image.T
     # print(V[0])
     W = np.random.rand(n, r)
     H = np.random.rand(r, m)
+
+    print("V shape:" + str(V.shape))
+    print("W shape:" + str(W.shape))
+    print("H shape:" + str(H.shape))
     
     for i in range(10):
         print("iter:%d" % (i))
@@ -54,35 +61,40 @@ def setup_mnist():
     return mnist_image, labels.numpy()
 
 '''
-\mu番目の「例題」 $\mu = 1,2, ..., n$
-i番目の「ピクセル」 $i = 1,2, ..., m$
+\mu番目の「例題」 $\mu = 1,2, ..., m$
+i番目の「ピクセル」 $i = 1,2, ..., n$
 a番目の「基底」 $a = 1,2, ..., r$
 '''
 # 値更新
 def update(V, W, H):
     print(W)
-    print(H)
     input()
-    for i in range(m):
+    WH = np.dot(W, H) + epsilon
+    print("WH shape:" + str(WH.shape))
+    for i in range(n):
         for a in range(r):
-            tmp_sum = 0
-            for mu in range(n):
-                tmp_sum += (V[i][mu] / np.dot(W,H)[i][mu]) * H[a][mu]
+            tmp_sum = np.sum((V[i] / WH[i]) * H[a])
+            # for mu in range(n):
+            #     tmp_sum += (V[i][mu] / WH[i][mu]) * H[a][mu]
             W[i][a] = W[i][a] * tmp_sum
 
-    for i in range(m):
-        for a in range(r):
-            tmp_sum = 0
-            for j in range(m):
-                tmp_sum += W[j][a]
-            W[i][a] = W[i][a] / tmp_sum
+    for i in range(n):
+        W_col_sum = np.sum(W[i]) + epsilon
+        # for a in range(r):
+        #     tmp_sum = 0
+        #     for j in range(m):
+        #         tmp_sum += W[j][a]
+        #     W[i][a] = W[i][a] / tmp_sum
+        W[i] = W[i] / W_col_sum
 
+    WH = np.dot(W, H) + epsilon
     for a in range(r):
-        for mu in range(n):
-            tmp_sum = 0
-            for i in range(m):
-                tmp_sum += W[i][a] * V[i][mu] / np.dot(W,H)[i][mu]
+        for mu in range(m):
+            tmp_sum = np.sum(W[:,a] * (V[:,mu] / WH[:,mu]))
+            # for i in range(n):
+            #     tmp_sum += W[i][a] * V[i][mu] / WH[i][mu]
             H[a][mu] = H[a][mu] * tmp_sum
+
     # W = W * np.dot(V, H) / np.dot(np.dot(W, H.T), H)
     # H = H * np.dot(W.T, V).T / np.dot(W.T, np.dot(W, H.T)).T
     return W, H
