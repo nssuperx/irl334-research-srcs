@@ -16,6 +16,8 @@ n = 28 * 28 # 画素数
 m = 1000    # 画像数
 r = 10
 
+iteration = 10
+
 def main():
     mnist_image, labels = setup_mnist()
     V = mnist_image.T
@@ -27,18 +29,21 @@ def main():
     print("W shape:" + str(W.shape))
     print("H shape:" + str(H.shape))
     
-    for i in range(10):
+    for i in range(iteration):
         print("iter:%d" % (i))
         W, H = update(V, W, H)
 
-    """
-    確認!!
-    tmp = np.random.randint(0,m)
-    npimg = V[tmp].reshape((28, 28))
-    print(labels[tmp])
-    plt.imshow(npimg, cmap='gray')
+    
+    # 確認!!
+    sample_index = np.random.randint(0,m)
+    npimg = V[:,sample_index].reshape((28, 28))
+    print(labels[sample_index])
+    plt.imshow(npimg)
     plt.show()
-    """
+    
+    npimg = (np.dot(W,H[:,sample_index])).reshape((28, 28))
+    plt.imshow(npimg)
+    plt.show()
 
 
 def setup_mnist():
@@ -67,10 +72,7 @@ a番目の「基底」 $a = 1,2, ..., r$
 '''
 # 値更新
 def update(V, W, H):
-    print(W)
-    input()
     WH = np.dot(W, H) + epsilon
-    print("WH shape:" + str(WH.shape))
     for i in range(n):
         for a in range(r):
             tmp_sum = np.sum((V[i] / WH[i]) * H[a])
