@@ -16,11 +16,12 @@ r = 10
 def main():
     V, labels = setup_mnist()
     # V = np.dot(V, 256)
-    print(V[0])
-    W = np.random.rand(m, r)
-    H = np.random.rand(n, r)
+    # print(V[0])
+    W = np.random.rand(n, r)
+    H = np.random.rand(r, m)
     
     for i in range(10):
+        print("iter:%d" % (i))
         W, H = update(V, W, H)
 
     """
@@ -52,13 +53,38 @@ def setup_mnist():
 
     return mnist_image, labels.numpy()
 
+'''
+\mu番目の「例題」 $\mu = 1,2, ..., n$
+i番目の「ピクセル」 $i = 1,2, ..., m$
+a番目の「基底」 $a = 1,2, ..., r$
+'''
 # 値更新
 def update(V, W, H):
     print(W)
     print(H)
     input()
-    W = W * np.dot(V, H) / np.dot(np.dot(W, H.T), H)
-    H = H * np.dot(W.T, V).T / np.dot(W.T, np.dot(W, H.T)).T
+    for i in range(m):
+        for a in range(r):
+            tmp_sum = 0
+            for mu in range(n):
+                tmp_sum += (V[i][mu] / np.dot(W,H)[i][mu]) * H[a][mu]
+            W[i][a] = W[i][a] * tmp_sum
+
+    for i in range(m):
+        for a in range(r):
+            tmp_sum = 0
+            for j in range(m):
+                tmp_sum += W[j][a]
+            W[i][a] = W[i][a] / tmp_sum
+
+    for a in range(r):
+        for mu in range(n):
+            tmp_sum = 0
+            for i in range(m):
+                tmp_sum += W[i][a] * V[i][mu] / np.dot(W,H)[i][mu]
+            H[a][mu] = H[a][mu] * tmp_sum
+    # W = W * np.dot(V, H) / np.dot(np.dot(W, H.T), H)
+    # H = H * np.dot(W.T, V).T / np.dot(W.T, np.dot(W, H.T)).T
     return W, H
 
 
