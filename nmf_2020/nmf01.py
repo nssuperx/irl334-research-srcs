@@ -29,11 +29,19 @@ def main():
     print("W shape:" + str(W.shape))
     print("H shape:" + str(H.shape))
     
-    for i in range(iteration):
-        print("iter:%d" % (i))
-        W, H = update(V, W, H)
+    F_list = []
 
-    
+    for i in range(iteration):
+        W, H = update(V, W, H)
+        WH = np.dot(W, H) + epsilon
+        log_WH = np.log(WH)
+        F = np.sum(np.multiply(V, log_WH) - WH)
+        F_list.append(F)
+        print("iter:%d F:%f" % (i, F))
+
+    plt.plot(range(iteration), F_list)
+    plt.show()
+
     # 確認!!
     sample_index = np.random.randint(0,m)
     npimg = V[:,sample_index].reshape((28, 28))
@@ -80,7 +88,7 @@ def update(V, W, H):
             #     tmp_sum += (V[i][mu] / WH[i][mu]) * H[a][mu]
             W[i][a] = W[i][a] * tmp_sum
 
-    W_tmp = np.copy(W) # 大事
+    W_tmp = np.copy(W) # 大事 参照渡し
     for i in range(n):
         for a in range(r):
             tmp_sum = np.sum(W_tmp[:,a]) + epsilon
