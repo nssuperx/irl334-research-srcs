@@ -23,16 +23,10 @@ class NMF(torch.autograd.Function):
     @staticmethod
     def backward(ctx, output):
         V, W, H = ctx.saved_tensors
-        grad_W = grad_H = None
+        dF_dW = None
+        dF_dH = None
 
-        if ctx.needs_input_grad[0]:
-            grad_input = grad_output.mm(weight)
-        if ctx.needs_input_grad[1]:
-            grad_weight = grad_output.t().mm(input)
-        if bias is not None and ctx.needs_input_grad[2]:
-            grad_bias = grad_output.sum(0)
-
-        return grad_input, grad_weight, grad_bias
+        return dF_dW, dF_dH
 
 def main():
     mnist_image, labels = setup_mnist()
