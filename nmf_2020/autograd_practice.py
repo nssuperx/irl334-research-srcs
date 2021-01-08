@@ -10,52 +10,58 @@ xとyを当てる
 """
 
 mu = 0.01
-iteration = 1000
+iteration = 100
 
 def main():
     target_z = torch.tensor(12, requires_grad=False)
     target_x = torch.tensor(3, requires_grad=False)
     target_y = torch.tensor(4, requires_grad=False)
 
-    x = torch.rand(1, requires_grad=True)
-    y = torch.rand(1, requires_grad=True)
+    for start_x in range(15):
+        for start_y in range(15):
 
-    print("x:" + str(x))
-    print("y:" + str(y))
+            x = torch.tensor(float(start_x), requires_grad=True)
+            y = torch.tensor(float(start_y), requires_grad=True)
 
-    # klDivLoss = torch.nn.KLDivLoss()
+            # print("x:" + str(x))
+            # print("y:" + str(y))
 
-    # ログ用リスト
-    x_LOG = []
-    y_LOG = []
-    dist_LOG = []
+            # klDivLoss = torch.nn.KLDivLoss()
 
-    for i in range(iteration):
-        # 距離を計算
-        distance = torch.dist(target_z, x * y)
-        # distance = klDivLoss(target_z, x * y)
-        dist_LOG.append(distance.data)
+            # ログ用リスト
+            x_LOG = []
+            y_LOG = []
 
-        # 微分
-        distance.backward()
+            for i in range(iteration):
+                # 距離を計算
+                # distance = torch.dist(target_z, x * y)
+                distance = torch.sqrt((target_z - x * y)**2)
+                # distance = klDivLoss(target_z, x * y)
 
-        x_LOG.append(x.data.clone())
-        y_LOG.append(y.data.clone())
+                # 微分
+                distance.backward()
 
-        # 引く（勾配の向きにずらす）
-        x.data.sub_(mu * x.grad.data)
-        y.data.sub_(mu * y.grad.data)
+                x_LOG.append(x.data.clone())
+                y_LOG.append(y.data.clone())
 
-        # 微分をゼロに．ここよくわからない．
-        x.grad.data.zero_()
-        y.grad.data.zero_()
+                # 引く（勾配の向きにずらす）
+                x.data.sub_(mu * x.grad.data)
+                y.data.sub_(mu * y.grad.data)
 
-        if((i+1) % 10 == 0):
-            print("iter:" + str(i) + "   x:"+ str(x.data) + "   y:"+ str(y.data))
+                # 微分をゼロに．ここよくわからない．
+                x.grad.data.zero_()
+                y.grad.data.zero_()
 
-    plt.plot(x_LOG, y_LOG)
-    plt.show()
-    plt.plot(range(iteration), dist_LOG)
+                """
+                if((i+1) % 10 == 0):
+                    print("iter:" + str(i) + "   x:"+ str(x.data) + "   y:"+ str(y.data))
+                """
+
+
+            plt.plot(x_LOG, y_LOG)
+
+    plt.xlabel("x")
+    plt.ylabel("y")
     plt.show()
         
 

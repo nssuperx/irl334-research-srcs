@@ -21,11 +21,50 @@ iteration = 50
 
 def main():
     mnist_image, labels = setup_mnist()
-    # tensor型でやり直す
-    # V = mnist_image.T   # 正規化済み[0,1]
+    V = torch.tensor(mnist_image.T)   # 正規化済み[0,1]
 
-    # W = torch.rand((n,r), requires_grad=True)
-    # H = torch.rand((r,m), requires_grad=True)
+    n = 4
+    m = 3
+    r = 2
+    V = torch.rand((n,m), requires_grad=True)
+    W = torch.rand((n,r), requires_grad=True)
+    H = torch.rand((r,m), requires_grad=True)
+
+    print(V)
+    print(V.shape)
+    print(W)
+    print(W.shape)
+    print(H)
+    print(H.shape)
+    print(torch.matmul(W, H))
+    print((torch.matmul(W, H)).shape)
+    print(torch.mul(V, (torch.matmul(W, H))))
+    print((torch.mul(V, (torch.matmul(W, H)))).shape)
+
+
+    """
+    for i in range(iteration):
+        # 距離を計算
+        distance = torch.dist(V, W * H)
+        dist_LOG.append(distance.data)
+
+        # 微分
+        distance.backward()
+
+        x_LOG.append(x.data.clone())
+        y_LOG.append(y.data.clone())
+
+        # 引く（勾配の向きにずらす）
+        x.data.sub_(mu * x.grad.data)
+        y.data.sub_(mu * y.grad.data)
+
+        # 微分をゼロに．ここよくわからない．
+        x.grad.data.zero_()
+        y.grad.data.zero_()
+
+        if((i+1) % 10 == 0):
+            print("iter:" + str(i) + "   x:"+ str(x.data) + "   y:"+ str(y.data))
+    """
 
 def setup_mnist():
     """
