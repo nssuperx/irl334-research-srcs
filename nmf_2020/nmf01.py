@@ -50,9 +50,18 @@ def main():
     ax1 = fig.add_subplot(1,2,1)
     ax1.imshow(original_npimg)
     
-    restore_npimg = (np.dot(W,H[:,sample_index])).reshape((28, 28))
+    restore_npimg = np.dot(W,H[:,sample_index]).reshape((28, 28))
     ax2 = fig.add_subplot(1,2,2)
     ax2.imshow(restore_npimg)
+    plt.show()
+
+    # 基底画像の確認
+    show_W_img_num = 10
+    fig = plt.figure()
+    for i in range(show_W_img_num):
+        W_img = W[:,i].reshape((28, 28))
+        ax = fig.add_subplot(2,5,i+1)
+        ax.imshow(W_img)
     plt.show()
 
 

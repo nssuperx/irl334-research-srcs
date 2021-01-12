@@ -75,7 +75,6 @@ def main():
         W.grad.data.zero_()
         H.grad.data.zero_()
 
-    print(F_LOG)
     plt.plot(range(iteration), F_LOG)
     plt.show()
 
@@ -86,9 +85,18 @@ def main():
     ax1 = fig.add_subplot(1,2,1)
     ax1.imshow(original_img.data)
     
-    restore_img = (torch.matmul(W,H[:,sample_index])).reshape((28, 28))
+    restore_img = torch.matmul(W,H[:,sample_index]).reshape((28, 28))
     ax2 = fig.add_subplot(1,2,2)
     ax2.imshow(restore_img.data)
+    plt.show()
+
+    # 基底画像の確認
+    show_W_img_num = 10
+    fig = plt.figure()
+    for i in range(show_W_img_num):
+        W_img = W[:,i].reshape((28, 28))
+        ax = fig.add_subplot(2,5,i+1)
+        ax.imshow(W_img.data)
     plt.show()
 
 
