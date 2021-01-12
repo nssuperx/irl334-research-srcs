@@ -17,8 +17,8 @@ def main():
     target_x = torch.tensor(3, requires_grad=False)
     target_y = torch.tensor(4, requires_grad=False)
 
-    for start_x in range(15):
-        for start_y in range(15):
+    for start_x in range(-15, 15):
+        for start_y in range(-15, 15):
 
             x = torch.tensor(float(start_x), requires_grad=True)
             y = torch.tensor(float(start_y), requires_grad=True)

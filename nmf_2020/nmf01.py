@@ -14,7 +14,7 @@ epsilon = 1e-7
 
 n = 28 * 28 # 画素数
 m = 1000    # 画像数
-r = 10
+r = 50
 
 iteration = 50
 
@@ -44,13 +44,15 @@ def main():
 
     # 確認!!
     sample_index = np.random.randint(0,m)
-    npimg = V[:,sample_index].reshape((28, 28))
     print(labels[sample_index])
-    plt.imshow(npimg)
-    plt.show()
+    fig = plt.figure()
+    original_npimg = V[:,sample_index].reshape((28, 28))
+    ax1 = fig.add_subplot(1,2,1)
+    ax1.imshow(original_npimg)
     
-    npimg = (np.dot(W,H[:,sample_index])).reshape((28, 28))
-    plt.imshow(npimg)
+    restore_npimg = (np.dot(W,H[:,sample_index])).reshape((28, 28))
+    ax2 = fig.add_subplot(1,2,2)
+    ax2.imshow(restore_npimg)
     plt.show()
 
 

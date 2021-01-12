@@ -15,56 +15,82 @@ epsilon = 1e-7
 
 n = 28 * 28 # 画素数
 m = 1000    # 画像数
-r = 10
+r = 50
 
-iteration = 50
+mu = 0.01
+iteration = 500
 
 def main():
     mnist_image, labels = setup_mnist()
     V = torch.tensor(mnist_image.T)   # 正規化済み[0,1]
 
-    n = 4
-    m = 3
-    r = 2
-    V = torch.rand((n,m), requires_grad=True)
+    # n = 4
+    # m = 3
+    # r = 2
+    # V = torch.rand((n,m))
     W = torch.rand((n,r), requires_grad=True)
     H = torch.rand((r,m), requires_grad=True)
 
-    print(V)
-    print(V.shape)
-    print(W)
-    print(W.shape)
-    print(H)
-    print(H.shape)
-    print(torch.matmul(W, H))
-    print((torch.matmul(W, H)).shape)
-    print(torch.mul(V, (torch.matmul(W, H))))
-    print((torch.mul(V, (torch.matmul(W, H)))).shape)
+    print("V.shape: " + str(V.shape))
+    print("W.shape: " + str(W.shape))
+    print("H.shape: " + str(H.shape))
+    print("(torch.matmul(W, H)).shape: " + str((torch.matmul(W, H)).shape))
+    print("(torch.mul(V, (torch.matmul(W, H)))).shape: " + str((torch.mul(V, (torch.matmul(W, H)))).shape))
 
+    F_LOG = []
 
-    """
     for i in range(iteration):
         # 距離を計算
-        distance = torch.dist(V, W * H)
-        dist_LOG.append(distance.data)
+        # KL-divergence
+        """
+        WH = torch.matmul(W, H) + epsilon
+        log_WH = torch.log(WH)
+        F = torch.sum(torch.mul(V, log_WH) - WH)
+        """
+
+        # Frobenius norm
+        WH = torch.matmul(W,H) + epsilon
+        # 以下2つ同じ
+        # F = torch.linalg.norm(V - WH)
+        F = torch.sqrt(torch.sum(torch.sub(V, WH)**2))
+
+        # 2乗和
+        # F = torch.sum(torch.sub(V, WH)**2)
+
+        F_LOG.append(F.data)
+
 
         # 微分
-        distance.backward()
+        F.backward()
 
-        x_LOG.append(x.data.clone())
-        y_LOG.append(y.data.clone())
+        # print(W.grad)
+        # print(H.grad)
+        # input()
 
         # 引く（勾配の向きにずらす）
-        x.data.sub_(mu * x.grad.data)
-        y.data.sub_(mu * y.grad.data)
+        W.data.sub_(mu * W.grad.data)
+        H.data.sub_(mu * H.grad.data)
 
         # 微分をゼロに．ここよくわからない．
-        x.grad.data.zero_()
-        y.grad.data.zero_()
+        W.grad.data.zero_()
+        H.grad.data.zero_()
 
-        if((i+1) % 10 == 0):
-            print("iter:" + str(i) + "   x:"+ str(x.data) + "   y:"+ str(y.data))
-    """
+    print(F_LOG)
+    plt.plot(range(iteration), F_LOG)
+    plt.show()
+
+    sample_index = random.randrange(0, m)
+    print(labels[sample_index])
+    fig = plt.figure()
+    original_img = V[:,sample_index].reshape((28, 28))
+    ax1 = fig.add_subplot(1,2,1)
+    ax1.imshow(original_img.data)
+    
+    restore_img = (torch.matmul(W,H[:,sample_index])).reshape((28, 28))
+    ax2 = fig.add_subplot(1,2,2)
+    ax2.imshow(restore_img.data)
+    plt.show()
+
 
 def setup_mnist():
     """
