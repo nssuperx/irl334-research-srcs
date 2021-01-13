@@ -22,12 +22,10 @@ iteration = 500
 
 def main():
     mnist_image, labels = setup_mnist()
-    V = torch.tensor(mnist_image.T)   # 正規化済み[0,1]
+    print(type(mnist_image))
+    print(type(labels))
+    V = mnist_image.T   # 正規化済み[0,1]
 
-    # n = 4
-    # m = 3
-    # r = 2
-    # V = torch.rand((n,m))
     W = torch.rand((n,r), requires_grad=True)
     H = torch.rand((r,m), requires_grad=True)
 
@@ -41,31 +39,12 @@ def main():
 
     for i in range(iteration):
         # 距離を計算
-        # KL-divergence
-        """
-        WH = torch.matmul(W, H) + epsilon
-        log_WH = torch.log(WH)
-        F = torch.sum(torch.mul(V, log_WH) - WH)
-        """
-
-        # Frobenius norm
-        WH = torch.matmul(W,H) + epsilon
-        # 以下2つ同じ
-        # F = torch.linalg.norm(V - WH)
-        F = torch.sqrt(torch.sum(torch.sub(V, WH)**2))
-
-        # 2乗和
-        # F = torch.sum(torch.sub(V, WH)**2)
-
+        # F = kl_divergence(V, W, H)
+        F = frobenius_norm(V, W, H)
         F_LOG.append(F.data)
-
 
         # 微分
         F.backward()
-
-        # print(W.grad)
-        # print(H.grad)
-        # input()
 
         # 引く（勾配の向きにずらす）
         W.data.sub_(mu * W.grad.data)
@@ -102,22 +81,38 @@ def main():
 
 def setup_mnist():
     """
-    pytorchを使ってmnistのデータを作り，numpy配列を作る．
+    mnistのデータを作る．
     Returns:
         mnist_image:
-            m * n次元のmnistのnumpy配列
+            m * n次元のmnistのtensor型のデータ
         labels:
-            ラベルのnumpy配列
+            ラベル
     """
     mnist_data = MNIST('./mnist', train=True, download=True, transform=transforms.ToTensor())
     data_loader = DataLoader(mnist_data, batch_size=m, shuffle=False)
     data_iter = iter(data_loader)
     images, labels = data_iter.next()
-    mnist_image = np.zeros((m, n))
+    mnist_image = torch.zeros((m, n))
     for i in range(m):
-        mnist_image[i] = images[i][0].numpy().reshape(n)
+        mnist_image[i] = images[i][0].reshape(n)
 
-    return mnist_image, labels.numpy()
+    return mnist_image, labels
+
+def kl_divergence(V, W, H):
+    WH = torch.matmul(W, H)
+    log_WH = torch.log(WH)
+    F = torch.sum(torch.mul(V, log_WH) - WH)
+    return F
+
+def frobenius_norm(V, W, H):
+    WH = torch.matmul(W,H) + epsilon
+    # 以下2つ同じ
+    # F = torch.linalg.norm(V - WH)
+    F = torch.sqrt(torch.sum(torch.sub(V, WH)**2))
+
+    # 2乗和
+    # F = torch.sum(torch.sub(V, WH)**2)
+    return F
 
 if __name__ == "__main__":
     main()

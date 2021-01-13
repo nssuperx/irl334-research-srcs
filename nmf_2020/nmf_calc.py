@@ -33,9 +33,7 @@ def main():
 
     for i in range(iteration):
         W, H = update(V, W, H)
-        WH = np.dot(W, H) + epsilon
-        log_WH = np.log(WH)
-        F = np.sum(np.multiply(V, log_WH) - WH)
+        F = kl_divergence(V, W, H)
         F_list.append(F)
         print("iter:%d F:%f" % (i, F))
 
@@ -84,6 +82,15 @@ def setup_mnist():
 
     return mnist_image, labels.numpy()
 
+def kl_divergence(V, W, H):
+    WH = np.dot(W, H) + epsilon
+    log_WH = np.log(WH)
+    F = np.sum(np.multiply(V, log_WH) - WH)
+    return F
+
+def frobenius_norm(V, W, H):
+    pass
+
 '''
 \mu番目の「例題」 $\mu = 1,2, ..., m$
 i番目の「ピクセル」 $i = 1,2, ..., n$
@@ -103,8 +110,8 @@ def update(V, W, H):
     for i in range(n):
         for a in range(r):
             tmp_sum = np.sum(W_tmp[:,a]) + epsilon
-        #     for j in range(m):
-        #         tmp_sum += W[j][a]
+            # for j in range(m):
+            #     tmp_sum += W[j][a]
             W[i][a] = W[i][a] / tmp_sum
 
     WH = np.dot(W, H) + epsilon
