@@ -18,12 +18,13 @@ m = 1000    # 画像数
 r = 50
 
 mu = 0.01
-iteration = 500
+iteration = 10000
+
+# setup function
+mseLoss = torch.nn.MSELoss()
 
 def main():
     mnist_image, labels = setup_mnist()
-    print(type(mnist_image))
-    print(type(labels))
     V = mnist_image.T   # 正規化済み[0,1]
 
     W = torch.rand((n,r), requires_grad=True)
@@ -32,8 +33,6 @@ def main():
     print("V.shape: " + str(V.shape))
     print("W.shape: " + str(W.shape))
     print("H.shape: " + str(H.shape))
-    print("(torch.matmul(W, H)).shape: " + str((torch.matmul(W, H)).shape))
-    print("(torch.mul(V, (torch.matmul(W, H)))).shape: " + str((torch.mul(V, (torch.matmul(W, H)))).shape))
 
     F_LOG = []
 
@@ -41,11 +40,15 @@ def main():
         # 距離を計算
         # F = kl_divergence(V, W, H)
         F = frobenius_norm(V, W, H)
+        # F = mse_loss(V, W, H)
         F_LOG.append(F.data)
 
         # 微分
         F.backward()
 
+        # print(W.T[1])
+        # input()
+        
         # 引く（勾配の向きにずらす）
         W.data.sub_(mu * W.grad.data)
         H.data.sub_(mu * H.grad.data)
@@ -53,6 +56,17 @@ def main():
         # 微分をゼロに．ここよくわからない．
         W.grad.data.zero_()
         H.grad.data.zero_()
+        
+        """
+        with torch.no_grad(): 
+            # 引く（勾配の向きにずらす）
+            W.data.sub_(mu * W.grad.data)
+            H.data.sub_(mu * H.grad.data)
+
+            # 微分をゼロに．ここよくわからない．
+            W.grad.data.zero_()
+            H.grad.data.zero_()
+        """
 
     plt.plot(range(iteration), F_LOG)
     plt.show()
@@ -78,6 +92,37 @@ def main():
         ax.imshow(W_img.data)
     plt.show()
 
+    print(W.T[0]) # 負の値もあったしスパースじゃない???
+
+
+def kl_divergence(V, W, H):
+    WH = torch.matmul(W, H)
+    log_WH = torch.log(WH)
+    F = torch.sum(torch.mul(V, log_WH) - WH)
+    # F = torch.sum(V * torch.log(V / WH)) - torch.sum(V) + torch.sum(WH)
+    return F
+
+def frobenius_norm(V, W, H):
+    WH = torch.matmul(W,H)
+    F = torch.linalg.norm(V - WH)
+    # F = torch.sqrt(torch.sum(torch.sub(V, WH)**2))
+    return F
+
+def mse_loss(V, W, H):
+    """
+    平均二乗誤差
+    """
+    WH = torch.matmul(W,H)
+    # F = torch.mean(torch.sub(V, WH)**2)
+    F = mseLoss(V, WH)
+
+    """
+    ニ乗和のつもりだったが違った．値が大きくなりすぎてた．
+    F = torch.sum(torch.sub(V, WH)**2)
+    """
+
+    return F
+
 
 def setup_mnist():
     """
@@ -98,21 +143,6 @@ def setup_mnist():
 
     return mnist_image, labels
 
-def kl_divergence(V, W, H):
-    WH = torch.matmul(W, H)
-    log_WH = torch.log(WH)
-    F = torch.sum(torch.mul(V, log_WH) - WH)
-    return F
-
-def frobenius_norm(V, W, H):
-    WH = torch.matmul(W,H) + epsilon
-    # 以下2つ同じ
-    # F = torch.linalg.norm(V - WH)
-    F = torch.sqrt(torch.sum(torch.sub(V, WH)**2))
-
-    # 2乗和
-    # F = torch.sum(torch.sub(V, WH)**2)
-    return F
 
 if __name__ == "__main__":
     main()
