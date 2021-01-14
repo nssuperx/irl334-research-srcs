@@ -54,8 +54,8 @@ def main():
         H.data.sub_(mu * H.grad.data)
 
         # 微分をゼロに．ここよくわからない．
-        W.grad.data.zero_()
-        H.grad.data.zero_()
+        W.grad.zero_()
+        H.grad.zero_()
         
         """
         with torch.no_grad(): 
