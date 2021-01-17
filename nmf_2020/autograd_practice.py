@@ -12,6 +12,8 @@ xとyを当てる
 mu = 0.01
 iteration = 100
 
+klDivLoss = torch.nn.KLDivLoss()
+
 def main():
     target_z = torch.tensor(12, requires_grad=False)
     target_x = torch.tensor(3, requires_grad=False)
@@ -26,8 +28,6 @@ def main():
             # print("x:" + str(x))
             # print("y:" + str(y))
 
-            # klDivLoss = torch.nn.KLDivLoss()
-
             # ログ用リスト
             x_LOG = []
             y_LOG = []
@@ -37,6 +37,7 @@ def main():
                 # distance = torch.dist(target_z, x * y)
                 distance = torch.sqrt((target_z - x * y)**2)
                 # distance = klDivLoss(target_z, x * y)
+                # distance = kl_divergence(target_z, x, y)
 
                 # 微分
                 distance.backward()
@@ -63,8 +64,13 @@ def main():
     plt.xlabel("x")
     plt.ylabel("y")
     plt.show()
-        
 
+def kl_divergence(V, W, H):
+    WH = W * H
+    # F = V * torch.log(WH) - WH
+    F = V * torch.log(V / WH) - V + WH
+    # F = V * torch.log(V / WH)
+    return F
 
 if __name__ == "__main__":
     main()

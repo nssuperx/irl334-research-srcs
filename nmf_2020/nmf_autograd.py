@@ -6,6 +6,7 @@ import torch
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST
+from torch.autograd import detect_anomaly
 
 # http://yann.lecun.com/exdb/mnist/
 # The training set contains 60000 examples, and the test set 10000 examples.
@@ -37,36 +38,46 @@ def main():
     F_LOG = []
 
     for i in range(iteration):
+        
+        with detect_anomaly():
+            # 距離を計算
+            # F = kl_divergence(V, W, H)
+            F = frobenius_norm(V, W, H)
+            # F = mse_loss(V, W, H)
+            F_LOG.append(F.data)
+            # 微分
+            F.backward()
+
+        """
         # 距離を計算
-        # F = kl_divergence(V, W, H)
-        F = frobenius_norm(V, W, H)
+        F = kl_divergence(V, W, H)
+        # F = frobenius_norm(V, W, H)
         # F = mse_loss(V, W, H)
         F_LOG.append(F.data)
-
         # 微分
         F.backward()
+        """
 
         # print(W.T[1])
         # input()
-        
+
+        """
+        with torch.no_grad
         # 引く（勾配の向きにずらす）
         W.data.sub_(mu * W.grad.data)
         H.data.sub_(mu * H.grad.data)
-
         # 微分をゼロに．ここよくわからない．
         W.grad.zero_()
         H.grad.zero_()
-        
         """
+        
         with torch.no_grad(): 
             # 引く（勾配の向きにずらす）
             W.data.sub_(mu * W.grad.data)
             H.data.sub_(mu * H.grad.data)
-
             # 微分をゼロに．ここよくわからない．
             W.grad.data.zero_()
             H.grad.data.zero_()
-        """
 
     plt.plot(range(iteration), F_LOG)
     plt.show()
@@ -98,8 +109,9 @@ def main():
 def kl_divergence(V, W, H):
     WH = torch.matmul(W, H)
     log_WH = torch.log(WH)
-    F = torch.sum(torch.mul(V, log_WH) - WH)
+    F = torch.sum(V * log_WH - WH)
     # F = torch.sum(V * torch.log(V / WH)) - torch.sum(V) + torch.sum(WH)
+    # F = torch.sum(V * torch.log(V / WH))
     return F
 
 def frobenius_norm(V, W, H):
