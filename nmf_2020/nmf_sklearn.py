@@ -75,8 +75,6 @@ def main():
 
     plt.show()
     
-    # 基底を作るときに使ってない画像は復元できない？NMFの弱点？
-
 
 def setup_mnist():
     """

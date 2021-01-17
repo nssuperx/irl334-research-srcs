@@ -62,7 +62,6 @@ def main():
         # input()
 
         """
-        with torch.no_grad
         # 引く（勾配の向きにずらす）
         W.data.sub_(mu * W.grad.data)
         H.data.sub_(mu * H.grad.data)
