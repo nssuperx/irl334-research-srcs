@@ -27,9 +27,13 @@ mseLoss = torch.nn.MSELoss()
 def main():
     mnist_image, labels = setup_mnist()
     V = mnist_image.T   # 正規化済み[0,1]
+    # V.div_(V.sum())
 
     W = torch.rand((n,r), requires_grad=True)
     H = torch.rand((r,m), requires_grad=True)
+    # with torch.no_grad():
+    #     W.div_(W.sum())
+    #     H.div_(H.sum())
 
     print("V.shape: " + str(V.shape))
     print("W.shape: " + str(W.shape))
@@ -38,42 +42,25 @@ def main():
     F_LOG = []
 
     for i in range(iteration):
-        
-        with detect_anomaly():
-            # 距離を計算
-            # F = kl_divergence(V, W, H)
-            F = frobenius_norm(V, W, H)
-            # F = mse_loss(V, W, H)
-            F_LOG.append(F.data)
-            # 微分
-            F.backward()
-
-        """
+        # with detect_anomaly():        # nanを検出したいときは，計算をこのブロック内で行う
         # 距離を計算
-        F = kl_divergence(V, W, H)
-        # F = frobenius_norm(V, W, H)
+        # F = kl_divergence(V, W, H)
+        F = frobenius_norm(V, W, H)
         # F = mse_loss(V, W, H)
         F_LOG.append(F.data)
         # 微分
         F.backward()
-        """
-
+        
         # print(W.T[1])
         # input()
 
-        """
-        # 引く（勾配の向きにずらす）
-        W.data.sub_(mu * W.grad.data)
-        H.data.sub_(mu * H.grad.data)
-        # 微分をゼロに．ここよくわからない．
-        W.grad.zero_()
-        H.grad.zero_()
-        """
-        
+        # TODO: 関数化，普通の勾配法と指数型勾配法が切り替えられるように
         with torch.no_grad(): 
             # 引く（勾配の向きにずらす）
-            W.data.sub_(mu * W.grad.data)
-            H.data.sub_(mu * H.grad.data)
+            # W.data.sub_(mu * W.grad.data)
+            # H.data.sub_(mu * H.grad.data)
+            W.data.mul_(torch.exp(-mu * W.grad.data))
+            H.data.mul_(torch.exp(-mu * H.grad.data))
             # 微分をゼロに．ここよくわからない．
             W.grad.data.zero_()
             H.grad.data.zero_()
