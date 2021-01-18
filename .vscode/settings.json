@@ -35,6 +35,16 @@
             ]
         },
         {
+            "name": "uplatex+dvipdfmx",
+            "tools": [
+                "uplatex",
+                "pbibtex",
+                "uplatex",
+                "uplatex",
+                "dvipdfmx"
+            ]
+        },
+        {
             "name": "platex+dvipdfmx",
             "tools": [
                 "platex",
@@ -49,6 +59,14 @@
         {
             "name": "platex",
             "command": "platex",
+            "args": [
+                "-interaction=nonstopmode",
+                "%DOC%"
+            ]
+        },
+        {
+            "name": "uplatex",
+            "command": "uplatex",
             "args": [
                 "-interaction=nonstopmode",
                 "%DOC%"
