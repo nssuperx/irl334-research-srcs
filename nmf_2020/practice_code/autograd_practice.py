@@ -19,8 +19,8 @@ def main():
     target_x = torch.tensor(3, requires_grad=False)
     target_y = torch.tensor(4, requires_grad=False)
 
-    for start_x in range(-15, 15):
-        for start_y in range(-15, 15):
+    for start_x in range(15):
+        for start_y in range(15):
 
             x = torch.tensor(float(start_x), requires_grad=True)
             y = torch.tensor(float(start_y), requires_grad=True)
@@ -46,8 +46,10 @@ def main():
                 y_LOG.append(y.data.clone())
 
                 # 引く（勾配の向きにずらす）
-                x.data.sub_(mu * x.grad.data)
-                y.data.sub_(mu * y.grad.data)
+                # x.data.sub_(mu * x.grad.data)
+                # y.data.sub_(mu * y.grad.data)
+                x.data.mul_(torch.exp(-mu * x.grad.data))
+                y.data.mul_(torch.exp(-mu * y.grad.data))
 
                 # 微分をゼロに．ここよくわからない．
                 x.grad.data.zero_()
@@ -57,7 +59,6 @@ def main():
                 if((i+1) % 10 == 0):
                     print("iter:" + str(i) + "   x:"+ str(x.data) + "   y:"+ str(y.data))
                 """
-
 
             plt.plot(x_LOG, y_LOG)
 
