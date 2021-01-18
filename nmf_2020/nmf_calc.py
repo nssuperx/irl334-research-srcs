@@ -66,11 +66,13 @@ def main():
 def setup_mnist():
     """
     pytorchを使ってmnistのデータを作り，numpy配列を作る．
-    Returns:
-        mnist_image:
-            m * n次元のmnistのnumpy配列
-        labels:
-            ラベルのnumpy配列
+    
+    Returns
+    --------
+    mnist_image:
+        m * n次元のmnistのnumpy配列
+    labels:
+        ラベルのnumpy配列
     """
     mnist_data = MNIST('./mnist', train=True, download=True, transform=transforms.ToTensor())
     data_loader = DataLoader(mnist_data, batch_size=m, shuffle=False)

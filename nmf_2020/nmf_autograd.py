@@ -138,11 +138,13 @@ def mse_loss(V, W, H):
 def setup_mnist():
     """
     mnistのデータを作る．
-    Returns:
-        mnist_image:
-            m * n次元のmnistのtensor型のデータ
-        labels:
-            ラベル
+    
+    Returns
+    ---------
+    mnist_image:
+        m * n次元のmnistのtensor型のデータ
+    labels:
+        ラベル
     """
     mnist_data = MNIST('./mnist', train=True, download=True, transform=transforms.ToTensor())
     data_loader = DataLoader(mnist_data, batch_size=m, shuffle=False)

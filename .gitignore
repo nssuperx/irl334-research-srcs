@@ -10,6 +10,9 @@
 # image files
 *.png
 
+# output files
+*.csv
+
 # figure directory
 figs
 

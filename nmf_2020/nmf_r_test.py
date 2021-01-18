@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import csv
 from sklearn.datasets import fetch_openml
 from sklearn.model_selection import train_test_split
 from sklearn.decomposition import NMF
@@ -28,12 +29,15 @@ def main():
         iter_LOG.append(nmf.n_iter_)
         F_LOG.append(nmf.reconstruction_err_)
 
+    # csv書き出し．処理に相当な時間がかかるのでバックアップをとっておく．
+    csv_out((range(1, r), iter_LOG, F_LOG), ('r','iter','f'))
+
     fig = plt.figure()
     ax1 = fig.add_subplot(1,2,1)
     ax1.plot(range(1, r), iter_LOG)
     ax2 = fig.add_subplot(1,2,2)
     ax2.plot(range(1, r), F_LOG)
-    plt.show()    
+    plt.show()
 
 def setup_mnist():
     """
@@ -43,6 +47,28 @@ def setup_mnist():
     x_train, x_test, y_train, y_test = train_test_split(digits.data, digits.target, train_size=m, random_state=0, shuffle=True)
 
     return x_train.T, x_test.T, y_train, y_test
+
+def csv_out(out_data, label):
+    """
+    結果をcsvで出力する．
+
+    Parameters
+    ----------
+    out_data : tuple
+        結果のリストのタプル
+    label : tuple
+        csvファイルの列のラベルのタプル
+    """
+
+    out_data_T = zip(*out_data)
+    with open('nmf_r_test.csv', 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(label)      # 列の一番上の文字など
+        for row in out_data_T:
+            data_row = []
+            for data in row:
+                data_row.append(data)
+            writer.writerow(data_row)
 
 if __name__ == "__main__":
     main()
