@@ -12,13 +12,14 @@ from sklearn.decomposition import NMF
 # ['GTK3Agg', 'GTK3Cairo', 'MacOSX', 'nbAgg', 'Qt4Agg', 'Qt4Cairo', 'Qt5Agg', 'Qt5Cairo', 'TkAgg', 'TkCairo', 'WebAgg',
 # 'WX', 'WXAgg', 'WXCairo', 'agg', 'cairo', 'pdf', 'pgf', 'ps', 'svg', 'template']
 
-n = 28 * 28 # 画素数
-m = 10000    # 画像数
-r = 10
+n = 28 * 28     # 画素数
+m = 10000       # 画像数
+r = 20          # 基底数
 
 def main():
     V, V_test, label, label_test = setup_mnist()
-    nmf = NMF(n_components=r, max_iter=400)
+    # nmf = NMF(n_components=r, max_iter=10000, beta_loss='frobenius', solver='cd', tol=0.0001, random_state=0)
+    nmf = NMF(n_components=r, max_iter=10000, beta_loss='kullback-leibler', solver='mu', tol=0.0001, random_state=0)
     # 基底ベクトルを取得
     W = nmf.fit_transform(V)
     # これを，可視化する．棒グラフを作る．
@@ -28,9 +29,20 @@ def main():
     print("H shape:" + str(H.shape))
     print("iter:%d" % (nmf.n_iter_))
     
+    # TODO: 画像表示処理を関数化
+
     # 基底ベクトルを画像のように整形
     W_image = W.T.reshape(r, 28, 28)
 
+    # 基底画像の確認
+    show_W_img_num = 10
+    fig = plt.figure()
+    for i in range(show_W_img_num):
+        ax = fig.add_subplot(2,5,i+1)
+        ax.imshow(W_image[i])
+    plt.show()
+
+    """
     # ここからグラフ作成
     sample_num = 5
     sample_index_list = np.random.randint(0, m, size=sample_num)
@@ -74,6 +86,7 @@ def main():
         ax.imshow(W_image[i])
 
     plt.show()
+    """
     
 
 def setup_mnist():
