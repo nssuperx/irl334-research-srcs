@@ -12,9 +12,11 @@ from torchvision.datasets import MNIST
 # EPSILON = np.finfo(np.float32).eps
 epsilon = 1e-7
 
+np.random.seed(0)
+
 n = 28 * 28 # 画素数
 m = 1000    # 画像数
-r = 50
+r = 10
 
 iteration = 50
 
@@ -100,32 +102,35 @@ a番目の「基底」 $a = 1,2, ..., r$
 '''
 # 値更新
 def update(V, W, H):
+    """
+    NMF更新
+    Lee & Seung アルゴリズム
+
+    Parameters
+    ----------
+    V: numpy.adarray
+        オリジナルのデータ
+    W: numpy.adarray
+        基底
+    H: numpy.adarray
+        重み
+
+    Returns
+    --------
+    W: numpy.adarray
+        基底
+    H: numpy.adarray
+        重み
+    """
     WH = np.dot(W, H) + epsilon
-    for i in range(n):
-        for a in range(r):
-            tmp_sum = np.sum((V[i] / WH[i]) * H[a])
-            # for mu in range(n):
-            #     tmp_sum += (V[i][mu] / WH[i][mu]) * H[a][mu]
-            W[i][a] = W[i][a] * tmp_sum
+    W = W * np.dot(V / WH, H.T)
 
-    W_tmp = np.copy(W) # 大事 参照渡し
-    for i in range(n):
-        for a in range(r):
-            tmp_sum = np.sum(W_tmp[:,a]) + epsilon
-            # for j in range(m):
-            #     tmp_sum += W[j][a]
-            W[i][a] = W[i][a] / tmp_sum
+    W_tmp = np.sum(W, axis=0)
+    W = W / np.tile(W_tmp, (n, 1))
 
     WH = np.dot(W, H) + epsilon
-    for a in range(r):
-        for mu in range(m):
-            tmp_sum = np.sum(W[:,a] * (V[:,mu] / WH[:,mu]))
-            # for i in range(n):
-            #     tmp_sum += W[i][a] * V[i][mu] / WH[i][mu]
-            H[a][mu] = H[a][mu] * tmp_sum
-
-    # W = W * np.dot(V, H.T) / np.dot(np.dot(W, H) + epsilon, H.T)
-    # H = H * np.dot(W.T, V) / np.dot(W.T, np.dot(W, H)) + epsilon
+    H = H * np.dot(W.T, (V/WH))
+    
     return W, H
 
 
