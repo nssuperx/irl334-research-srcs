@@ -3,8 +3,8 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
-from nmf import NMF
-from data_function import setup_mnist
+from modules.nmf import NMF
+from modules.data_function import setup_mnist
 
 # http://yann.lecun.com/exdb/mnist/
 # The training set contains 60000 examples, and the test set 10000 examples.
