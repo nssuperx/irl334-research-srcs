@@ -17,7 +17,7 @@ class NMF:
 
         Parameters
         ----------
-        V: numpy.adarray
+        V: numpy.ndarray
             オリジナルのデータ
         r: int
             基底数
