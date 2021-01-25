@@ -4,8 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from modules.nmf import NMF
-from modules.data_function import setup_mnist
-from modules.array_function import make_baseGridImage, normalization
+from modules.data import setup_mnist
+from modules.array import make_baseGridImage, normalization
 
 # http://yann.lecun.com/exdb/mnist/
 # The training set contains 60000 examples, and the test set 10000 examples.

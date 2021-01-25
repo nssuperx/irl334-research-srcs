@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import NMF
 
-from modules.data_function import setup_mnist, csv_make_labels, csv_out_row
+from modules.data import setup_mnist, csv_make_labels, csv_out_row
 
 # http://yann.lecun.com/exdb/mnist/
 # The training set contains 60000 examples, and the test set 10000 examples.
