@@ -5,12 +5,13 @@ import matplotlib.pyplot as plt
 
 from modules.nmf import NMF
 from modules.data_function import setup_mnist
+from modules.array_function import make_baseGridImage, normalization
 
 # http://yann.lecun.com/exdb/mnist/
 # The training set contains 60000 examples, and the test set 10000 examples.
 
 m = 1000       # 画像数
-r = 10         # 基底数
+r = 100         # 基底数
 iteration = 50
 
 def main():
@@ -41,12 +42,19 @@ def main():
     plt.show()
 
     # 基底画像の確認
-    show_W_img_num = 10
-    fig = plt.figure()
-    for i in range(show_W_img_num):
-        W_img = W[:,i].reshape((28, 28))
-        ax = fig.add_subplot(2,5,i+1)
-        ax.imshow(W_img, cmap="Greys_r")
+    W_image = W.T.reshape(r, 28, 28)
+    W_images = make_baseGridImage(W_image, r, normalize=True)
+    img_max_abs = np.abs(W_image.max())
+    img_min_abs = np.abs(W_image.min())
+    colormap_range = (img_max_abs if img_max_abs > img_min_abs else img_min_abs) / 2
+    sqrt_n = 28
+    sqrt_r = int(np.sqrt(r))
+    plt.imshow(W_images, cmap="Greys", extent=(0, sqrt_n * sqrt_r, 0, sqrt_n * sqrt_r))
+    plt.xticks(range(0, sqrt_n * sqrt_r, sqrt_n))
+    plt.yticks(range(0, sqrt_n * sqrt_r, sqrt_n))
+    plt.grid(which = "major", color = "black", alpha = 0.8, linestyle = "--", linewidth = 1)
+    plt.xticks(color="None")
+    plt.yticks(color="None")
     plt.show()
 
 if __name__ == "__main__":

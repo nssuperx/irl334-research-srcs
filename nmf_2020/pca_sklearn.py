@@ -39,7 +39,6 @@ def main():
     img_min_abs = np.abs(W_image.min())
     colormap_range = (img_max_abs if img_max_abs > img_min_abs else img_min_abs) / 2
     sqrt_r = int(np.sqrt(r))
-    # plt.imshow(W_images, cmap="PiYG", vmin=-colormap_range, vmax=colormap_range, extent=(0, sqrt_n * sqrt_r, 0, sqrt_n * sqrt_r))
     plt.imshow(W_images, cmap="PiYG", extent=(0, sqrt_n * sqrt_r, 0, sqrt_n * sqrt_r))
     plt.xticks(range(0, sqrt_n * sqrt_r, sqrt_n))
     plt.yticks(range(0, sqrt_n * sqrt_r, sqrt_n))
