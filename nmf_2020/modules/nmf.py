@@ -11,7 +11,7 @@ class NMF:
         self.epsilon = epsilon
         np.random.seed(seed)
 
-    def calc(self, V, r, iteration=200):
+    def calc(self, V, r, iteration=500):
         """
         NMF計算
 
@@ -24,6 +24,11 @@ class NMF:
         iteration: int
             繰り返し回数
         """
+        if (r <= 0):
+            print("NMF calc error!!")
+            print("r must be greater than zero.")
+            exit()
+        
         self.W = np.random.rand(V.shape[0], r)
         self.H = np.random.rand(r, V.shape[1])
         self.loss_LOG = []
