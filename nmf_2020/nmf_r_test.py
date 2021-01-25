@@ -8,9 +8,9 @@ from modules.data_function import setup_mnist, csv_make_labels, csv_out_row
 # The training set contains 60000 examples, and the test set 10000 examples.
 
 m = 1000       # 画像数
-r = 10         # 基底数
+r = 28 * 28         # 基底数
 
-iteration = 500
+iteration = 300
 
 def main():
     V, label = setup_mnist(image_num=m)
