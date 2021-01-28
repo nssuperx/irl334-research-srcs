@@ -1,23 +1,30 @@
 import csv
 import matplotlib.pyplot as plt
 
-with open('out_data/nmf_r_test_frobenius_mu.csv') as f:
+from modules.visualize import show_graph
+
+with open('out_data/nmf_r25.csv') as f:
     reader = csv.reader(f)
     data = [row for row in reader]
 
-labels = data[0]
+x_label = data[0][0]
+y_label = data[0][1]
 del data[0]    # 先頭1行を消す
 
 data_T = [x for x in zip(*data)]
 
-r_list = [int(i) for i in data_T[0]]
-iter_LOG = [float(i) for i in data_T[1]]
-F_LOG = [float(i) for i in data_T[2]]
+x_list = [int(i) for i in data_T[0]]
+y_list = [float(i) for i in data_T[1]]
+# F_LOG = [float(i) for i in data_T[2]]
 
+show_graph(x_list, y_list, x_label, y_label)
+
+'''
 fig = plt.figure()
 # fig.subplots_adjust(wspace=0.5)
-ax1 = fig.add_subplot(121, xlabel=labels[0], ylabel=labels[1])
-ax1.plot(r_list, iter_LOG)
-ax2 = fig.add_subplot(122, xlabel=labels[0], ylabel=labels[2])
-ax2.plot(r_list, F_LOG)
+ax1 = fig.add_subplot(121, xlabel=x_label, ylabel=y_label)
+ax1.plot(x_list, y_list)
+ax2 = fig.add_subplot(122, xlabel=x_label, ylabel=labels[2])
+ax2.plot(x_list, F_LOG)
 plt.show()
+'''

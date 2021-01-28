@@ -1,21 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
-from sklearn.datasets import fetch_openml
-from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
 
 from modules.data import setup_mnist
 from modules.array import make_baseGridImage, normalization
-from modules.visualize import show_base_glid, show_reconstruct_pairs, show_base_weight
+from modules.visualize import show_base_grid, show_reconstruct_pairs, show_base_weight
 
 # http://yann.lecun.com/exdb/mnist/
 # The training set contains 60000 examples, and the test set 10000 examples.
 
 n = 28 * 28     # 画素数
-sqrt_n = 28
-m = 10000       # 画像数
-r = 49
+m = 1000       # 画像数
+r = 100
 
 def main():
     V, label = setup_mnist(image_num=m)
@@ -31,7 +27,7 @@ def main():
     reconstruct_V = pca.inverse_transform(W)
     print("reconstruct_V.shape: " + str(reconstruct_V.shape))
     
-    show_base_glid(W, r, img_normalize=True)
+    show_base_grid(W, r, img_normalize=True)
     show_reconstruct_pairs(V, reconstruct_V, m, sample_num=5)
     # show_base_weight(V, reconstruct_V, W, H, r, m)
 

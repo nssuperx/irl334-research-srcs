@@ -61,3 +61,22 @@ def csv_out_row(filename, out_row):
     with open(filename, 'a') as f:
         writer = csv.writer(f)
         writer.writerow(out_row)
+
+def csv_out(filename, labels, datas):
+    """
+    データをcsvで出力する．
+
+    Parameters
+    ----------
+    filename : str
+        出力ファイル名
+    labels : tuple str
+        ラベル文字列のタプル
+    datas : tuple list
+        データのリストのタプル
+    """
+    data = list(zip(*datas))
+    with open(filename, 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(labels)
+        writer.writerows(data)

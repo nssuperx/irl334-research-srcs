@@ -5,7 +5,7 @@ from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
 from .array import make_baseGridImage
 
 
-def show_base_glid(W, r, img_normalize=False, img_cmap="PiYG", grid_color="black"):
+def show_base_grid(W, r, img_normalize=False, img_cmap="PiYG", grid_color="black"):
     """
     基底画像をグリッド状に表示する．
 
@@ -29,8 +29,6 @@ def show_base_glid(W, r, img_normalize=False, img_cmap="PiYG", grid_color="black
 
     # 基底画像をグリッド状に表示
     W_imgs = make_baseGridImage(W_img, r, normalize=img_normalize)
-    img_max_abs = np.abs(W_img.max())
-    img_min_abs = np.abs(W_img.min())
     plt.imshow(W_imgs, cmap=img_cmap, extent=(0, img_width * sqrt_r, 0, img_height * sqrt_r))
     plt.xticks(range(0, img_width * sqrt_r, img_width))
     plt.yticks(range(0, img_height * sqrt_r, img_height))
@@ -40,7 +38,7 @@ def show_base_glid(W, r, img_normalize=False, img_cmap="PiYG", grid_color="black
     plt.show()
 
 
-def show_reconstruct_pairs(V, reconstruct_V, m, sample_num=5, img_cmap="Greys"):
+def show_reconstruct_pairs(V, reconstruct_V, m, sample_num=5, img_cmap="Greys", random_select=False):
     """
     オリジナル画像と再構成画像のペアを表示する．
 
@@ -57,8 +55,10 @@ def show_reconstruct_pairs(V, reconstruct_V, m, sample_num=5, img_cmap="Greys"):
     img_cmap: str
         表示する画像のカラーマップ
     """
-
-    sample_index_list = np.random.randint(0, m, size=sample_num)
+    if random_select:
+        sample_index_list = np.random.randint(0, m, size=sample_num)
+    else:
+        sample_index_list = np.arange(sample_num, dtype='int32')
     fig = plt.figure()
     for i in range(0, sample_num):
         img = V[:,sample_index_list[i]].reshape(28, 28)
@@ -147,4 +147,24 @@ def show_base_weight(V, reconstruct_V, W, H, r, m, sample_num=5, img_cmap="Greys
         ax.axes.yaxis.set_visible(False)
         ax.imshow(W_img[i], cmap=img_cmap)
 
+    plt.show()
+
+def show_graph(x_list, y_list, x_label, y_label, fontsize=16):
+    """
+    グラフを表示する．
+
+    Parameters
+    ----------
+    x_list, y_list : list
+        x軸のリストとy軸のリスト
+    x_label, y_label : str
+        x軸のラベルとy軸のラベル
+    fontsize : int
+        軸ラベルや目盛りのフォントサイズ
+    """
+    plt.rcParams["font.size"] = fontsize
+    fig = plt.figure(figsize=(8.0, 6.0))
+    fig.subplots_adjust(left=0.2)
+    ax = fig.add_subplot(111, xlabel=x_label, ylabel=y_label)
+    ax.plot(x_list, y_list)
     plt.show()
