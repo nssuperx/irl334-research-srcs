@@ -168,3 +168,29 @@ def show_graph(x_list, y_list, x_label, y_label, fontsize=16):
     ax = fig.add_subplot(111, xlabel=x_label, ylabel=y_label)
     ax.plot(x_list, y_list)
     plt.show()
+
+def show_graphs(x_list, y_lists, x_label, y_label, y_labels, fontsize=16):
+    """
+    グラフを表示する．
+
+    Parameters
+    ----------
+    x_list : list
+        x軸の値のリスト
+    y_lists : tuple list
+        y軸の値のリストのタプル
+    x_label, y_label : str
+        x軸のラベルとy軸のラベル
+    y_labels : tuple str
+        y軸の値のラベルのタプル, legendするときに使う
+    fontsize : int
+        軸ラベルや目盛りのフォントサイズ
+    """
+    plt.rcParams["font.size"] = fontsize
+    fig = plt.figure(figsize=(8.0, 6.0))
+    fig.subplots_adjust(left=0.2)
+    ax = fig.add_subplot(111, xlabel=x_label, ylabel=y_label)
+    for y_list, y_graphlabel in zip(y_lists, y_labels):
+        ax.plot(x_list, y_list, label=y_graphlabel)
+    ax.legend()
+    plt.show()
