@@ -5,7 +5,7 @@ from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
 from .array import make_baseGridImage
 
 
-def show_base_grid(W, r, img_normalize=False, img_cmap="PiYG", grid_color="black"):
+def show_base_grid(W, r, horizontal_num=None, vertical_num=None, img_normalize=False, img_cmap="PiYG", grid_color="black"):
     """
     基底画像をグリッド状に表示する．
 
@@ -22,16 +22,22 @@ def show_base_grid(W, r, img_normalize=False, img_cmap="PiYG", grid_color="black
     """
     img_width = int(np.sqrt(W.shape[0]))
     img_height = int(np.sqrt(W.shape[0]))
-    sqrt_r = int(np.sqrt(r))
+    if horizontal_num is None or vertical_num is None:
+        h_num = int(np.sqrt(r))
+        v_num = int(np.sqrt(r))
+    else:
+        h_num = horizontal_num
+        v_num = vertical_num
 
     # 基底ベクトルを画像のように整形
     W_img = W.T.reshape(r, img_height, img_width)
 
     # 基底画像をグリッド状に表示
-    W_imgs = make_baseGridImage(W_img, r, normalize=img_normalize)
-    plt.imshow(W_imgs, cmap=img_cmap, extent=(0, img_width * sqrt_r, 0, img_height * sqrt_r))
-    plt.xticks(range(0, img_width * sqrt_r, img_width))
-    plt.yticks(range(0, img_height * sqrt_r, img_height))
+    W_imgs = make_baseGridImage(W_img, h_num, v_num, normalize=img_normalize)
+    plt.figure(figsize=(6,6))
+    plt.imshow(W_imgs, cmap=img_cmap, extent=(0, img_width * h_num, 0, img_height * v_num))
+    plt.xticks(range(0, img_width * h_num, img_width))
+    plt.yticks(range(0, img_height * v_num, img_height))
     plt.grid(which="major", color=grid_color, alpha=1.0, linestyle="--", linewidth=1)
     plt.xticks(color="None")
     plt.yticks(color="None")
@@ -192,5 +198,5 @@ def show_graphs(x_list, y_lists, x_label, y_label, y_labels, fontsize=16):
     ax = fig.add_subplot(111, xlabel=x_label, ylabel=y_label)
     for y_list, y_graphlabel in zip(y_lists, y_labels):
         ax.plot(x_list, y_list, label=y_graphlabel)
-    ax.legend()
+    ax.legend(fontsize=14)
     plt.show()

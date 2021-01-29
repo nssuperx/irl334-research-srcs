@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 
 from modules.nmf import NMF
 from modules.data import setup_mnist, csv_out
-from modules.array import make_baseGridImage, normalization
 from modules.visualize import show_base_grid, show_reconstruct_pairs, show_base_weight, show_graph
 
 # http://yann.lecun.com/exdb/mnist/
@@ -13,7 +12,8 @@ from modules.visualize import show_base_grid, show_reconstruct_pairs, show_base_
 
 m = 1000       # 画像数
 # r = 1000        # 基底数
-r_list = [25, 49, 100, 784, 1000]
+# r_list = [25, 49, 100, 784, 1000]
+r_list = [10]
 iteration = 200
 
 def main():
@@ -29,15 +29,13 @@ def main():
         F_list = nmf.loss_LOG
         csv_out('nmf_r' + str(r) + '.csv', ('iteration', 'F'), (range(1, iteration + 1), F_list))
 
-    # show_graph(range(iteration), F_list, 'iteration', 'F')
+        # show_graph(range(iteration), F_list, 'iteration', 'F')
 
-    '''
-    reconstruct_V = np.dot(W, H)
-
-    show_base_grid(W, r, img_cmap="Greens", img_normalize=True)
-    show_reconstruct_pairs(V, reconstruct_V, m)
-    # show_base_weight(V, reconstruct_V, W, H, r, m)
-    '''
+        reconstruct_V = np.dot(W, H)
+        show_base_grid(W, r, img_cmap="Greens", img_normalize=True)
+        show_reconstruct_pairs(V, reconstruct_V, m)
+        # show_base_weight(V, reconstruct_V, W, H, r, m)
+    
 
 
 
