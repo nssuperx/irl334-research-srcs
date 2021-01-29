@@ -23,9 +23,9 @@ def make_baseGridImage(W, h_num, v_num, normalize=False):
         h_list = []
         for j in range(h_num):
             if normalize:
-                h_list.append(normalization(W[(i * v_num) + j]))
+                h_list.append(normalization(W[(i * h_num) + j]))
             else:
-                h_list.append(W[(i * v_num) + j])
+                h_list.append(W[(i * h_num) + j])
         W_list.append(h_list)
 
     return np.block(W_list)

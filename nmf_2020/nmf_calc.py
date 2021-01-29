@@ -32,7 +32,7 @@ def main():
         # show_graph(range(iteration), F_list, 'iteration', 'F')
 
         reconstruct_V = np.dot(W, H)
-        show_base_grid(W, r, img_cmap="Greens", img_normalize=True)
+        show_base_grid(W, r,horizontal_num=5, vertical_num=2, img_cmap="Greens", img_normalize=True)
         show_reconstruct_pairs(V, reconstruct_V, m)
         # show_base_weight(V, reconstruct_V, W, H, r, m)
     
