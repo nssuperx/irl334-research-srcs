@@ -4,6 +4,7 @@ class NMF:
     W = None
     H = None
     loss_LOG = None
+    # probdist_V = None
 
     epsilon = None
 
@@ -29,12 +30,14 @@ class NMF:
             print("r must be greater than zero.")
             exit()
         
+        # self.probdist_V = self.prob_dist(V)
         self.W = np.random.rand(V.shape[0], r)
         self.H = np.random.rand(r, V.shape[1])
         self.loss_LOG = []
         for i in range(iteration):
             self.update(V)
             loss = self.kl_divergence(V)
+            # loss = self.frobenius_norm(V)
             self.loss_LOG.append(loss)
 
     def update(self, V):
@@ -50,13 +53,20 @@ class NMF:
         WH = np.dot(self.W, self.H) + self.epsilon
         self.W = self.W * np.dot(V / WH, self.H.T)
 
-        W_tmp = np.sum(self.W, axis=0)
-        self.W = self.W / np.tile(W_tmp, (V.shape[0], 1))
+        self.W = self.W / np.tile(np.sum(self.W, axis=0), (self.W.shape[0], 1))
 
         WH = np.dot(self.W, self.H) + self.epsilon
-        self.H = self.H * np.dot(self.W.T, (V/WH))
+        self.H = self.H * np.dot(self.W.T, (V / WH))
 
     def kl_divergence(self, V):
         WH = np.dot(self.W, self.H) + self.epsilon
         F = np.sum(np.multiply(V, np.log(WH)) - WH)
         return F
+
+    def frobenius_norm(self, V):
+        WH = np.dot(self.W, self.H) + self.epsilon
+        F = np.linalg.norm(V - WH)
+        return F
+
+    def prob_dist(self, V):
+        return V / np.tile(np.sum(V, axis=0), (V.shape[0], 1))

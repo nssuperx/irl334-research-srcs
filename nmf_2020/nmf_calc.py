@@ -27,18 +27,16 @@ def main():
         W = nmf.W
         H = nmf.H
         F_list = nmf.loss_LOG
-        csv_out('nmf_r' + str(r) + '.csv', ('iteration', 'F'), (range(1, iteration + 1), F_list))
+        # csv_out('nmf_r' + str(r) + '.csv', ('iteration', 'F'), (range(1, iteration + 1), F_list))
 
-        # show_graph(range(iteration), F_list, 'iteration', 'F')
+        show_graph(range(iteration), F_list, 'iteration', 'F')
 
-        reconstruct_V = np.dot(W, H)
-        show_base_grid(W, r,horizontal_num=5, vertical_num=2, img_cmap="Greens", img_normalize=True)
-        show_reconstruct_pairs(V, reconstruct_V, m)
+        # reconstruct_V = np.dot(W, H)
+        # show_base_grid(W, r, horizontal_num=5, vertical_num=2, img_cmap="Greens", img_normalize=True)
+        # show_base_grid(W, r, img_cmap="Greens", img_normalize=True)
+        # show_reconstruct_pairs(V, reconstruct_V, m)
         # show_base_weight(V, reconstruct_V, W, H, r, m)
     
-
-
-
 if __name__ == "__main__":
     main()
     
