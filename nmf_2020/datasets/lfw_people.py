@@ -13,7 +13,7 @@ img_w = lfw_people.images[0].shape[1]
 
 out_images = lfw_people.images.reshape(images_num, img_h * img_w).T
 
-np.save('./datasets/face_images', out_images)
+np.save('./face_images', out_images)
 
 print(out_images.shape)
 img = out_images.T[0].reshape(img_h, img_w)

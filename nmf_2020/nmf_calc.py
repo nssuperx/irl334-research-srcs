@@ -18,7 +18,7 @@ iteration = 200
 
 def main():
     V, labels = setup_mnist(image_num=m)
-    V = setup_face(image_num=m)
+    # V = setup_face(image_num=m)
 
     print("V shape:" + str(V.shape))
 

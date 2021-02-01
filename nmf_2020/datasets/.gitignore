@@ -1,0 +1,9 @@
+# datasets directory
+face
+newsgroups
+newsgroups_vectorized
+mnist
+
+# numpy array
+*.npy
+*.npz

@@ -1,6 +1,2 @@
-# datasets
-newsgroups
-newsgroups_vectorized
-
 # Python cache
 __pycache__

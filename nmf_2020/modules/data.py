@@ -21,7 +21,7 @@ def setup_mnist(image_num):
     labels:
         ラベルのnumpy配列
     """
-    mnist_data = MNIST('./mnist', train=True, download=True, transform=transforms.ToTensor())
+    mnist_data = MNIST('./datasets/mnist', train=True, download=True, transform=transforms.ToTensor())
     data_loader = DataLoader(mnist_data, batch_size=image_num, shuffle=False)
     data_iter = iter(data_loader)
     images, labels = data_iter.next()
