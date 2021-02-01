@@ -28,7 +28,7 @@ def main():
     print("reconstruct_V.shape: " + str(reconstruct_V.shape))
     
     show_base_grid(W, r, img_normalize=True)
-    show_reconstruct_pairs(V, reconstruct_V, m, sample_num=5)
+    show_reconstruct_pairs(V, reconstruct_V, m, sample_num=5, separate=True)
     # show_base_weight(V, reconstruct_V, W, H, r, m)
 
 
