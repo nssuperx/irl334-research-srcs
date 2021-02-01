@@ -44,7 +44,7 @@ def show_base_grid(W, r, horizontal_num=None, vertical_num=None, img_normalize=F
     plt.show()
 
 
-def show_reconstruct_pairs(V, reconstruct_V, m, sample_num=5, img_cmap="Greys", random_select=False):
+def show_reconstruct_pairs(V, reconstruct_V, m, sample_num=5, img_cmap="Greys", random_select=False, img_height=None, img_width=None):
     """
     オリジナル画像と再構成画像のペアを表示する．
 
@@ -60,21 +60,34 @@ def show_reconstruct_pairs(V, reconstruct_V, m, sample_num=5, img_cmap="Greys", 
         表示したいペア数
     img_cmap: str
         表示する画像のカラーマップ
+    random_select: boolean
+        表示する画像をランダムで選ぶかどうか
+    img_height, img_width, int
+        表示する画像の縦と横のピクセル数
+        設定しなかったらsqrt(V.shape[0])
     """
     if random_select:
         sample_index_list = np.random.randint(0, m, size=sample_num)
     else:
         sample_index_list = np.arange(sample_num, dtype='int32')
+
+    if img_height is None or img_width is None:
+        height = int(np.sqrt(V.shape[0]))
+        width = int(np.sqrt(V.shape[0]))
+    else:
+        height = int(img_height)
+        width = int(img_width)
+    
     fig = plt.figure()
     for i in range(0, sample_num):
-        img = V[:,sample_index_list[i]].reshape(28, 28)
+        img = V[:,sample_index_list[i]].reshape(height, width)
         ax = fig.add_subplot(2,5,i+1)
         ax.axes.xaxis.set_visible(False)
         ax.axes.yaxis.set_visible(False)
         aximg = ax.imshow(img, cmap=img_cmap)
         # aximg = ax.imshow(img, cmap=img_cmap, vmin=-1, vmax=1)
         # fig.colorbar(aximg, ax=ax)
-        img = reconstruct_V[:,sample_index_list[i]].reshape(28, 28)
+        img = reconstruct_V[:,sample_index_list[i]].reshape(height, width)
         ax = fig.add_subplot(2,5,i+6)
         ax.axes.xaxis.set_visible(False)
         ax.axes.yaxis.set_visible(False)

@@ -28,6 +28,8 @@ def setup_mnist(image_num):
     mnist_image = images.reshape(image_num, images.shape[2] * images.shape[3])
     return mnist_image.numpy().T, labels.numpy()
 
+def setup_face(image_num=13233):
+    return np.load('./datasets/face_images.npy')[:, :image_num]
 
 def csv_make_labels(filename, labels):
     """
