@@ -11,8 +11,8 @@ from modules.visualize import show_base_grid, show_reconstruct_pairs, show_base_
 # The training set contains 60000 examples, and the test set 10000 examples.
 
 m = 1000       # 画像数
-# r = 1000        # 基底数 決め方:(n + m)r < nm
-r_list = [10, 49, 100, 439, 784, 1000]
+# r_list = [10, 49, 100, 439, 784, 1000]
+r_list = [25] # 基底数 決め方:(n + m)r < nm
 iteration = 200
 
 def main():
@@ -28,14 +28,14 @@ def main():
         W = nmf.W
         H = nmf.H
         F_list = nmf.loss_LOG
-        # csv_out('nmf_r' + str(r) + '.csv', ('iteration', 'F'), (range(1, iteration + 1), F_list))
+        csv_out('nmf_r' + str(r) + '_div_m.csv', ('iteration', 'F'), (range(1, iteration + 1), F_list))
 
         # show_graph(range(iteration), F_list, 'iteration', 'F')
 
-        reconstruct_V = np.dot(W, H)
+        # reconstruct_V = np.dot(W, H)
         # show_base_grid(W, r, horizontal_num=5, vertical_num=2, img_cmap="Greens", img_normalize=True)
         # show_base_grid(W, r, img_cmap="Greens", img_normalize=True)
-        show_reconstruct_pairs(V, reconstruct_V, m, img_cmap='Greys', separate=True)
+        # show_reconstruct_pairs(V, reconstruct_V, m, img_cmap='Greys', separate=True)
         # show_base_weight(V, reconstruct_V, W, H, r, m)
     
 if __name__ == "__main__":

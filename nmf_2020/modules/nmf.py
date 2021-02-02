@@ -61,6 +61,8 @@ class NMF:
     def kl_divergence(self, V):
         WH = np.dot(self.W, self.H) + self.epsilon
         F = np.sum(np.multiply(V, np.log(WH)) - WH)
+        # F = np.sum(np.multiply(V, np.log(WH)) - WH) / V.shape[1]
+        # F = np.sum(np.multiply(V, np.log(WH)) - WH) / (V.shape[0] * V.shape[1])
         return F
 
     def frobenius_norm(self, V):
