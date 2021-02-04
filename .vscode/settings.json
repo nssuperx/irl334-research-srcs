@@ -28,6 +28,16 @@
     ],
     "latex-workshop.latex.recipes": [
         {
+            "name": "platex+dvipdfmx",
+            "tools": [
+                "platex",
+                "pbibtex",
+                "platex",
+                "platex",
+                "dvipdfmx-ptex"
+            ]
+        },
+        {
             "name": "latexmk",
             "tools": [
                 "latexmk"
@@ -40,17 +50,7 @@
                 "pbibtex",
                 "uplatex",
                 "uplatex",
-                "dvipdfmx"
-            ]
-        },
-        {
-            "name": "platex+dvipdfmx",
-            "tools": [
-                "platex",
-                "pbibtex",
-                "platex",
-                "platex",
-                "dvipdfmx"
+                "dvipdfmx-uptex"
             ]
         },
     ],
@@ -72,9 +72,20 @@
             ]
         },
         {
-            "name": "dvipdfmx",
+            "name": "dvipdfmx-ptex",
             "command": "dvipdfmx",
             "args": [
+                "-f",
+                "ptex-ipaex.map",
+                "%DOC%"
+            ]
+        },
+        {
+            "name": "dvipdfmx-uptex",
+            "command": "dvipdfmx",
+            "args": [
+                "-f",
+                "uptex-ipaex.map",
                 "%DOC%"
             ]
         },
