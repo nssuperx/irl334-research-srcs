@@ -5,7 +5,8 @@ from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
 from .array import make_baseGridImage
 
 
-def show_base_grid(W, r, horizontal_num=None, vertical_num=None, img_normalize=False, img_cmap="PiYG", grid_color="black"):
+def show_base_grid(W, r, horizontal_num=None, vertical_num=None, img_normalize=False,
+                    img_cmap="PiYG", grid_color="black", save_img=True, filename=None, show_img=True):
     """
     基底画像をグリッド状に表示する．
 
@@ -19,6 +20,12 @@ def show_base_grid(W, r, horizontal_num=None, vertical_num=None, img_normalize=F
         表示する画像のカラーマップ
     grid_color: str
         グリッドの色
+    save_img: boolean
+        生成された図を保存するかどうか
+    filename: str
+        保存するときのファイル名
+    show_img: boolean
+        生成された図を表示するかどうか
     """
     img_width = int(np.sqrt(W.shape[0]))
     img_height = int(np.sqrt(W.shape[0]))
@@ -34,7 +41,7 @@ def show_base_grid(W, r, horizontal_num=None, vertical_num=None, img_normalize=F
 
     # 基底画像をグリッド状に表示
     W_imgs = make_baseGridImage(W_img, h_num, v_num, normalize=img_normalize)
-    plt.figure(figsize=(6,6))
+    plt.figure(figsize=(6, 6 * v_num / h_num))
     plt.subplots_adjust(left=0.02, right=0.98, bottom=0.02, top=0.98)
     plt.imshow(W_imgs, cmap=img_cmap, extent=(0, img_width * h_num, 0, img_height * v_num))
     plt.xticks(range(0, img_width * h_num, img_width))
@@ -42,10 +49,15 @@ def show_base_grid(W, r, horizontal_num=None, vertical_num=None, img_normalize=F
     plt.grid(which="major", color=grid_color, alpha=1.0, linestyle="--", linewidth=1)
     plt.xticks(color="None")
     plt.yticks(color="None")
-    plt.show()
+
+    if save_img:
+        plt.savefig(filename)
+    if show_img:
+        plt.show()
 
 
-def show_reconstruct_pairs(V, reconstruct_V, m, sample_num=5, img_cmap="Greys", random_select=False, img_height=None, img_width=None, separate=False):
+def show_reconstruct_pairs(V, reconstruct_V, m, sample_num=5, img_cmap="Greys", random_select=False,img_height=None, img_width=None,
+                            separate=False, save_img=True, save_original=False, filename=None, show_img=True):
     """
     オリジナル画像と再構成画像のペアを表示する．
 
@@ -68,6 +80,10 @@ def show_reconstruct_pairs(V, reconstruct_V, m, sample_num=5, img_cmap="Greys", 
         設定しなかったらsqrt(V.shape[0])
     separate: boolean
         オリジナル画像と再構成画像を分けて表示するかどうか
+    save_img, save_original: boolean
+        生成された図を保存するかどうか
+    filename: str
+        保存するときのファイル名
     """
     if random_select:
         sample_index_list = np.random.randint(0, m, size=sample_num)
@@ -93,7 +109,13 @@ def show_reconstruct_pairs(V, reconstruct_V, m, sample_num=5, img_cmap="Greys", 
                 # aximg = ax.imshow(img, cmap=img_cmap, vmin=-1, vmax=1)
                 # fig.colorbar(aximg, ax=ax)
             plt.subplots_adjust(left=0.02, right=0.98, bottom=0.02, top=0.98)
-            plt.show()
+
+            if save_original and imgs is V:
+                plt.savefig('original_' + filename)
+            if save_img and imgs is reconstruct_V:
+                plt.savefig(filename)
+            if show_img:
+                plt.show()       
 
     else:
         fig = plt.figure(figsize=(sample_num,1.9))
@@ -113,10 +135,13 @@ def show_reconstruct_pairs(V, reconstruct_V, m, sample_num=5, img_cmap="Greys", 
             # aximg = ax.imshow(img, cmap=img_cmap, vmin=-1, vmax=1)
             # fig.colorbar(aximg, ax=ax)
         plt.subplots_adjust(left=0.02, right=0.98, bottom=0.02, top=0.98)
-        plt.show()
+        if save_img:
+            plt.savefig(filename)
+        if show_img:
+            plt.show()
 
 
-def show_base_weight(V, reconstruct_V, W, H, r, m, sample_num=5, img_cmap="Greys"):
+def show_base_weight(V, reconstruct_V, W, H, r, m, sample_num=5, img_cmap="Greys", random_select=False, img_height=None, img_width=None):
     """
     再構成画像の基底画像と重みの関係を棒グラフで表示する．
     基底数が多くなると，見にくい．
@@ -139,23 +164,38 @@ def show_base_weight(V, reconstruct_V, W, H, r, m, sample_num=5, img_cmap="Greys
         表示したいペア数
     img_cmap: str
         表示する画像のカラーマップ
+    random_select: boolean
+        表示する画像をランダムで選ぶかどうか
+    img_height, img_width: int
+        表示する画像の縦と横のピクセル数
+        設定しなかったらsqrt(V.shape[0])
     """
+    if random_select:
 
-    img_width = int(np.sqrt(W.shape[0]))
-    img_height = int(np.sqrt(W.shape[0]))
-    W_img = W.T.reshape(r, img_height, img_width)
+        sample_index_list = np.random.randint(0, m, size=sample_num)
+    else:
+        sample_index_list = np.arange(sample_num, dtype='int32')
 
-    sample_index_list = np.random.randint(0, m, size=sample_num)
+    if img_height is None or img_width is None:
+        height = int(np.sqrt(V.shape[0]))
+        width = int(np.sqrt(V.shape[0]))
+    else:
+        height = int(img_height)
+        width = int(img_width)
+
+    W_img = W.T.reshape(r, height, width)
+
     figrow_master = sample_num + 1
     figcol_master = r + 2
     fig = plt.figure()
     plt.rcParams['axes.xmargin'] = 0
+    plt.subplots_adjust(left=0.02, right=0.98, bottom=0.02, top=0.98)
     gs_master = GridSpec(nrows=figrow_master, ncols=figcol_master)
 
     # 選択したオリジナル画像
     gs_1 = GridSpecFromSubplotSpec(nrows=sample_num, ncols=1, subplot_spec=gs_master[0:sample_num, 0])
     for i in range(0, sample_num):
-        img = V[:, sample_index_list[i]].reshape(28, 28)
+        img = V[:, sample_index_list[i]].reshape(height, width)
         ax = fig.add_subplot(gs_1[i, :])
         ax.axes.xaxis.set_visible(False)
         ax.axes.yaxis.set_visible(False)
@@ -166,12 +206,13 @@ def show_base_weight(V, reconstruct_V, W, H, r, m, sample_num=5, img_cmap="Greys
     for i in range(0, sample_num):
         ax = fig.add_subplot(gs_2[i, :])
         ax.axes.xaxis.set_visible(False)
+        ax.axes.yaxis.set_visible(False)
         ax.bar(range(r), H[:, sample_index_list[i]])
 
     # 復元画像
     gs_3 = GridSpecFromSubplotSpec(nrows=sample_num, ncols=1, subplot_spec=gs_master[0:sample_num, figcol_master-1])
     for i in range(0, sample_num):
-        img = reconstruct_V[:,sample_index_list[i]].reshape(28, 28)
+        img = reconstruct_V[:,sample_index_list[i]].reshape(height, width)
         ax = fig.add_subplot(gs_3[i, :])
         ax.axes.xaxis.set_visible(False)
         ax.axes.yaxis.set_visible(False)
