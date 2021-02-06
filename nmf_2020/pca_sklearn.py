@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
 from modules.data import setup_mnist
-from modules.array import make_baseGridImage_square, normalization
+from modules.array import make_baseGridImage_square, normalize
 from modules.visualize import show_base_grid, show_reconstruct_pairs, show_base_weight
 
 # http://yann.lecun.com/exdb/mnist/

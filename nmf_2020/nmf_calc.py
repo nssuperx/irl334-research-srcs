@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from modules.nmf import NMF
 from modules.data import setup_mnist, csv_out, setup_face
 from modules.visualize import show_base_grid, show_reconstruct_pairs, show_base_weight, show_graph
+from modules.array import normalize, search_near_imagepair
 
 m = 1000       # 画像数
 # r_list = [10, 49, 100, 439, 784, 1000]
@@ -35,25 +36,6 @@ def main():
         # show_reconstruct_pairs(V, reconstruct_V, m, img_cmap='Greys', separate=True)
         # show_base_weight(V, reconstruct_V, W, H, r, m)
 
-        # TODO: 以下，関数化する．
-        idx_w = 0
-        idx_v = 0
-        min_w = None
-        min_v_idx_list = []
-        
-        # for i in range(W.shape[1]):
-        for i in range(4):
-            w = W[:,i]
-            w = w.reshape(W.shape[0], 1)
-            print(np.tile(w, (1, m)))
-            tmp = (np.tile(w, (1, m)) - V)
-            diff = np.sum(tmp, axis=0)
-            diff = np.square(diff)
-            print(diff)
-            min_v_idx_list.append(np.copy(np.argmin(diff)))
-
-        print(min_v_idx_list)
-    
 if __name__ == "__main__":
     main()
     
