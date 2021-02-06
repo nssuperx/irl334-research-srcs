@@ -4,7 +4,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST
 
-def setup_mnist(image_num):
+def setup_mnist(image_num=60000):
     """
     pytorchを使ってmnistのデータを作り，numpy配列を作る．
 
@@ -29,6 +29,20 @@ def setup_mnist(image_num):
     return mnist_image.numpy().T, labels.numpy()
 
 def setup_face(image_num=13233):
+    """
+    顔画像のデータセットを読み込み，numpy配列を作る．
+
+    Parameters
+    ----------
+    image_num : int
+        使用する画像の枚数
+
+    
+    Returns
+    --------
+    face_image:
+        n * m次元の顔画像のnumpy配列
+    """
     return np.load('./datasets/face_images.npy')[:, :image_num]
 
 def csv_make_labels(filename, labels):

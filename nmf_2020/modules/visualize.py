@@ -6,7 +6,7 @@ from .array import make_baseGridImage
 
 
 def show_base_grid(W, r, horizontal_num=None, vertical_num=None, img_normalize=False,
-                    img_cmap="PiYG", grid_color="black", save_img=True, filename=None, show_img=True):
+                    img_cmap="PiYG", grid_color="black", save_img=False, filename=None, show_img=True):
     """
     基底画像をグリッド状に表示する．
 
