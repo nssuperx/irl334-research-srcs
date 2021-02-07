@@ -1,6 +1,18 @@
 import numpy as np
 
 class NMF:
+    """
+    NMFの計算，値を保持する．
+
+    Attributes
+    ----------
+    W, H: numpy.ndarray
+        計算で使用する行列
+    loss_LOG: list
+        目的関数の計算結果のログ
+    epsilon: float
+        ゼロ除算回避用の微小な値
+    """
     W = None
     H = None
     loss_LOG = None
@@ -9,10 +21,18 @@ class NMF:
     epsilon = None
 
     def __init__(self, epsilon=1e-7, seed=None):
+        """
+        Parameters
+        ----------
+        epsilon: float
+            ゼロ除算回避用の微小な値
+        seed: int
+            乱数シード値
+        """
         self.epsilon = epsilon
         np.random.seed(seed)
 
-    def calc(self, V, r, iteration=500, save=False, use_cache=False):
+    def calc(self, V, r, iteration=500, save=False, use_cache=False, filename=None):
         """
         NMF計算
 
@@ -24,6 +44,12 @@ class NMF:
             基底数
         iteration: int
             繰り返し回数
+        save: boolean
+            計算後のデータを保存するかのフラグ
+        use_cache: boolean
+            前の結果を使うかのフラグ
+        filename: str
+            保存するときのファイル名文字列
         """
         if use_cache:
             self.load_data()
