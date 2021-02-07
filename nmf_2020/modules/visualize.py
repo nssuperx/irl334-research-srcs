@@ -4,6 +4,34 @@ from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
 
 from .array import make_baseGridImage
 
+def show_image(V, img_cmap="Greys", save_img=False, filename=None, show_img=True):
+    """
+    1枚の画像を表示する．
+
+    Parameters
+    ----------
+    V: numpy.ndarray
+        画像
+    img_cmap: str
+        表示する画像のカラーマップ
+    save_img: boolean
+        生成された図を保存するかどうか
+    filename: str
+        保存するときのファイル名
+    show_img: boolean
+        生成された図を表示するかどうか
+    """
+    img_height = int(np.sqrt(V.shape[0]))
+    img_width = int(np.sqrt(V.shape[0]))
+    img = V.reshape(img_height, img_width)
+    plt.imshow(img, cmap=img_cmap)
+    plt.xticks(color="None")
+    plt.yticks(color="None")
+
+    if save_img:
+        plt.savefig(filename)
+    if show_img:
+        plt.show()
 
 def show_base_grid(W, r, horizontal_num=None, vertical_num=None, img_normalize=False,
                     img_cmap="PiYG", grid_color="black", save_img=False, filename=None, show_img=True):
