@@ -8,7 +8,7 @@ class NMF:
 
     epsilon = None
 
-    def __init__(self, epsilon=1e-7, seed=0):
+    def __init__(self, epsilon=1e-7, seed=None):
         self.epsilon = epsilon
         np.random.seed(seed)
 
@@ -70,7 +70,7 @@ class NMF:
         V: numpy.adarray
             オリジナルのデータ
 
-        Return
+        Returns
         ----------
         F: float
             KL-divergence
@@ -90,7 +90,7 @@ class NMF:
         V: numpy.adarray
             オリジナルのデータ
 
-        Return
+        Returns
         ----------
         F: float
             frobeniusノルム
@@ -108,7 +108,7 @@ class NMF:
         V: numpy.adarray
             行列
 
-        Return
+        Returns
         ----------
         numpy.adarray
             確率分布になった行列

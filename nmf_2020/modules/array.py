@@ -11,7 +11,7 @@ def normalize(V, axis=None):
     axis: int
         方向
 
-    Return
+    Returns
     ----------
     numpy.adarray
         確率分布になった行列
@@ -31,7 +31,7 @@ def prob_dist(V):
     V: numpy.adarray
         行列
 
-    Return
+    Returns
     ----------
     numpy.adarray
         確率分布になった行列

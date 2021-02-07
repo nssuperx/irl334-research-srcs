@@ -21,7 +21,7 @@ def main():
 
     for r in r_list:
         print("r = " + str(r))
-        nmf = NMF()
+        nmf = NMF(seed=0)
         nmf.calc(V, r, iteration, save=False, use_cache=True)
         W = nmf.W
         H = nmf.H
@@ -35,6 +35,9 @@ def main():
         # show_base_grid(W, r, img_cmap="Greens", img_normalize=True)
         # show_reconstruct_pairs(V, reconstruct_V, m, img_cmap='Greys', separate=True)
         # show_base_weight(V, reconstruct_V, W, H, r, m)
+
+        # TODO: 以下，関数化
+
 
 if __name__ == "__main__":
     main()
