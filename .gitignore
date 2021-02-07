@@ -3,7 +3,6 @@
 *.dvi
 *.log
 *.out
-*.pdf
 *.synctex.gz
 *.vrb
 

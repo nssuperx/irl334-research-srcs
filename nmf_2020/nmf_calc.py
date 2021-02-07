@@ -38,11 +38,13 @@ def main():
 
         # TODO: 以下，関数化
         # r = 302が「6」みたいな形の基底画像
+        """
         show_image(W[:, 302], img_cmap="Greens")
         H_sort_index = np.argsort(H[302])[::-1]
         print(H_sort_index)
         show_image(V[:, H_sort_index[0]], img_cmap='Greys')
         show_image(reconstruct_V[:, H_sort_index[0]], img_cmap='Greys')
+        """
 
 
         """
@@ -53,15 +55,15 @@ def main():
         show_base_grid(W_sort, r, img_cmap="Greens", img_normalize=True, save_img=False, filename='nmf_r' + str(r) + '_sort1.pdf', show_img=True)
         """
 
-        """
-        Hの分布
+
+        # Hの分布
         H_sum_row = np.sum(H, axis=1) / r
         print(H_sum_row.shape)
         plt.scatter(range(r), H_sum_row, s=10)
         plt.xlabel('W image number')
-        plt.ylabel('Use rate')
+        plt.ylabel('use rate')
         plt.show()
-        """
+
 
 
 
