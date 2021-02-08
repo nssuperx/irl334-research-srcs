@@ -28,6 +28,16 @@
     ],
     "latex-workshop.latex.recipes": [
         {
+            "name": "uplatex+dvipdfmx",
+            "tools": [
+                "uplatex",
+                "pbibtex",
+                "uplatex",
+                "uplatex",
+                "dvipdfmx-uptex"
+            ]
+        },
+        {
             "name": "platex+dvipdfmx",
             "tools": [
                 "platex",
@@ -41,16 +51,6 @@
             "name": "latexmk",
             "tools": [
                 "latexmk"
-            ]
-        },
-        {
-            "name": "uplatex+dvipdfmx",
-            "tools": [
-                "uplatex",
-                "pbibtex",
-                "uplatex",
-                "uplatex",
-                "dvipdfmx-uptex"
             ]
         },
     ],
