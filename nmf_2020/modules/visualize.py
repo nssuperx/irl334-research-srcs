@@ -24,6 +24,7 @@ def show_image(V, img_cmap="Greys", save_img=False, filename=None, show_img=True
     img_height = int(np.sqrt(V.shape[0]))
     img_width = int(np.sqrt(V.shape[0]))
     img = V.reshape(img_height, img_width)
+    plt.figure()
     plt.imshow(img, cmap=img_cmap)
     plt.xticks(color="None")
     plt.yticks(color="None")

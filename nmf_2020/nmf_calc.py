@@ -22,7 +22,7 @@ def main():
     for r in r_list:
         print("r = " + str(r))
         nmf = NMF(seed=0)
-        nmf.calc(V, r, iteration, save=False, use_cache=True)
+        nmf.calc(V, r, iteration, save=False, use_cache=False)
         W = nmf.W
         H = nmf.H
         F_list = nmf.loss_LOG
@@ -57,15 +57,14 @@ def main():
 
 
         # Hの分布
-        H_sum_row = np.sum(H, axis=1) / r
+        H_sum_row = np.sum(H, axis=1) / m
         print(H_sum_row.shape)
-        plt.scatter(range(r), H_sum_row, s=10)
+        plt.figure()
+        plt.scatter(range(1, r+1), H_sum_row, s=10)
         plt.xlabel('W image number')
         plt.ylabel('use rate')
+        # plt.savefig('nmf_r' + str(r) + '_H_scatter.pdf')
         plt.show()
-
-
-
 
 if __name__ == "__main__":
     main()
