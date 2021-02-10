@@ -31,6 +31,14 @@
             "name": "uplatex+dvipdfmx",
             "tools": [
                 "uplatex",
+                "uplatex",
+                "dvipdfmx-uptex"
+            ]
+        },
+        {
+            "name": "uplatex+pbibtex+dvipdfmx",
+            "tools": [
+                "uplatex",
                 "pbibtex",
                 "uplatex",
                 "uplatex",
