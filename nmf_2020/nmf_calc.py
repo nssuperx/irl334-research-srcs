@@ -9,7 +9,7 @@ from modules.visualize import show_base_grid, show_reconstruct_pairs, show_base_
 from modules.array import normalize, search_near_imagepair
 
 m = 1000       # 画像数
-# r_list = [10, 49, 100, 439, 784, 1000]
+# r_list = [49, 100, 439, 784]
 r_list = [439] # 基底数 決め方:(n + m)r < nm
 iteration = 200
 
@@ -55,7 +55,7 @@ def main():
         show_base_grid(W_sort, r, img_cmap="Greens", img_normalize=True, save_img=False, filename='nmf_r' + str(r) + '_sort1.pdf', show_img=True)
         """
 
-        """
+        
         # Hの分布
         H_sum_row = np.sum(H, axis=1) / m
         H_sum_row_sort = np.sort(H_sum_row)[::-1]
@@ -64,24 +64,32 @@ def main():
 
         print(H_sum_row_sort.shape)
         plt.figure()
-        plt.scatter(range(1, r+1), H_sum_row_sort, s=10)
+        plt.plot(range(1, r+1), H_sum_row_sort, linewidth=3.0)
         plt.xlabel('a')
-        # plt.savefig('nmf_r' + str(r) + '_H_scatter.pdf')
-        plt.show()
-        show_base_grid(W_sort, 1000, img_cmap="Greens", img_normalize=True, save_img=False, filename='nmf_r' + str(r) + '_grid_sort.pdf', show_img=True)
-        """
+        plt.savefig('nmf_r' + str(r) + '_H_sort_scatter.pdf')
+        # plt.show()
+        show_base_grid(W_sort, r+2, img_cmap="Greens", img_normalize=True, save_img=True, filename='nmf_r' + str(r) + '_grid_sort.pdf', show_img=False)
+        
 
         """
         # Hのヒストグラム
-        plt.rcParams["font.size"] = 6
         fig = plt.figure(figsize=(5,0.9))
         for i in range(5):
             ax = fig.add_subplot(1,5,i+1, ylim=(0.0, 10.0))
             ax.axes.yaxis.set_visible(i==0)
             ax.bar(range(r), H[:, i], width=2.0)
-        # plt.show()
+        plt.show()
         plt.savefig('nmf_r' + str(r) + '_H_bar.pdf', bbox_inches='tight')
         """
+
+        """
+        #r=302
+        plt.figure(figsize=(10,2))
+        plt.bar(range(m), H[302,:], width=10)
+        plt.savefig('nmf_r' + str(r) + '_r302_bar.pdf', bbox_inches='tight')
+        show_image(V[:,506])
+        """
+
         
 
 if __name__ == "__main__":
