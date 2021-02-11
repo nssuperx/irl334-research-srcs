@@ -40,13 +40,19 @@ def prob_dist(V):
 
 def make_baseGridImage(W, h_num, v_num, img_normalize=False):
     W_list = []
+    # 基底ベクトルを画像のように整形
+    W_img = W.T.reshape(W.shape[1], int(np.sqrt(W.shape[0])), int(np.sqrt(W.shape[0])))
     for i in range(v_num):
         h_list = []
         for j in range(h_num):
+            idx = (i * h_num) + j
+            if W.shape[1] <= idx:
+                h_list.append(np.zeros(W_img[0].shape))
+                continue
             if img_normalize:
-                h_list.append(normalize(W[(i * h_num) + j]))
+                h_list.append(normalize(W_img[idx]))
             else:
-                h_list.append(W[(i * h_num) + j])
+                h_list.append(W_img[idx])
         W_list.append(h_list)
 
     return np.block(W_list)

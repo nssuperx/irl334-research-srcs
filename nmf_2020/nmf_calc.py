@@ -22,7 +22,7 @@ def main():
     for r in r_list:
         print("r = " + str(r))
         nmf = NMF(seed=0)
-        nmf.calc(V, r, iteration, save=False, use_cache=False)
+        nmf.calc(V, r, iteration, save=False, use_cache=True)
         W = nmf.W
         H = nmf.H
         F_list = nmf.loss_LOG
@@ -32,7 +32,7 @@ def main():
 
         reconstruct_V = np.dot(W, H)
         # show_base_grid(W, r, horizontal_num=5, vertical_num=2, img_cmap="Greens", img_normalize=True, save_img=False, filename=None, show_img=True)
-        # show_base_grid(W, r, img_cmap="Greens", img_normalize=True, save_img=False, filename='nmf_r' + str(r) + '_grid_m10000.pdf', show_img=True)
+        show_base_grid(W, r, img_cmap="Greens", img_normalize=True, save_img=False, filename='nmf_r' + str(r) + '_grid_m10000.pdf', show_img=True)
         # show_reconstruct_pairs(V, reconstruct_V, m, img_cmap='Greys', separate=True, save_img=True, filename='nmf_r' + str(r) + '_reconstruct_m10000.pdf', show_img=False)
         # show_base_weight(V, reconstruct_V, W, H, r, m)
 
@@ -58,13 +58,17 @@ def main():
 
         # Hの分布
         H_sum_row = np.sum(H, axis=1) / m
-        print(H_sum_row.shape)
+        H_sum_row_sort = np.sort(H_sum_row)[::-1]
+        H_sum_row_index_sort = np.argsort(H_sum_row)[::-1]
+        W_sort = W[:,H_sum_row_index_sort]
+
+        print(H_sum_row_sort.shape)
         plt.figure()
-        plt.scatter(range(1, r+1), H_sum_row, s=10)
-        plt.xlabel('W image number')
-        plt.ylabel('use rate')
-        # plt.savefig('nmf_r' + str(r) + '_H_scatter.pdf')
+        plt.scatter(range(1, r+1), H_sum_row_sort, s=10)
+        plt.xlabel('a')
         plt.show()
+        show_base_grid(W_sort, 1000, img_cmap="Greens", img_normalize=True, save_img=False, filename='nmf_r' + str(r) + '_grid_sort.pdf', show_img=True)
+        # plt.savefig('nmf_r' + str(r) + '_H_scatter.pdf')
 
 if __name__ == "__main__":
     main()

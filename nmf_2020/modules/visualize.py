@@ -65,11 +65,8 @@ def show_base_grid(W, r, horizontal_num=None, vertical_num=None, img_normalize=F
         h_num = horizontal_num
         v_num = vertical_num
 
-    # 基底ベクトルを画像のように整形
-    W_img = W.T.reshape(r, img_height, img_width)
-
     # 基底画像をグリッド状に表示
-    W_imgs = make_baseGridImage(W_img, h_num, v_num, img_normalize=img_normalize)
+    W_imgs = make_baseGridImage(W, h_num, v_num, img_normalize=img_normalize)
     plt.figure(figsize=(6, 6 * v_num / h_num))
     plt.subplots_adjust(left=0.02, right=0.98, bottom=0.02, top=0.98)
     plt.imshow(W_imgs, cmap=img_cmap, extent=(0, img_width * h_num, 0, img_height * v_num))
