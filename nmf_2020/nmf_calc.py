@@ -10,7 +10,7 @@ from modules.array import normalize, search_near_imagepair
 
 m = 1000       # 画像数
 # r_list = [49, 100, 439, 784]
-r_list = [439] # 基底数 決め方:(n + m)r < nm
+r_list = [784] # 基底数 決め方:(n + m)r < nm
 iteration = 200
 
 def main():
@@ -22,7 +22,7 @@ def main():
     for r in r_list:
         print("r = " + str(r))
         nmf = NMF(seed=0)
-        nmf.calc(V, r, iteration, save=False, use_cache=True)
+        nmf.calc(V, r, iteration, save=False, use_cache=False)
         W = nmf.W
         H = nmf.H
         F_list = nmf.loss_LOG
@@ -64,12 +64,10 @@ def main():
 
         print(H_sum_row_sort.shape)
         plt.figure()
-        plt.plot(range(1, r+1), H_sum_row_sort, linewidth=3.0)
-        plt.xlabel('a')
-        plt.ylabel("H'a / m")
-        plt.savefig('nmf_r' + str(r) + '_H_sort_scatter.pdf')
+        plt.scatter(range(1, r+1), H_sum_row_sort, s=10)
+        # plt.savefig('nmf_r' + str(r) + '_H_sort_scatter.png')
         # plt.show()
-        show_base_grid(W_sort, r+2, img_cmap="Greens", img_normalize=True, save_img=True, filename='nmf_r' + str(r) + '_grid_sort.pdf', show_img=False)
+        show_base_grid(W_sort, r+2, horizontal_num=10, vertical_num=79, img_cmap="Greens", img_normalize=True, save_img=False, filename='nmf_r' + str(r) + '_grid_sort.pdf', show_img=True)
         
 
         """
