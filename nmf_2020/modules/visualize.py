@@ -231,8 +231,10 @@ def show_base_weight(V, reconstruct_V, W, H, r, m, sample_num=5, img_cmap="Greys
     gs_2 = GridSpecFromSubplotSpec(nrows=sample_num, ncols=r, subplot_spec=gs_master[0:sample_num, 1:figcol_master-1])
     for i in range(0, sample_num):
         ax = fig.add_subplot(gs_2[i, :])
+        # ax = fig.add_subplot(gs_2[i, :], ylim=(0.0, 60.0))
         ax.axes.xaxis.set_visible(False)
-        ax.axes.yaxis.set_visible(False)
+        # ax.axes.yaxis.set_visible(False)
+        ax.yaxis.set_tick_params(which='both', direction='in')
         ax.bar(range(r), H[:, sample_index_list[i]])
 
     # 復元画像
@@ -250,7 +252,7 @@ def show_base_weight(V, reconstruct_V, W, H, r, m, sample_num=5, img_cmap="Greys
         ax = fig.add_subplot(gs_4[:, i])
         ax.axes.xaxis.set_visible(False)
         ax.axes.yaxis.set_visible(False)
-        ax.imshow(W_img[i], cmap=img_cmap)
+        ax.imshow(W_img[i], cmap="Greens")
 
     plt.show()
 

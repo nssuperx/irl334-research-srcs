@@ -30,11 +30,11 @@ def main():
 
         # show_graph(range(iteration), F_list, 'iteration', 'F')
 
-        reconstruct_V = np.dot(W, H)
+        # reconstruct_V = np.dot(W, H)
         # show_base_grid(W, r, horizontal_num=5, vertical_num=2, img_cmap="Greens", img_normalize=True, save_img=False, filename=None, show_img=True)
-        show_base_grid(W, r, img_cmap="Greens", img_normalize=True, save_img=False, filename='nmf_r' + str(r) + '_grid_m10000.pdf', show_img=True)
+        # show_base_grid(W, r, img_cmap="Greens", img_normalize=True, save_img=False, filename='nmf_r' + str(r) + '_grid_m10000.pdf', show_img=True)
         # show_reconstruct_pairs(V, reconstruct_V, m, img_cmap='Greys', separate=True, save_img=True, filename='nmf_r' + str(r) + '_reconstruct_m10000.pdf', show_img=False)
-        # show_base_weight(V, reconstruct_V, W, H, r, m)
+        # show_base_weight(V, reconstruct_V, W, H, r, m, random_select=False)
 
         # TODO: 以下，関数化
         # r = 302が「6」みたいな形の基底画像
@@ -55,7 +55,7 @@ def main():
         show_base_grid(W_sort, r, img_cmap="Greens", img_normalize=True, save_img=False, filename='nmf_r' + str(r) + '_sort1.pdf', show_img=True)
         """
 
-
+        """
         # Hの分布
         H_sum_row = np.sum(H, axis=1) / m
         H_sum_row_sort = np.sort(H_sum_row)[::-1]
@@ -66,9 +66,23 @@ def main():
         plt.figure()
         plt.scatter(range(1, r+1), H_sum_row_sort, s=10)
         plt.xlabel('a')
+        # plt.savefig('nmf_r' + str(r) + '_H_scatter.pdf')
         plt.show()
         show_base_grid(W_sort, 1000, img_cmap="Greens", img_normalize=True, save_img=False, filename='nmf_r' + str(r) + '_grid_sort.pdf', show_img=True)
-        # plt.savefig('nmf_r' + str(r) + '_H_scatter.pdf')
+        """
+
+        """
+        # Hのヒストグラム
+        plt.rcParams["font.size"] = 6
+        fig = plt.figure(figsize=(5,0.9))
+        for i in range(5):
+            ax = fig.add_subplot(1,5,i+1, ylim=(0.0, 10.0))
+            ax.axes.yaxis.set_visible(i==0)
+            ax.bar(range(r), H[:, i], width=2.0)
+        # plt.show()
+        plt.savefig('nmf_r' + str(r) + '_H_bar.pdf', bbox_inches='tight')
+        """
+        
 
 if __name__ == "__main__":
     main()
