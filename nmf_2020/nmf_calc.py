@@ -66,6 +66,7 @@ def main():
         plt.figure()
         plt.plot(range(1, r+1), H_sum_row_sort, linewidth=3.0)
         plt.xlabel('a')
+        plt.ylabel("H'a / m")
         plt.savefig('nmf_r' + str(r) + '_H_sort_scatter.pdf')
         # plt.show()
         show_base_grid(W_sort, r+2, img_cmap="Greens", img_normalize=True, save_img=True, filename='nmf_r' + str(r) + '_grid_sort.pdf', show_img=False)
