@@ -32,15 +32,15 @@ def main():
     # 出力
     # rightScanImgArray = np.load("./rightScanImgTmp.npy")
     np.save("./rightScanImgTmp", rightScanImgArray)
-    rightimg = Image.fromarray(rightScanImgArray * 255)
+    rightimg = Image.fromarray(rightScanImgArray * 255).convert("L")
     rightimg.show()
-    # rightimg.save("./rightScanImg.png")
+    rightimg.save("./rightScanImg.png")
 
     # leftScanImgArray = np.load("./leftScanImgTmp.npy")
     np.save("./leftScanImgTmp", leftScanImgArray)
-    leftimg = Image.fromarray(leftScanImgArray * 255)
+    leftimg = Image.fromarray(leftScanImgArray * 255).convert("L")
     leftimg.show()
-    # leftimg.save("./leftScanImg.png")
+    leftimg.save("./leftScanImg.png")
 
 
 
