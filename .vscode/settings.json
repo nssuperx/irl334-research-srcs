@@ -123,3 +123,5 @@
         },
     ]
 }
+
+// /usr/share/texlive/texmf-dist/fonts/map/dvipdfmx/ptex-fontmaps ここにmapファイルがあるからそれを確認
