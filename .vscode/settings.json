@@ -1,4 +1,5 @@
 {
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
     "latex-workshop.latex.autoBuild.run":"onSave",
     "latex-workshop.latex.autoClean.run": "onBuilt",
     "latex-workshop.intellisense.package.enabled": true,
@@ -121,7 +122,8 @@
                 "%DOC%"
             ],
         },
-    ]
+    ],
+    "python.pythonPath": "env\\Scripts\\python.exe"
 }
 
 // /usr/share/texlive/texmf-dist/fonts/map/dvipdfmx/ptex-fontmaps ここにmapファイルがあるからそれを確認
