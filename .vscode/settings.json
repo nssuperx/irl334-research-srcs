@@ -123,7 +123,7 @@
             ],
         },
     ],
-    "python.pythonPath": "env\\Scripts\\python.exe"
+    "python.defaultInterpreterPath": "env\\Scripts\\python.exe"
 }
 
 // /usr/share/texlive/texmf-dist/fonts/map/dvipdfmx/ptex-fontmaps ここにmapファイルがあるからそれを確認

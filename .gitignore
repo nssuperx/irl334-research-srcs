@@ -11,3 +11,6 @@
 
 # python env
 env
+
+# pytorch datasets
+data
