@@ -4,7 +4,7 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 import torch.nn as nn
-import torch.nn.functional as F
+from torch.utils.tensorboard import SummaryWriter
 
 trainset = torchvision.datasets.MNIST(root='../data', train=True, download=True, transform=transforms.ToTensor())
 trainloader = torch.utils.data.DataLoader(trainset, shuffle=True)
@@ -13,16 +13,15 @@ testloader = torch.utils.data.DataLoader(testset, shuffle=False)
 
 classes = torchvision.datasets.MNIST.classes
 
-data_iter = iter(trainloader)
-images, labels = data_iter.next()
-
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(256, len(classes))
+        self.fc1 = nn.Linear(28*28, len(classes))
 
     def forward(self, x):
-        x = F.sigmoid(self.fc1(x))
+        x = torch.flatten(x)
+        # x = torch.flatten(x, 1)
+        x = torch.sigmoid(self.fc1(x))
         # x = F.relu(self.fc1(x))
         # x = self.fc1(x)
         return x
@@ -33,13 +32,12 @@ def main():
     criterion = nn.MSELoss()
 
     for epoch in range(1):  # loop over the dataset multiple times
-
+        writer = SummaryWriter()
         running_loss = 0.0
         for i, data in enumerate(trainloader, 0):
             # get the inputs; data is a list of [inputs, labels]
             inputs, labels = data
-            # MNIST のとき torch.Size([4, 1, 32, 32])
-
+            # MNIST のとき torch.Size([1, 1, 28, 28])
             # forward + backward + optimize
             outputs = net(inputs)
             loss = criterion(outputs, labels)
@@ -51,6 +49,9 @@ def main():
                 print('[%d, %5d] loss: %.3f' %
                     (epoch + 1, i + 1, running_loss / 2000))
                 running_loss = 0.0
+
+            writer.add_graph(net, inputs)
+            writer.close()
 
         print('Finished Training')
 
