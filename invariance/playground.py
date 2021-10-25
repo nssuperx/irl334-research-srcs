@@ -18,6 +18,27 @@ class TemplateImage:
         self.mean = self.img.mean()
         self.variance = self.img.var()
         self.sd = self.img.std()
+
+
+def scan(originalImgArray: np.ndarray, templateImgArray: np.ndarray) -> np.ndarray:
+    # 走査
+    # TODO: 遅すぎるのでなんとかする
+    scanImgArray = np.empty((originalImgArray.shape[0] - templateImgArray.shape[0], originalImgArray.shape[1] - templateImgArray.shape[1]))
+    for i in range(scanImgArray.shape[0]):
+        for j in range(scanImgArray.shape[1]):
+            # 相関係数出す範囲をスライス
+            scanTargetImgArray = originalImgArray[i:i+templateImgArray.shape[0], j:j+templateImgArray.shape[1]]
+            cov = np.mean(np.multiply(scanTargetImgArray, templateImgArray))
+            # scanImgArray[i][j] = np.corrcoef(scanTargetImgArray.flatten(), templateImgArray.flatten())[0][1]
+            scanImgArray[i][j] = cov / (scanTargetImgArray.std() * templateImgArray.std())
+
+    return scanImgArray
+
+
+def image_save(filepath: str, scanImgArray: np.ndarray) -> None:
+    img = Image.fromarray(scanImgArray * 255).convert("L")
+    # img.show()
+    img.save(filepath)
     
 
 def main():
@@ -26,42 +47,19 @@ def main():
     originalImgArray = imgDic["original"]
     rightEyeImgArray = imgDic["right_eye"]
     leftEyeImgArray = imgDic["left_eye"]
-    print(originalImgArray[0])
 
-    # 右目で走査した画像配列を作成
-    rightScanImgArray = np.empty((originalImgArray.shape[0] - rightEyeImgArray.shape[0], originalImgArray.shape[1] - rightEyeImgArray.shape[1]))
-    leftScanImgArray = np.empty((originalImgArray.shape[0] - leftEyeImgArray.shape[0], originalImgArray.shape[1] - leftEyeImgArray.shape[1]))
-    print(rightScanImgArray.shape)
-
-    # 走査
-    # TODO: numpy.corrcoef()の挙動をちゃんと調べる
-    for i in range(rightScanImgArray.shape[0]):
-        for j in range(rightScanImgArray.shape[1]):
-            # 相関係数出す範囲をスライス
-            scanTargetImgArray = originalImgArray[i:i+rightEyeImgArray.shape[0], j:j+rightEyeImgArray.shape[1]]
-            cov = np.mean(np.multiply(scanTargetImgArray, rightEyeImgArray))
-            # rightScanImgArray[i][j] = np.corrcoef(scanTargetImgArray.flatten(), rightEyeImgArray.flatten())[0][1]
-            rightScanImgArray[i][j] = cov / (scanTargetImgArray.std() * rightEyeImgArray.std())
-    
-    for i in range(leftScanImgArray.shape[0]):
-        for j in range(leftScanImgArray.shape[1]):
-            # 相関係数出す範囲をスライス
-            scanTargetImgArray = originalImgArray[i:i+leftEyeImgArray.shape[0], j:j+leftEyeImgArray.shape[1]]
-            leftScanImgArray[i][j] = np.corrcoef(scanTargetImgArray.flatten(), leftEyeImgArray.flatten())[0][1]
+    # 走査した画像配列を作成
+    # rightScanImgArray = scan(originalImgArray, rightEyeImgArray)
+    # leftScanImgArray = scan(originalImgArray, leftEyeImgArray)
 
     # 出力
-    # rightScanImgArray = np.load("./rightScanImgTmp.npy")
-    np.save("./rightScanImgTmp", rightScanImgArray)
-    rightimg = Image.fromarray(rightScanImgArray * 255).convert("L")
-    rightimg.show()
-    rightimg.save("./images/out/rightScanImg.png")
+    rightScanImgArray = np.load("./rightScanImgTmp.npy")
+    # np.save("./rightScanImgTmp", rightScanImgArray)
+    image_save("./images/out/rightScanImg.png", rightScanImgArray)
 
-    # leftScanImgArray = np.load("./leftScanImgTmp.npy")
-    np.save("./leftScanImgTmp", leftScanImgArray)
-    leftimg = Image.fromarray(leftScanImgArray * 255).convert("L")
-    leftimg.show()
-    leftimg.save("./images/out/leftScanImg.png")
-
+    leftScanImgArray = np.load("./leftScanImgTmp.npy")
+    # np.save("./leftScanImgTmp", leftScanImgArray)
+    image_save("./images/out/leftScanImg.png", leftScanImgArray)
 
 
 def read_image(normalize: bool = True) -> dict:
