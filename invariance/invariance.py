@@ -19,6 +19,26 @@ class TemplateImage:
         self.variance = self.img.var()
         self.sd = self.img.std()
 
+class ReceptiveField:
+    template: TemplateImage
+    height: int
+    width: int
+    def __init__(self, template: TemplateImage, height: int, width: int) -> None:
+        self.template = template
+        self.height = height
+        self.width = width
+
+class CombinedReceptiveField:
+    rightRF: ReceptiveField
+    leftRF: ReceptiveField
+    height: int
+    width: int
+    def __init__(self, rightRF: ReceptiveField, leftRF: ReceptiveField, height: int, width: int) -> None:
+        self.rightRF = rightRF
+        self.leftRF = leftRF
+        self.height = height
+        self.width = width
+
 
 def scan(originalImgArray: np.ndarray, templateImgArray: np.ndarray) -> np.ndarray:
     # 走査
@@ -95,7 +115,7 @@ def read_image(normalize: bool = True) -> dict:
     return imgDic
 
 
-def image_read_test(imgDic: dict):
+def image_read_test(imgDic: dict) -> None:
     """
     画像を読み込めたかテストする
 
