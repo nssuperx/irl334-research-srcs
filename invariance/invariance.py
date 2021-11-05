@@ -1,4 +1,4 @@
-from typing import ContextManager, Dict
+from typing import ContextManager, Dict, Tuple
 from PIL import Image
 import numpy as np
 
@@ -20,24 +20,70 @@ class TemplateImage:
         self.sd = self.img.std()
 
 class ReceptiveField:
+    """
+    走査後の出力画像から一番興奮してる座標取れそう．
+    オリジナル画像の座標のみ持っておくべき．
+    テンプレート画像を持ってないとfciが計算できないので，一応持っておく．
+    参照渡しであることを信じる
+    """
+    # img: np.ndarray
     template: TemplateImage
+    is_active: bool
     height: int
     width: int
-    def __init__(self, template: TemplateImage, height: int, width: int) -> None:
+    originalImgPos: Tuple[int, int]
+    mostActivePos: Tuple[int, int]
+    activity: float
+
+    def __init__(self, originalImgPos: Tuple[int, int], scannedImgArray: np.ndarray, template: TemplateImage, height: int = 70, width: int = 70) -> None:
+        # self.img = originalImg[originalImgPos]
         self.template = template
+        self.originalImgPos = originalImgPos
         self.height = height
         self.width = width
+        scannedArray = scannedImgArray[originalImgPos[0]:originalImgPos[0] + (height - template.img.shape[0]), originalImgPos[1]:originalImgPos[1] + (width - template.img.shape[1])]
+        self.mostActivePos = np.unravel_index(np.argmax(scannedArray), scannedArray.shape)
+        self.activity = np.max(scannedArray)
 
 class CombinedReceptiveField:
+    # TODO: ほんとはこっちでどのくらい重なるか調整できるべき
     rightRF: ReceptiveField
     leftRF: ReceptiveField
     height: int
     width: int
-    def __init__(self, rightRF: ReceptiveField, leftRF: ReceptiveField, height: int, width: int) -> None:
+    overlap: int
+    fci: float
+
+    def __init__(self, rightRF: ReceptiveField, leftRF: ReceptiveField, height: int = 70, width: int = 110, overlap: int = 30) -> None:
         self.rightRF = rightRF
         self.leftRF = leftRF
         self.height = height
         self.width = width
+        self.overlap = overlap
+        
+        # fci計算．関数化した方がいいかも
+        noOverlap = (width - overlap) / 2
+        x = int(noOverlap + self.leftRF.mostActivePos[0] - self.rightRF.mostActivePos[0])
+        # y = abs(self.leftRF.mostActivePos[1] - self.rightRF.mostActivePos[1])
+        rightOverlap: np.ndarray
+        leftOverlap: np.ndarray
+        if self.rightRF.mostActivePos[1] < self.leftRF.mostActivePos[1]:
+            y = int(self.leftRF.mostActivePos[1] - self.rightRF.mostActivePos[1])
+            rightOverlap = self.rightRF.template.img[x: , y: ]
+            leftOverlap = self.leftRF.template.img[0:self.rightRF.template.img.shape[0] - x, 0:self.rightRF.template.img.shape[1] - y]
+        else:
+            y = int(self.rightRF.mostActivePos[1] - self.leftRF.mostActivePos[1])
+            rightOverlap = self.rightRF.template.img[x: , 0:self.rightRF.template.img.shape[1] - y]
+            leftOverlap = self.leftRF.template.img[0:self.rightRF.template.img.shape[0] - x, y: ]
+        
+        if rightOverlap.size == 0:
+            self.fci = 0.0
+        else:
+            self.fci = np.sum(np.dot(rightOverlap, leftOverlap))
+        
+
+    def get_fci(self) -> float:
+        return self.fci
 
 
 def scan(originalImgArray: np.ndarray, templateImgArray: np.ndarray) -> np.ndarray:
@@ -65,19 +111,30 @@ def main():
     imgDic = read_image()
     # image_read_test(imgDic)
     originalImgArray = imgDic["original"]
-    rightEyeImgArray = imgDic["right_eye"]
-    leftEyeImgArray = imgDic["left_eye"]
+    # rightEyeImgArray = imgDic["right_eye"]
+    # leftEyeImgArray = imgDic["left_eye"]
+    rightTemplate = TemplateImage(imgDic["right_eye"])
+    leftTemplate = TemplateImage(imgDic["left_eye"])
 
     # 走査した画像配列を作成
     # rightScanImgArray = scan(originalImgArray, rightEyeImgArray)
     # leftScanImgArray = scan(originalImgArray, leftEyeImgArray)
 
-    # 出力
+    # 入力
     rightScanImgArray = np.load("./rightScanImgTmp.npy")
+    leftScanImgArray = np.load("./leftScanImgTmp.npy")
+
+    # 試しに一つReceptiveFieldを作る
+    rightRF = ReceptiveField((400,700), rightScanImgArray, rightTemplate)
+    leftRF = ReceptiveField((400,740), leftScanImgArray, leftTemplate)
+
+    combinedRF = CombinedReceptiveField(rightRF, leftRF)
+
+    print("fci:" + str(combinedRF.get_fci()))
+
+
     # np.save("./rightScanImgTmp", rightScanImgArray)
     image_save("./images/out/rightScanImg.png", rightScanImgArray)
-
-    leftScanImgArray = np.load("./leftScanImgTmp.npy")
     # np.save("./leftScanImgTmp", leftScanImgArray)
     image_save("./images/out/leftScanImg.png", leftScanImgArray)
 
