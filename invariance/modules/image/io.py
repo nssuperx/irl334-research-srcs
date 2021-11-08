@@ -28,6 +28,12 @@ def read_image(normalize: bool = True) -> dict:
         originalImage = (originalImage - originalImage.mean()) / originalImage.std()
         rightEyeImage = (rightEyeImage - rightEyeImage.mean()) / rightEyeImage.std()
         leftEyeImage = (leftEyeImage - leftEyeImage.mean()) / leftEyeImage.std()
+
+        # (x - x.min()) / (x.max() - x.min())
+        # originalImage = (originalImage - originalImage.min()) / (originalImage.max() - originalImage.min())
+        # rightEyeImage = (rightEyeImage - rightEyeImage.min()) / (rightEyeImage.max() - rightEyeImage.min())
+        # leftEyeImage = (leftEyeImage - leftEyeImage.min()) / (leftEyeImage.max() - leftEyeImage.min())
+
     else:
         # 画像読み込みつつndarrayに変換，asarray()を使うとread-onlyなデータができる．
         originalImage = np.asarray(Image.open(originalImagePath))
