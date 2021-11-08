@@ -2,8 +2,8 @@ from typing import ContextManager, Dict, Tuple
 import numpy as np
 
 from modules.core import TemplateImage, ReceptiveField, CombinedReceptiveField
-from modules.image.io import read_image, save_image
-from modules.image.function import scan
+from modules.image.io import load_image, save_image
+from modules.image.function import scan, scan_combinedRF
 from modules.numeric import zscore, min_max_normalize
 
 """
@@ -12,7 +12,7 @@ from modules.numeric import zscore, min_max_normalize
 """
 
 def main():
-    imgDic = read_image()
+    imgDic = load_image()
     # image_read_test(imgDic)
     originalImgArray = imgDic["original"]
     # rightEyeImgArray = imgDic["right_eye"]
@@ -21,39 +21,28 @@ def main():
     leftTemplate = TemplateImage(imgDic["left_eye"])
 
     # 走査した画像配列を作成
-    rightScanImgArray = scan(originalImgArray, rightTemplate.img)
-    leftScanImgArray = scan(originalImgArray, leftTemplate.img)
-    rightScanImgArray = zscore(rightScanImgArray)
-    leftScanImgArray = zscore(leftScanImgArray)
-    np.save("./rightScanImgTmp", rightScanImgArray)
-    np.save("./leftScanImgTmp", leftScanImgArray)
+    # rightScanImgArray = scan(originalImgArray, rightTemplate.img)
+    # leftScanImgArray = scan(originalImgArray, leftTemplate.img)
+    # save_image("./images/out/rightScanImg.png", rightScanImgArray)
+    # save_image("./images/out/leftScanImg.png", leftScanImgArray)
+
+    # rightScanImgArray = zscore(rightScanImgArray)
+    # leftScanImgArray = zscore(leftScanImgArray)
+    # np.save("./rightScanImgTmp", rightScanImgArray)
+    # np.save("./leftScanImgTmp", leftScanImgArray)
+    
     # 入力
-    # rightScanImgArray = np.load("./rightScanImgTmp.npy")
-    # leftScanImgArray = np.load("./leftScanImgTmp.npy")
+    rightScanImgArray = np.load("./rightScanImgTmp.npy")
+    leftScanImgArray = np.load("./leftScanImgTmp.npy")
 
     # 試しに一つReceptiveFieldを作る
     # test_one_cRF(rightScanImgArray, leftScanImgArray, rightTemplate, leftTemplate)
 
     # 全部scanしてみる
-    rfHeight = 70
-    rfWidth = 70
-    cRFHeight = 70
-    cRFWidth = 110
-    step = 10
-    fciArray = np.zeros((originalImgArray.shape[0] // step, originalImgArray.shape[1] // step))
-    for y in range(0, cRFHeight, step):
-        for x in range(0, cRFWidth, step):
-            rightRF = ReceptiveField((y, x), rightScanImgArray, rightTemplate)
-            leftRF = ReceptiveField((y, x + (cRFWidth- cRFHeight)), leftScanImgArray, leftTemplate)
-            combinedRF = CombinedReceptiveField(rightRF, leftRF)
-            fciArray[y//step][x//step] = combinedRF.get_fci()
-    # 適当に正規化([0,1])
-    # fciArray = zscore(fciArray)
-    fciArray = min_max_normalize(fciArray)
-
-    save_image("./images/out/fciImg.png", fciArray)
-    save_image("./images/out/rightScanImg.png", rightScanImgArray)
-    save_image("./images/out/leftScanImg.png", leftScanImgArray)
+    # fciArray = scan_combinedRF(70, 110, 1, originalImgArray, rightScanImgArray, rightTemplate, leftScanImgArray, leftTemplate)
+    # np.save("./fciArray", fciArray)
+    fciArray = np.load("./fciArray.npy")
+    # print(fciArray)
 
 if __name__ == "__main__":
     main()

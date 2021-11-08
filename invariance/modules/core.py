@@ -35,6 +35,7 @@ class ReceptiveField:
         self.originalImgPos = originalImgPos
         self.height = height
         self.width = width
+        # NOTE: RFが担当する領域内のスキャン後の画像を切り抜いて，最も興奮している場所を探す
         scannedArray = scannedImgArray[originalImgPos[0]:originalImgPos[0] + (height - template.img.shape[0]), originalImgPos[1]:originalImgPos[1] + (width - template.img.shape[1])]
         self.mostActivePos = np.unravel_index(np.argmax(scannedArray), scannedArray.shape)
         self.activity = np.max(scannedArray)
@@ -59,7 +60,15 @@ class CombinedReceptiveField:
     # fci を計算する
     # NOTE: マイナスになってもok．抑制の入力．
     def calc_fci(self) -> float:
-        noOverlap = (self.width - self.overlap) / 2
+        noOverlap = (self.width - self.overlap) // 2
+        if(self.rightRF.mostActivePos[1] + self.rightRF.template.img.shape[1] < noOverlap):
+            self.fci = 0.0
+            return self.fci
+
+        if(self.leftRF.mostActivePos[1] > self.overlap):
+            self.fci = 0.0
+            return self.fci
+        
         x = int(noOverlap + self.leftRF.mostActivePos[0] - self.rightRF.mostActivePos[0])
         # y = abs(self.leftRF.mostActivePos[1] - self.rightRF.mostActivePos[1])
         rightOverlap: np.ndarray

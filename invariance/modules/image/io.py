@@ -1,21 +1,32 @@
 from PIL import Image
 import numpy as np
+from ..numeric import min_max_normalize
 
 def save_image(filepath: str, scanImgArray: np.ndarray) -> None:
-    img = Image.fromarray(scanImgArray * 255).convert("L")
+    """画像を保存する
+    この関数内で正規化を行うので，元画像配列の状態は気にしなくてok
+
+    Args:
+        filepath (str): 保存するパス
+        scanImgArray (np.ndarray): 保存したい画像配列
+    """
+    img = min_max_normalize(scanImgArray)
+    img = Image.fromarray(img * 255).convert("L")
     # img.show()
     img.save(filepath)
 
-def read_image(normalize: bool = True) -> dict:
-    """
-    画像を読み込む
+def load_image(normalize: bool = True) -> dict:
+    """画像を読み込む
 
-    Returns
-    ----------
-    Dictionary
-        key: 画像の種類(original, right_eye, left_eye)
-        value: numpy.adarray: 読み込んだ画像
+    Args:
+        normalize (bool, optional): 正規化するかしないか. Defaults to True.
+
+    Returns:
+        dict: 3種類の画像が格納されているDictionary
+            key: 画像の種類(original, right_eye, left_eye)
+            value: numpy.ndarray: 読み込んだ画像
     """
+
     originalImagePath = "./images/in/sample.png"
     rightEyeImagePath = "./images/in/right_eye.png"
     leftEyeImagePath = "./images/in/left_eye.png"
@@ -43,3 +54,4 @@ def read_image(normalize: bool = True) -> dict:
     imgDic = {"original": originalImage, "right_eye": rightEyeImage, "left_eye": leftEyeImage}
 
     return imgDic
+
