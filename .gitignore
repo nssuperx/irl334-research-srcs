@@ -15,5 +15,8 @@ env
 # pytorch datasets
 data
 
+# python cache file
+__pycache__
+
 # tonsorboard log dir
 runs
