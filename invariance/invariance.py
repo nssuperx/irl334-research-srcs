@@ -39,10 +39,10 @@ def main():
     # test_one_cRF(rightScanImgArray, leftScanImgArray, rightTemplate, leftTemplate)
 
     # 全部scanしてみる
-    # fciArray = scan_combinedRF(70, 110, 1, originalImgArray, rightScanImgArray, rightTemplate, leftScanImgArray, leftTemplate)
-    # np.save("./fciArray", fciArray)
-    fciArray = np.load("./fciArray.npy")
-    # print(fciArray)
+    fciArray = scan_combinedRF(70, 110, 1, originalImgArray, rightScanImgArray, rightTemplate, leftScanImgArray, leftTemplate)
+    np.save("./fciArray", fciArray)
+    # fciArray = np.load("./fciArray.npy")
+    print(fciArray)
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,8 @@
 from typing import Tuple
 import numpy as np
 
+from .numeric import zscore
+
 class TemplateImage:
     img: np.ndarray
     mean: float
@@ -69,26 +71,30 @@ class CombinedReceptiveField:
             self.fci = 0.0
             return self.fci
         
-        x = int(noOverlap + self.leftRF.mostActivePos[0] - self.rightRF.mostActivePos[0])
+        # TODO: overlap領域のサイズが違うときがある．完全にバグ．
+        x = int(noOverlap + self.leftRF.mostActivePos[1] - self.rightRF.mostActivePos[1])
         # y = abs(self.leftRF.mostActivePos[1] - self.rightRF.mostActivePos[1])
         rightOverlap: np.ndarray
         leftOverlap: np.ndarray
-        if self.rightRF.mostActivePos[1] < self.leftRF.mostActivePos[1]:
-            y = int(self.leftRF.mostActivePos[1] - self.rightRF.mostActivePos[1])
-            rightOverlap = self.rightRF.template.img[x: , y: ]
-            leftOverlap = self.leftRF.template.img[0:self.rightRF.template.img.shape[0] - x, 0:self.rightRF.template.img.shape[1] - y]
+        if self.rightRF.mostActivePos[0] < self.leftRF.mostActivePos[0]:
+            y = int(self.leftRF.mostActivePos[0] - self.rightRF.mostActivePos[0])
+            rightOverlap = self.rightRF.template.img[0:self.rightRF.template.img.shape[0] - y , x: ]
+            leftOverlap = self.leftRF.template.img[y: , 0:self.rightRF.template.img.shape[1] - x]
         else:
-            y = int(self.rightRF.mostActivePos[1] - self.leftRF.mostActivePos[1])
-            rightOverlap = self.rightRF.template.img[x: , 0:self.rightRF.template.img.shape[1] - y]
-            leftOverlap = self.leftRF.template.img[0:self.rightRF.template.img.shape[0] - x, y: ]
+            y = int(self.rightRF.mostActivePos[0] - self.leftRF.mostActivePos[0])
+            rightOverlap = self.rightRF.template.img[y: , x: ]
+            leftOverlap = self.leftRF.template.img[0:self.rightRF.template.img.shape[0] - y, x:self.rightRF.template.img.shape[1] - x]
         
         if rightOverlap.size == 0:
             self.fci = 0.0
         else:
+            # 正規化
+            rightOverlap = zscore(rightOverlap)
+            leftOverlap = zscore(leftOverlap)
             self.fci = np.sum(np.dot(rightOverlap.T, leftOverlap))
         
         return self.fci
 
     def get_fci(self) -> float:
         return self.fci
-    # TODO: max fciが1になるように調整，でもそもそも重ならないならゼロなのでここの調整はどうすればいい？
+    # NOTE: max fciが1になるように調整，でもそもそも重ならないならゼロなのでここの調整はどうすればいい？
