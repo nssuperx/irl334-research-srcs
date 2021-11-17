@@ -15,10 +15,11 @@ def save_image(filepath: str, scanImgArray: np.ndarray) -> None:
     # img.show()
     img.save(filepath)
 
-def load_image(normalize: bool = True) -> dict:
+def load_image(setNumber: int, normalize: bool = True) -> dict:
     """画像を読み込む
 
     Args:
+        setNumber (int): データセット番号
         normalize (bool, optional): 正規化するかしないか. Defaults to True.
 
     Returns:
@@ -27,9 +28,9 @@ def load_image(normalize: bool = True) -> dict:
             value: numpy.ndarray: 読み込んだ画像
     """
 
-    originalImagePath = "./images/in/sample.png"
-    rightEyeImagePath = "./images/in/right_eye.png"
-    leftEyeImagePath = "./images/in/left_eye.png"
+    originalImagePath = "./dataset/" + str(setNumber) + "/in/sample.png"
+    rightEyeImagePath = "./dataset/" + str(setNumber) + "/in/right_eye.png"
+    leftEyeImagePath = "./dataset/" + str(setNumber) + "/in/left_eye.png"
 
     if normalize:
         originalImage = np.array(Image.open(originalImagePath))

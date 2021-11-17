@@ -1,5 +1,7 @@
 from .core import TemplateImage, ReceptiveField, CombinedReceptiveField
 import numpy as np
+from PIL import Image
+from .numeric import min_max_normalize
 
 def image_read_test(imgDic: dict) -> None:
     """
@@ -16,11 +18,10 @@ def image_read_test(imgDic: dict) -> None:
     for key, value in imgDic.items():
         print("type:" + str(type(value)) + " " + str(key) + " shape:" + str(value.shape))
 
-    """
     for imgArray in imgDic.values():
-        img = Image.fromarray(imgArray)
+        img = min_max_normalize(imgArray)
+        img = Image.fromarray(img * 255).convert("L")
         img.show()
-    """
 
 def test_one_cRF(rightScanImgArray: np.ndarray, leftScanImgArray: np.ndarray, rightTemplate: TemplateImage, leftTemplate: TemplateImage) -> None:
     rightRF = ReceptiveField((400,700), rightScanImgArray, rightTemplate)
