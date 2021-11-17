@@ -29,18 +29,18 @@
     ],
     "latex-workshop.latex.recipes": [
         {
-            "name": "uplatex+dvipdfmx",
+            "name": "uplatex+pbibtex+dvipdfmx",
             "tools": [
+                "uplatex",
+                "pbibtex",
                 "uplatex",
                 "uplatex",
                 "dvipdfmx-uptex"
             ]
         },
         {
-            "name": "uplatex+pbibtex+dvipdfmx",
+            "name": "uplatex+dvipdfmx",
             "tools": [
-                "uplatex",
-                "pbibtex",
                 "uplatex",
                 "uplatex",
                 "dvipdfmx-uptex"
