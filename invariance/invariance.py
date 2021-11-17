@@ -61,7 +61,7 @@ def main():
     plt.show()
     """
 
-    for i in range(3, 3 + 1):
+    for i in range(1, 3 + 1):
         imgDic = load_image(i)
         # image_read_test(imgDic)
         originalImgArray = imgDic["original"]
