@@ -125,6 +125,7 @@
     ],
     // "python.defaultInterpreterPath": "env\\Scripts\\python.exe", // windows
     "python.defaultInterpreterPath": "env/bin/python", // linux
+    "C_Cpp.clang_format_style": "{BreakBeforeBraces: Attach, SpaceBeforeParens: Never, IndentWidth: 4, ColumnLimit: 0, AllowShortIfStatementsOnASingleLine: true}",
 }
 
 // /usr/share/texlive/texmf-dist/fonts/map/dvipdfmx/ptex-fontmaps ここにmapファイルがあるからそれを確認

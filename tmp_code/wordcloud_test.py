@@ -25,10 +25,10 @@ def create_wordcloud(text):
     plt.axis("off")
     plt.show()
     #png出力
-    wordcloud.to_file("lee1999_wordcloud.png")
+    wordcloud.to_file("img.png")
 
 #テキストの読み込み
-with open('lee1999nature791seung.txt', 'r', encoding='utf-8') as fi:
+with open('paper.txt', 'r', encoding='utf-8') as fi:
     text = fi.read()
 
 create_wordcloud(text)
