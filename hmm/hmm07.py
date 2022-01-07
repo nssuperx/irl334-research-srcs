@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import math
 import random
 import numpy
@@ -10,7 +9,7 @@ theta_first = 0.7
 theta_last = 1.0
 theta_step = 0.05
 
-def make_matrix(a, b, fill=0.0): #  NumPy を使って高速に処理する方法がある
+def make_matrix(a, b, fill=0.0):
     m = []
     for i in range(a):
         m.append([fill]*b)
