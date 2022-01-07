@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import math
 import random
 
 from hmm_class import HMM
 
-def make_matrix(a, b, fill=0.0): #  NumPy を使って高速に処理する方法がある
+def make_matrix(a, b, fill=0.0):
     m = []
     for i in range(a):
         m.append([fill]*b)
