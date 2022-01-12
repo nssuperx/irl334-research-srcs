@@ -19,8 +19,6 @@ class HMM:
         self.xmap = [0]*self.n
         self.y = [0.0]*self.n
         
-        self.T = 2*pow(sigma,2)
-
         self.log_p00 = math.log(0.99)
         self.log_p01 = math.log(0.01)
         self.log_p10 = math.log(0.03)
@@ -48,43 +46,33 @@ class HMM:
         
     def generate_y(self):
         for i in range(0,self.n):
-            self.y[i] = random.gauss(self.x[i],self.sigma)
+            self.y[i] = random.normalvariate(self.x[i],self.sigma)
 
     def compute_xmap(self):
-        self.C[0][0] = -pow(self.y[0] - 0, 2) / self.T
-        self.C[0][1] = -pow(self.y[0] - 1, 2) / self.T
+        self.C[0][0] = -(self.y[0] - 0.0)*(self.y[0] - 0.0) / (2.0*self.sigma*self.sigma) - math.log(self.sigma)
+        self.C[0][1] = -(self.y[0] - 1.0)*(self.y[0] - 1.0) / (2.0*self.sigma*self.sigma) - math.log(self.sigma)
 
         for i in range(1,self.n):
-            self.C[i][0] = -pow(self.y[i] - 0, 2) / self.T
-            self.C[i][1] = -pow(self.y[i] - 1, 2) / self.T
-            t00 = self.C[i-1][0] + self.C[i][0] + self.log_p00
-            t01 = self.C[i-1][0] + self.C[i][1] + self.log_p01
-            t10 = self.C[i-1][1] + self.C[i][0] + self.log_p10
-            t11 = self.C[i-1][1] + self.C[i][1] + self.log_p11
-
-            if t00 > t10:
+            tmp0 = -(self.y[i] - 0.0)*(self.y[i] - 0.0) / (2.0*self.sigma*self.sigma)
+            if(self.C[i-1][0] + self.log_p00 > self.C[i-1][1] + self.log_p10):
                 self.S[i-1][0] = 0
-                self.C[i][0] += self.C[i-1][0] + self.log_p00
+                self.C[i][0] = self.C[i-1][0] + self.log_p00 + tmp0
             else:
                 self.S[i-1][0] = 1
-                self.C[i][0] += self.C[i-1][1] + self.log_p10
+                self.C[i][0] = self.C[i-1][1] + self.log_p10 + tmp0
 
-            if t01 > t11:
+            tmp1 = -(self.y[i] - 1.0)*(self.y[i] - 1.0) / (2.0*self.sigma*self.sigma)
+            if(self.C[i-1][0] + self.log_p01 > self.C[i-1][1] + self.log_p11):
                 self.S[i-1][1] = 0
-                self.C[i][1] += self.C[i-1][0] + self.log_p01
+                self.C[i][1] = self.C[i-1][0] + self.log_p01 + tmp1
             else:
                 self.S[i-1][1] = 1
-                self.C[i][1] += self.C[i-1][1] + self.log_p11
+                self.C[i][1] = self.C[i-1][1] + self.log_p11 + tmp1
         
-        if self.C[self.n-1][0] > self.C[self.n-1][1]:
-            self.S[self.n-1][0] = 0
-            self.S[self.n-1][1] = 0
+        if (self.C[self.n-1][0] > self.C[self.n-1][1]):
+            self.xmap[self.n-1] = 0
         else:
-            self.S[self.n-1][0] = 1
-            self.S[self.n-1][1] = 1
+            self.xmap[self.n-1] = 1
 
-        for i in range(0,self.n):
-            if self.C[i][0] > self.C[i][1]:
-                self.xmap[i] = self.S[i][0]
-            else:
-                self.xmap[i] = self.S[i][1]
+        for i in range(2,self.n+1):
+            self.xmap[self.n-i] = self.S[self.n-i][self.xmap[self.n-i+1]]

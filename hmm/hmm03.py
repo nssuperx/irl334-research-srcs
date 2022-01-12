@@ -18,7 +18,7 @@ def test20():
     z = make_matrix(m*2, n) 
 
     i = 0
-    for line in open("r20190702_20_test_cases", "r"):
+    for line in open("test_cases.txt", "r"):
         if line[0] == "#":
             continue
         data = line.split() # 文字列を空白文字を区切りに分割

@@ -28,7 +28,7 @@ def hmm01():
     plt.legend(xlabel) # 描画
 
     plt.show() # 描画
-    fig.savefig('fig1.pdf')
+    # fig.savefig('fig1.pdf')
 
 if __name__ == '__main__':
     hmm01()

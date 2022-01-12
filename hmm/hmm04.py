@@ -24,7 +24,6 @@ def hmm04():
     #そのインデックスを保持
     Xindex = x_transition.index(max(x_transition))
 
-    #見た目をきれいにするために、新しいインスタンスを作成
     hmm = hmm_buf[Xindex]
     hmm.generate_y()
     hmm.compute_xmap()
