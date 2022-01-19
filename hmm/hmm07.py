@@ -1,6 +1,6 @@
 import math
 import random
-import numpy
+import numpy as np
 import matplotlib.pyplot as plt
 
 n = 200
@@ -9,27 +9,21 @@ theta_first = 0.7
 theta_last = 1.0
 theta_step = 0.05
 
-def make_matrix(a, b, fill=0.0):
-    m = []
-    for i in range(a):
-        m.append([fill]*b)
-    return m
-
 class HMM:
     def __init__(self, n, sigma, p00, p11):
         self.n = n
         self.sigma = sigma
-        self.S = make_matrix(self.n, 2)     #次のをみて、Xiが取るべき値
-        self.C = make_matrix(self.n, 2)     #もっともらしさ
+        self.S = np.zeros((self.n, 2), dtype=np.int8)     #次のをみて、Xiが取るべき値
+        self.C = np.zeros((self.n, 2), dtype=np.float32)     #もっともらしさ
 
         self.p00 = p00
         self.p01 = 1.00 - p00
         self.p10 = 1.00 - p11
         self.p11 = p11
 
-        self.x = [0]*self.n
-        self.xmap = [0]*self.n
-        self.y = [0.0]*self.n
+        self.x = np.zeros(self.n, dtype=np.int8)
+        self.xmap = np.zeros(self.n, dtype=np.int8)
+        self.y = np.zeros(self.n, dtype=np.float32)
         
         self.T = 2*pow(sigma,2)
 
@@ -122,16 +116,13 @@ def hmm07():
     plt.title('hamming distanse') 
     plt.xlabel('theta')
     plt.ylabel('y')
-    plt.xticks(numpy.arange(min(theta_list), max(theta_list) + 0.01, theta_step))
+    plt.xticks(np.arange(min(theta_list), max(theta_list) + 0.01, theta_step))
     plt.legend() # 描画
 
     plt.show() # 描画
 
-def calc_hamming(hmm):
-    hamming_distanse = 0
-    for i in range(hmm.n):
-        hamming_distanse += abs(hmm.x[i] - hmm.xmap[i])
-    return hamming_distanse
+def calc_hamming(hmm: HMM) -> int:
+    return np.sum(np.absolute(hmm.x - hmm.xmap))
 
 def make_theta_list():
     theta_list = []
@@ -144,8 +135,8 @@ def make_theta_list():
     return theta_list
 
 def task(sigma, theta):
-    hmm = [HMM(n,sigma,theta,theta)] * hmm_num
-    hamming_distanse = [0] * hmm_num
+    hmm = [HMM(n,sigma,theta,theta) for i in range(hmm_num)]
+    hamming_distanse = [0 for i in range(hmm_num)]
 
     #データモデル固定
     hmm[0].generate_x()
@@ -157,8 +148,8 @@ def task(sigma, theta):
         hmm[i].compute_xmap()
         hamming_distanse[i] = calc_hamming(hmm[i])
 
-    hd_mean = numpy.mean(hamming_distanse)
-    hd_std = numpy.std(hamming_distanse)
+    hd_mean = np.mean(hamming_distanse)
+    hd_std = np.std(hamming_distanse)
 
     return hd_mean, hd_std
 

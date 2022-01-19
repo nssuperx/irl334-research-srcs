@@ -1,5 +1,6 @@
 import math
 import random
+import numpy as np
 import matplotlib.pyplot as plt
 
 from hmm_class import HMM
@@ -7,26 +8,22 @@ from hmm_class import HMM
 def hmm02():
     n = 200
     sigma = 0.7
-    hmm_buf = [HMM(n,sigma)] * 10
-    x_transition = [0] * 10
+    hmm_buf = [HMM(n, sigma) for i in range(10)]
+    x_transition = [0 for i in range(10)]
 
     t = range(n)
 
-    #10通りつくる
+    # 10通りつくる
     for i in range(10):
         hmm_buf[i].generate_x()
 
-    #たくさん遷移してるのを探す
+    # たくさん遷移してるのを探す
+    # ハミング距離を計算
     for i in range(10):
-        for j in range(1,n):
-            x_transition[i] += abs(hmm_buf[i].x[j-1] - hmm_buf[i].x[j])
+        x_transition[i] = np.sum(np.absolute(hmm_buf[i].x[0:n-2] - hmm_buf[i].x[1:n-1]))
 
-    #そのインデックスを保持
-    Xindex = x_transition.index(max(x_transition))
-
-    #見た目をきれいにするために、新しいインスタンスを作成
-    hmm = hmm_buf[Xindex]
-
+    # ここから実験
+    hmm = hmm_buf[x_transition.index(max(x_transition))]
     hmm.generate_y()
 
     t = range(n)

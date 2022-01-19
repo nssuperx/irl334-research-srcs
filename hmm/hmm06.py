@@ -1,6 +1,6 @@
 import math
 import random
-import numpy
+import numpy as np
 import matplotlib.pyplot as plt
 
 from hmm_class import HMM
@@ -34,11 +34,8 @@ def hmm06():
 
     plt.show() # 描画
 
-def calc_hamming(hmm):
-    hamming_distanse = 0
-    for i in range(hmm.n):
-        hamming_distanse += abs(hmm.x[i] - hmm.xmap[i])
-    return hamming_distanse
+def calc_hamming(hmm: HMM) -> int:
+    return np.sum(np.absolute(hmm.x - hmm.xmap))
 
 def make_sigma_list():
     sigma_list = []
@@ -51,8 +48,8 @@ def make_sigma_list():
     return sigma_list
 
 def task(sigma):
-    hmm = [HMM(n,sigma)] * hmm_num
-    hamming_distanse = [0] * hmm_num
+    hmm = [HMM(n, sigma) for i in range()]
+    hamming_distanse = [0 for i in range()]
 
     #hmm_num通りつくる
     for i in range(hmm_num):
@@ -61,8 +58,8 @@ def task(sigma):
         hmm[i].compute_xmap()
         hamming_distanse[i] = calc_hamming(hmm[i])
 
-    hd_mean = numpy.mean(hamming_distanse)
-    hd_std = numpy.std(hamming_distanse)
+    hd_mean = np.mean(hamming_distanse)
+    hd_std = np.std(hamming_distanse)
 
     return hd_mean, hd_std
 
