@@ -82,18 +82,10 @@ class HMM:
                 self.S[i-1][1] = 1
                 self.C[i][1] += self.C[i-1][1] + math.log(0.97)
         
-        if self.C[self.n-1][0] > self.C[self.n-1][1]:
-            self.S[self.n-1][0] = 0
-            self.S[self.n-1][1] = 0
-        else:
-            self.S[self.n-1][0] = 1
-            self.S[self.n-1][1] = 1
+        self.xmap[self.n-1] = 0 if self.C[self.n-1][0] > self.C[self.n-1][1] else 1
 
-        for i in range(0,self.n):
-            if self.C[i][0] > self.C[i][1]:
-                self.xmap[i] = self.S[i][0]
-            else:
-                self.xmap[i] = self.S[i][1]
+        for i in range(2,self.n+1):
+            self.xmap[self.n-i] = self.S[self.n-i][self.xmap[self.n-i+1]]
 
 
 def hmm07():
