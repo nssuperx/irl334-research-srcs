@@ -11,8 +11,6 @@ def hmm04():
     hmm_buf = [HMM(n, sigma) for i in range(10)]
     x_transition = [0 for i in range(10)]
 
-    t = range(n)
-
     #10通りつくる
     for i in range(10):
         hmm_buf[i].generate_x()
