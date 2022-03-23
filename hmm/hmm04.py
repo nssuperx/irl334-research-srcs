@@ -36,7 +36,7 @@ def hmm04():
     plt.title('Original Signal, Observations, Mapping Signal') 
     plt.xlabel('t') # X 軸
     plt.ylabel('x, y') # Y 軸
-    plt.legend() # 描画
+    plt.legend()
 
     plt.show() # 描画
 

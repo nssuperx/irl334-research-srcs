@@ -1,5 +1,4 @@
 import math
-import random
 import numpy as np
 
 class Model:
@@ -72,3 +71,6 @@ class HMM:
 
         for i in range(2,self.n+1):
             self.xmap[self.n-i] = self.S[self.n-i][self.xmap[self.n-i+1]]
+
+    def calc_hamming(self) -> int:
+        return np.sum(np.absolute(self.x - self.xmap))

@@ -1,7 +1,6 @@
-import math
-import random
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 from hmm_class import HMM
 
@@ -11,59 +10,42 @@ sigma_first = 0.3
 sigma_last = 2.0
 sigma_step = 0.1
 
-def hmm06():
-    sigma_list = make_sigma_list()
+def hmm06() -> None:
+    sigma_list = np.arange(sigma_first, sigma_last, sigma_step)
     mean_list = []
     std_list_up = []
     std_list_down = []
 
-    for i in sigma_list:
-        buffer = task(i)
-        mean_list.append(buffer[0])
-        std_list_up.append(buffer[0] + buffer[1])
-        std_list_down.append(buffer[0] - buffer[1])
+    for i in tqdm(sigma_list):
+        mean, std = task(i)
+        mean_list.append(mean)
+        std_list_up.append(mean + std)
+        std_list_down.append(mean - std)
 
     plt.plot(sigma_list, mean_list, label='mean')
-    plt.plot(sigma_list, std_list_up, label='std up')
-    plt.plot(sigma_list, std_list_down, label='std down')
+    plt.plot(sigma_list, std_list_up, label='std+')
+    plt.plot(sigma_list, std_list_down, label='std-')
 
     plt.title('hamming distanse') 
     plt.xlabel('sigma')
     plt.ylabel('y')
-    plt.legend() # 描画
+    plt.legend()
 
     plt.show() # 描画
 
-def calc_hamming(hmm: HMM) -> int:
-    return np.sum(np.absolute(hmm.x - hmm.xmap))
-
-def make_sigma_list():
-    sigma_list = []
-    sigma = sigma_first
-    while sigma <= sigma_last:
-        sigma_list.append(sigma)
-        sigma += sigma_step
-        sigma = round(sigma,1)
-    
-    return sigma_list
-
-def task(sigma):
-    hmm = [HMM(n, sigma) for i in range()]
-    hamming_distanse = [0 for i in range()]
+def task(sigma: float) -> tuple[float, float]:
+    hamming_distanse = [0 for i in range(hmm_num)]
 
     #hmm_num通りつくる
-    for i in range(hmm_num):
-        hmm[i].generate_x()
-        hmm[i].generate_y()
-        hmm[i].compute_xmap()
-        hamming_distanse[i] = calc_hamming(hmm[i])
+    for i in tqdm(range(hmm_num), leave=False):
+        hmm = HMM(n, sigma)
+        hmm.generate_x()
+        hmm.generate_y()
+        hmm.compute_xmap()
+        hamming_distanse[i] = hmm.calc_hamming()
 
-    hd_mean = np.mean(hamming_distanse)
-    hd_std = np.std(hamming_distanse)
-
-    return hd_mean, hd_std
+    return np.mean(hamming_distanse), np.std(hamming_distanse)
 
 
 if __name__ == '__main__':
     hmm06()
-    #print(make_sigma_list())
