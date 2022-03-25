@@ -41,13 +41,13 @@ def hmm07() -> None:
     plt.show() # 描画
 
 def task(hmm: HMM, theta: float) -> tuple[float, float]:
-    hamming_distanse = [0 for i in range(hmm_num)]
+    hamming_distanse = np.empty(hmm_num)
     
     for i in tqdm(range(hmm_num), leave=False):
         # 変更するのはxmapを計算するときに使うモデルのみ
         hmm.model_xmap = Model(theta, theta)
         hmm.compute_xmap()
-        hamming_distanse[i] = hmm.calc_hamming()
+        hamming_distanse[i] = hmm.calc_error()
 
     return np.mean(hamming_distanse), np.std(hamming_distanse)
 

@@ -9,15 +9,15 @@ hmm_num = 1000
 def hmm05():
     n = 200
     sigma = 0.7
-    hamming_distanse = [0 for i in range(hmm_num)]
+    hamming_distanse = np.empty(hmm_num)
 
     #hmm_num通りつくる
     for i in tqdm(range(hmm_num)):
-        hmm = HMM(n, sigma)
+        hmm = HMM(n, sigma, 0.99, 0.97)
         hmm.generate_x()
         hmm.generate_y()
         hmm.compute_xmap()
-        hamming_distanse[i] = hmm.calc_hamming()
+        hamming_distanse[i] = hmm.calc_error()
 
     hd_mean = np.mean(hamming_distanse)
     hd_var = np.var(hamming_distanse)

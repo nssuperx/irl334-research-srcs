@@ -2,7 +2,7 @@ import math
 import numpy as np
 
 class Model:
-    def __init__(self, p00: float = 0.99, p11: float = 0.97) -> None:
+    def __init__(self, p00: float, p11: float) -> None:
         self.p00 = p00
         self.p01 = 1.00 - p00
         self.p10 = 1.00 - p11
@@ -10,7 +10,7 @@ class Model:
 
 
 class HMM:
-    def __init__(self, n: int, sigma: float, x_p00: float = 0.99, x_p11: float = 0.97, xmap_p00: float = None, xmap_p11: float = None):
+    def __init__(self, n: int, sigma: float, x_p00: float, x_p11: float, xmap_p00: float = None, xmap_p11: float = None) -> None:
         self.n = n
         self.sigma = sigma
         self.S = np.zeros((self.n, 2), dtype=np.int8)        # 次のをみて、Xiが取るべき値
@@ -47,30 +47,30 @@ class HMM:
 
         log_sigma = math.log(self.sigma)
 
-        self.C[0][0] = -(self.y[0] - 0.0)*(self.y[0] - 0.0) / (2.0*self.sigma*self.sigma) - log_sigma
-        self.C[0][1] = -(self.y[0] - 1.0)*(self.y[0] - 1.0) / (2.0*self.sigma*self.sigma) - log_sigma
+        self.C[0][0] = -pow(self.y[0] - 0.0, 2.0) / (2.0*pow(self.sigma, 2.0)) - log_sigma
+        self.C[0][1] = -pow(self.y[0] - 1.0, 2.0) / (2.0*pow(self.sigma, 2.0)) - log_sigma
 
         for i in range(1,self.n):
-            tmp0 = -(self.y[i] - 0.0)*(self.y[i] - 0.0) / (2.0*self.sigma*self.sigma) - log_sigma
+            self.C[i][0] = -pow((self.y[i] - 0.0), 2.0)/ (2.0*pow(self.sigma, 2.0)) - log_sigma
             if(self.C[i-1][0] + log_p00 > self.C[i-1][1] + log_p10):
                 self.S[i-1][0] = 0
-                self.C[i][0] = self.C[i-1][0] + log_p00 + tmp0
+                self.C[i][0] += self.C[i-1][0] + log_p00
             else:
                 self.S[i-1][0] = 1
-                self.C[i][0] = self.C[i-1][1] + log_p10 + tmp0
+                self.C[i][0] += self.C[i-1][1] + log_p10
 
-            tmp1 = -(self.y[i] - 1.0)*(self.y[i] - 1.0) / (2.0*self.sigma*self.sigma) - log_sigma
+            self.C[i][1] = -pow((self.y[i] - 1.0), 2.0)/ (2.0*pow(self.sigma, 2.0)) - log_sigma
             if(self.C[i-1][0] + log_p01 > self.C[i-1][1] + log_p11):
                 self.S[i-1][1] = 0
-                self.C[i][1] = self.C[i-1][0] + log_p01 + tmp1
+                self.C[i][1] += self.C[i-1][0] + log_p01
             else:
                 self.S[i-1][1] = 1
-                self.C[i][1] = self.C[i-1][1] + log_p11 + tmp1
+                self.C[i][1] += self.C[i-1][1] + log_p11
         
         self.xmap[self.n-1] = 0 if self.C[self.n-1][0] > self.C[self.n-1][1] else 1
 
         for i in range(2,self.n+1):
             self.xmap[self.n-i] = self.S[self.n-i][self.xmap[self.n-i+1]]
 
-    def calc_hamming(self) -> int:
+    def calc_error(self) -> int:
         return np.sum(np.absolute(self.x - self.xmap))

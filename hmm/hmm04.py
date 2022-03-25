@@ -8,23 +8,24 @@ from hmm_class import HMM
 def hmm04():
     n = 200
     sigma = 0.7
-    hmm_buf = [HMM(n, sigma) for i in range(10)]
-    x_transition = [0 for i in range(10)]
+    sample_num = 10
+    hmm_buf = [HMM(n, sigma, 0.99, 0.97) for i in range(10)]
+    x_transition = np.empty(sample_num)
 
     #10通りつくる
-    for i in range(10):
+    for i in range(sample_num):
         hmm_buf[i].generate_x()
 
     # たくさん遷移してるのを探す
     # ハミング距離を計算
-    for i in range(10):
+    for i in range(sample_num):
         x_transition[i] = np.sum(np.absolute(hmm_buf[i].x[0:n-2] - hmm_buf[i].x[1:n-1]))
 
     # ここから実験
-    hmm = hmm_buf[x_transition.index(max(x_transition))]
+    hmm = hmm_buf[x_transition.argmax()]
     hmm.generate_y()
     hmm.compute_xmap()
-    hamming_distanse = calc_hamming(hmm)
+    hamming_distanse = hmm.calc_error()
 
     print('hamming_distanse = ' + str(hamming_distanse))
         
@@ -39,9 +40,6 @@ def hmm04():
     plt.legend()
 
     plt.show() # 描画
-
-def calc_hamming(hmm: HMM) -> int:
-    return np.sum(np.absolute(hmm.x - hmm.xmap))
 
 
 if __name__ == '__main__':

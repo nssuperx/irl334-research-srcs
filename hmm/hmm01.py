@@ -7,7 +7,7 @@ from hmm_class import HMM
 def hmm01():
     n = 200
     sigma = 0.7
-    hmm = [HMM(n, sigma) for i in range(10)]
+    hmm = [HMM(n, sigma, 0.99, 0.97) for i in range(10)]
 
     t = range(n)
     fig=plt.figure(0)

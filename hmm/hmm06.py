@@ -34,15 +34,15 @@ def hmm06() -> None:
     plt.show() # 描画
 
 def task(sigma: float) -> tuple[float, float]:
-    hamming_distanse = [0 for i in range(hmm_num)]
+    hamming_distanse = np.empty(hmm_num)
 
     #hmm_num通りつくる
     for i in tqdm(range(hmm_num), leave=False):
-        hmm = HMM(n, sigma)
+        hmm = HMM(n, sigma, 0.99, 0.97)
         hmm.generate_x()
         hmm.generate_y()
         hmm.compute_xmap()
-        hamming_distanse[i] = hmm.calc_hamming()
+        hamming_distanse[i] = hmm.calc_error()
 
     return np.mean(hamming_distanse), np.std(hamming_distanse)
 

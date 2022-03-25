@@ -8,7 +8,7 @@ def test20():
     n = 200
     m = 20 # m test cases
     sigma = 0.7
-    hmm = HMM(n, sigma)
+    hmm = HMM(n, sigma, 0.99, 0.97)
     z = np.zeros((m*2, n))
 
     i = 0
