@@ -13,9 +13,7 @@ class HMM:
     def __init__(self, n: int, sigma: float, x_p00: float, x_p11: float, xmap_p00: float = None, xmap_p11: float = None) -> None:
         self.n = n
         self.sigma = sigma
-        self.S = np.zeros((self.n, 2), dtype=np.int8)        # 次のをみて、Xiが取るべき値
-        self.C = np.zeros((self.n, 2), dtype=np.float32)     # もっともらしさ
-
+        
         self.x = np.zeros(self.n, dtype=np.int8)
         self.xmap = np.zeros(self.n, dtype=np.int8)
         self.y = np.zeros(self.n, dtype=np.float32)
@@ -47,30 +45,33 @@ class HMM:
 
         log_sigma = math.log(self.sigma)
 
-        self.C[0][0] = -pow(self.y[0] - 0.0, 2.0) / (2.0*pow(self.sigma, 2.0)) - log_sigma
-        self.C[0][1] = -pow(self.y[0] - 1.0, 2.0) / (2.0*pow(self.sigma, 2.0)) - log_sigma
+        dp = np.zeros((self.n, 2), dtype=np.int8)           # 次のをみて、Xiが取るべき値
+        prob = np.zeros((self.n, 2), dtype=np.float32)      # もっともらしさ probability
+
+        prob[0][0] = -pow(self.y[0] - 0.0, 2.0) / (2.0*pow(self.sigma, 2.0)) - log_sigma
+        prob[0][1] = -pow(self.y[0] - 1.0, 2.0) / (2.0*pow(self.sigma, 2.0)) - log_sigma
 
         for i in range(1,self.n):
-            self.C[i][0] = -pow((self.y[i] - 0.0), 2.0)/ (2.0*pow(self.sigma, 2.0)) - log_sigma
-            if(self.C[i-1][0] + log_p00 > self.C[i-1][1] + log_p10):
-                self.S[i-1][0] = 0
-                self.C[i][0] += self.C[i-1][0] + log_p00
+            prob[i][0] = -pow((self.y[i] - 0.0), 2.0)/ (2.0*pow(self.sigma, 2.0)) - log_sigma
+            if(prob[i-1][0] + log_p00 > prob[i-1][1] + log_p10):
+                dp[i-1][0] = 0
+                prob[i][0] += prob[i-1][0] + log_p00
             else:
-                self.S[i-1][0] = 1
-                self.C[i][0] += self.C[i-1][1] + log_p10
+                dp[i-1][0] = 1
+                prob[i][0] += prob[i-1][1] + log_p10
 
-            self.C[i][1] = -pow((self.y[i] - 1.0), 2.0)/ (2.0*pow(self.sigma, 2.0)) - log_sigma
-            if(self.C[i-1][0] + log_p01 > self.C[i-1][1] + log_p11):
-                self.S[i-1][1] = 0
-                self.C[i][1] += self.C[i-1][0] + log_p01
+            prob[i][1] = -pow((self.y[i] - 1.0), 2.0)/ (2.0*pow(self.sigma, 2.0)) - log_sigma
+            if(prob[i-1][0] + log_p01 > prob[i-1][1] + log_p11):
+                dp[i-1][1] = 0
+                prob[i][1] += prob[i-1][0] + log_p01
             else:
-                self.S[i-1][1] = 1
-                self.C[i][1] += self.C[i-1][1] + log_p11
+                dp[i-1][1] = 1
+                prob[i][1] += prob[i-1][1] + log_p11
         
-        self.xmap[self.n-1] = 0 if self.C[self.n-1][0] > self.C[self.n-1][1] else 1
+        self.xmap[self.n-1] = 0 if prob[self.n-1][0] > prob[self.n-1][1] else 1
 
         for i in range(2,self.n+1):
-            self.xmap[self.n-i] = self.S[self.n-i][self.xmap[self.n-i+1]]
+            self.xmap[self.n-i] = dp[self.n-i][self.xmap[self.n-i+1]]
 
     def calc_error(self) -> int:
         return np.sum(np.absolute(self.x - self.xmap))

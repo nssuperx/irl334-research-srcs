@@ -21,30 +21,30 @@ def compute_xmap(size, sigma, y, p00, p01, p10, p11):
     log_sigma = math.log(sigma)
 
     dp = np.zeros((size, 2), dtype=np.int8)        # 次のをみて、Xiが取るべき値
-    plausible = np.zeros((size, 2), dtype=np.float32)     # もっともらしさ
+    prob = np.zeros((size, 2), dtype=np.float32)     # もっともらしさ probability
     xmap = np.zeros(size, dtype=np.int8)
 
-    plausible[0][0] = -pow(y[0] - 0.0, 2.0) / (2.0*pow(sigma, 2.0)) - log_sigma
-    plausible[0][1] = -pow(y[0] - 1.0, 2.0) / (2.0*pow(sigma, 2.0)) - log_sigma
+    prob[0][0] = -pow(y[0] - 0.0, 2.0) / (2.0*pow(sigma, 2.0)) - log_sigma
+    prob[0][1] = -pow(y[0] - 1.0, 2.0) / (2.0*pow(sigma, 2.0)) - log_sigma
 
     for i in range(1,size):
-        plausible[i][0] = -pow((y[i] - 0.0), 2.0)/ (2.0*pow(sigma, 2.0)) - log_sigma
-        if(plausible[i-1][0] + log_p00 > plausible[i-1][1] + log_p10):
+        prob[i][0] = -pow((y[i] - 0.0), 2.0)/ (2.0*pow(sigma, 2.0)) - log_sigma
+        if(prob[i-1][0] + log_p00 > prob[i-1][1] + log_p10):
             dp[i-1][0] = 0
-            plausible[i][0] += plausible[i-1][0] + log_p00
+            prob[i][0] += prob[i-1][0] + log_p00
         else:
             dp[i-1][0] = 1
-            plausible[i][0] += plausible[i-1][1] + log_p10
+            prob[i][0] += prob[i-1][1] + log_p10
 
-        plausible[i][1] = -pow((y[i] - 1.0), 2.0)/ (2.0*pow(sigma, 2.0)) - log_sigma
-        if(plausible[i-1][0] + log_p01 > plausible[i-1][1] + log_p11):
+        prob[i][1] = -pow((y[i] - 1.0), 2.0)/ (2.0*pow(sigma, 2.0)) - log_sigma
+        if(prob[i-1][0] + log_p01 > prob[i-1][1] + log_p11):
             dp[i-1][1] = 0
-            plausible[i][1] += plausible[i-1][0] + log_p01
+            prob[i][1] += prob[i-1][0] + log_p01
         else:
             dp[i-1][1] = 1
-            plausible[i][1] += plausible[i-1][1] + log_p11
+            prob[i][1] += prob[i-1][1] + log_p11
     
-    xmap[size-1] = 0 if plausible[size-1][0] > plausible[size-1][1] else 1
+    xmap[size-1] = 0 if prob[size-1][0] > prob[size-1][1] else 1
 
     for i in range(2,size+1):
         xmap[size-i] = dp[size-i][xmap[size-i+1]]

@@ -25,8 +25,6 @@ class HMM:
     def __init__(self, n: int, sigma: float, x_p00: float, x_p11: float, xmap_p00: float = None, xmap_p11: float = None) -> None:
         self.n = n
         self.sigma = sigma
-        self.S = np.zeros((self.n, 2), dtype=np.int8)        # 次のをみて、Xiが取るべき値
-        self.C = np.zeros((self.n, 2), dtype=np.float32)     # もっともらしさ
 
         self.x = np.zeros(self.n, dtype=np.int8)
         self.xmap = np.zeros(self.n, dtype=np.int8)
