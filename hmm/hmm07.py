@@ -1,4 +1,5 @@
 from typing import List
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -13,6 +14,7 @@ theta_last = 0.999
 theta_step = 0.001
 
 def hmm07() -> None:
+    start = time.time()
     theta_list = np.arange(theta_first, theta_last, theta_step)
     error_list = []
 
@@ -23,6 +25,8 @@ def hmm07() -> None:
     error_array = np.array(error_list)
     mean_array = error_array.mean(axis=0, dtype=np.float64)
     std_array = error_array.std(axis=0, dtype=np.float64)
+
+    print(f'elapsed_time: {time.time()-start} sec')
 
     plt.plot(theta_list, mean_array, label='mean')
     plt.plot(theta_list, mean_array + std_array, label='std+')
