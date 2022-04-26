@@ -2,6 +2,7 @@ from typing import List
 import numpy as np
 import matplotlib.pyplot as plt
 from multiprocessing import Pool
+import os
 from itertools import product
 from logging import getLogger, StreamHandler, INFO, Formatter, CRITICAL
 import time
@@ -32,7 +33,7 @@ def hmm_task(n: int, sigma: float, p00: float, p11: float, trial_num: int) -> tr
         hmm.compute_xmap()
         hamming_distanse_list.append(calc_hamming(hmm))
     hamming_mean = np.asarray(hamming_distanse_list, dtype=np.float64).mean()
-    logger.info(f'process time: {time.time() - start_time}')
+    logger.info(f'[p00={p00:.2f}, p11={p11:.2f}] process time: {time.time() - start_time}')
     return trial_result(p00, p11, hamming_mean)
 
 def main():
@@ -42,7 +43,7 @@ def main():
 
     p_args = list(product(np.arange(0.50, 1.00, 0.01), np.arange(0.50, 1.00, 0.01)))
     hmm_args = [(n, sigma, arg[0], arg[1], 1000) for arg in p_args]
-    with Pool(processes=6) as pool:
+    with Pool(processes=os.cpu_count()//2) as pool:
         results = pool.starmap(hmm_task, hmm_args)
     logger.info(f'p_args len: {len(results)}')
 
