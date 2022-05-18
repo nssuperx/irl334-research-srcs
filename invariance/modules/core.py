@@ -1,19 +1,15 @@
 from typing import Tuple
 import numpy as np
+from PIL import Image, ImageDraw
 
-from .numeric import zscore
+from .numeric import zscore, min_max_normalize
 
 class TemplateImage:
-    img: np.ndarray
-    mean: float
-    variance: float
-    sd: float
-
     def __init__(self, imgArray: np.ndarray) -> None:
-        self.img = imgArray
-        self.mean = self.img.mean()
-        self.variance = self.img.var()
-        self.sd = self.img.std()
+        self.img: np.ndarray = imgArray
+        self.mean: float = self.img.mean()
+        self.variance: float = self.img.var()
+        self.sd: float = self.img.std()
 
 class ReceptiveField:
     """
@@ -22,42 +18,37 @@ class ReceptiveField:
     テンプレート画像を持ってないとfciが計算できないので，一応持っておく．
     参照渡しであることを信じる
     """
-    # img: np.ndarray
-    template: TemplateImage
-    is_active: bool
-    height: int
-    width: int
-    originalImgPos: Tuple[int, int]
-    mostActivePos: Tuple[int, int]
-    activity: float
-
     def __init__(self, originalImgPos: Tuple[int, int], scannedImgArray: np.ndarray, template: TemplateImage, height: int = 70, width: int = 70) -> None:
-        # self.img = originalImg[originalImgPos]
-        self.template = template
-        self.originalImgPos = originalImgPos
-        self.height = height
-        self.width = width
+        self.template: TemplateImage = template
+        self.originalImgPos: Tuple[int, int] = originalImgPos
+        self.height: int = height
+        self.width: int = width
         # NOTE: RFが担当する領域内のスキャン後の画像を切り抜いて，最も興奮している場所を探す
         scannedArray = scannedImgArray[originalImgPos[0]:originalImgPos[0] + (height - template.img.shape[0]), originalImgPos[1]:originalImgPos[1] + (width - template.img.shape[1])]
-        self.mostActivePos = np.unravel_index(np.argmax(scannedArray), scannedArray.shape)
-        self.activity = np.max(scannedArray)
+        self.mostActivePos: Tuple[int, int] = np.unravel_index(np.argmax(scannedArray), scannedArray.shape)
+        self.activity: float = np.max(scannedArray)
+
+    def show_img(self, originalImgArray: np.ndarray) -> None:
+        """受容野が担当している，最も興奮している部分に枠を囲んだ画像を表示する
+
+        Args:
+            originalImgArray (np.ndarray): オリジナル画像配列
+            オリジナル画像配列をこのクラスで持ちたくないので，表示するときのみスライスして使う．
+        """
+        im = Image.fromarray(min_max_normalize(originalImgArray[self.originalImgPos[0]:self.originalImgPos[0] + self.height, self.originalImgPos[1]:self.originalImgPos[1] + self.width]) * 255).convert('L')
+        draw = ImageDraw.Draw(im)
+        draw.rectangle((self.mostActivePos[1], self.mostActivePos[0], self.mostActivePos[1] + self.template.img.shape[1], self.mostActivePos[0] + self.template.img.shape[0]))
+        im.show()
 
 class CombinedReceptiveField:
     # TODO: ほんとはこっちでどのくらい重なるか調整できるべき
-    rightRF: ReceptiveField
-    leftRF: ReceptiveField
-    height: int
-    width: int
-    overlap: int
-    fci: float
-
     def __init__(self, rightRF: ReceptiveField, leftRF: ReceptiveField, height: int = 70, width: int = 110, overlap: int = 30) -> None:
-        self.rightRF = rightRF
-        self.leftRF = leftRF
-        self.height = height
-        self.width = width
-        self.overlap = overlap
-        self.calc_fci()
+        self.rightRF: ReceptiveField = rightRF
+        self.leftRF: ReceptiveField = leftRF
+        self.height: int = height
+        self.width: int = width
+        self.overlap: int = overlap
+        # self.fci: float = self.calc_fci()
 
     # fci を計算する
     # NOTE: マイナスになってもok．抑制の入力．
