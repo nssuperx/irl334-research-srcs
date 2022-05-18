@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 from .numeric import zscore, min_max_normalize
+from .vector2 import Vector2
 
 class TemplateImage:
     def __init__(self, imgArray: np.ndarray) -> None:
@@ -20,12 +21,12 @@ class ReceptiveField:
     """
     def __init__(self, originalImgPos: Tuple[int, int], scannedImgArray: np.ndarray, template: TemplateImage, height: int = 70, width: int = 70) -> None:
         self.template: TemplateImage = template
-        self.originalImgPos: Tuple[int, int] = originalImgPos
+        self.originalImgPos: Vector2 = Vector2(*originalImgPos)
         self.height: int = height
         self.width: int = width
         # NOTE: RFが担当する領域内のスキャン後の画像を切り抜いて，最も興奮している場所を探す
         scannedArray = scannedImgArray[originalImgPos[0]:originalImgPos[0] + (height - template.img.shape[0]), originalImgPos[1]:originalImgPos[1] + (width - template.img.shape[1])]
-        self.mostActivePos: Tuple[int, int] = np.unravel_index(np.argmax(scannedArray), scannedArray.shape)
+        self.mostActivePos: Vector2 = Vector2(*np.unravel_index(np.argmax(scannedArray), scannedArray.shape))
         self.activity: float = np.max(scannedArray)
 
     def show_img(self, originalImgArray: np.ndarray) -> None:
@@ -35,9 +36,12 @@ class ReceptiveField:
             originalImgArray (np.ndarray): オリジナル画像配列
             オリジナル画像配列をこのクラスで持ちたくないので，表示するときのみスライスして使う．
         """
-        im = Image.fromarray(min_max_normalize(originalImgArray[self.originalImgPos[0]:self.originalImgPos[0] + self.height, self.originalImgPos[1]:self.originalImgPos[1] + self.width]) * 255).convert('L')
+        oPos = self.originalImgPos                        # originalImgPos
+        aPos = self.mostActivePos                         # mostActivePos
+        tShape = Vector2(*self.template.img.shape)        # templateShape
+        im = Image.fromarray(min_max_normalize(originalImgArray[oPos.y:oPos.y + self.height, oPos.x:oPos.x + self.width]) * 255).convert('L')
         draw = ImageDraw.Draw(im)
-        draw.rectangle((self.mostActivePos[1], self.mostActivePos[0], self.mostActivePos[1] + self.template.img.shape[1], self.mostActivePos[0] + self.template.img.shape[0]))
+        draw.rectangle((aPos.x, aPos.y, aPos.x + tShape.x, aPos.y + tShape.y))
         im.show()
 
 class CombinedReceptiveField:
@@ -85,6 +89,19 @@ class CombinedReceptiveField:
             self.fci = np.sum(np.dot(rightOverlap.T, leftOverlap))
         
         return self.fci
+
+    def show_img(self, originalImgArray: np.ndarray) -> None:
+        oPos = self.leftRF.originalImgPos                           # originalImgPos
+        lAPos = self.leftRF.mostActivePos                           # lightRFmostActivePos
+        rAPos = self.rightRF.mostActivePos                          # rightRFmostActivePos
+        lTShape = Vector2(*self.leftRF.template.img.shape)          # leftRFtemplateShape
+        rTShape = Vector2(*self.rightRF.template.img.shape)         # rightRFtemplateShape
+        noOverlap = (self.width - self.overlap) // 2
+        im = Image.fromarray(min_max_normalize(originalImgArray[oPos.y:self.height, oPos.x:self.width]) * 255).convert('L')
+        draw = ImageDraw.Draw(im)
+        draw.rectangle((lAPos.x, lAPos.y, lAPos.x + lTShape.x, lAPos.y + lTShape.y))
+        draw.rectangle((rAPos.x + noOverlap, rAPos.y, rAPos.x + rTShape.x + noOverlap, rAPos.y + rTShape.y))
+        im.show()
 
     def get_fci(self) -> float:
         return self.fci

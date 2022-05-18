@@ -39,19 +39,20 @@ def main():
     leftScanImgArray = zscore(leftScanImgArray)
 
     # テスト: 一つReceptiveFieldを作る
-    noOverlap = 70 - (70 * 2 - 110)
-    test_leftRF = ReceptiveField((0,0), leftScanImgArray, leftTemplate)
+    # height: 30, width: 30, overlap: 12
+    height = 30
+    width = 30
+    overlap = 12
+    crf_width = 48
+    noOverlap = width - (width * 2 - crf_width)
+    test_leftRF = ReceptiveField((0,0), leftScanImgArray, leftTemplate, height, width)
     test_leftRF.show_img(originalImgArray)
-    test_rightRF = ReceptiveField((0,noOverlap), rightScanImgArray, rightTemplate)
+    test_rightRF = ReceptiveField((0,noOverlap), rightScanImgArray, rightTemplate, height, width)
     test_rightRF.show_img(originalImgArray)
 
     # テスト: 一つCombinedRF
-    test_crf = CombinedReceptiveField(test_leftRF, test_rightRF)
-    im = Image.fromarray(min_max_normalize(originalImgArray[0:test_crf.height, 0:test_crf.width]) * 255).convert('L')
-    draw = ImageDraw.Draw(im)
-    draw.rectangle((test_leftRF.mostActivePos[1], test_leftRF.mostActivePos[0], test_leftRF.mostActivePos[1] + leftTemplate.img.shape[1], test_leftRF.mostActivePos[0] + leftTemplate.img.shape[0]))
-    draw.rectangle((test_rightRF.mostActivePos[1] + noOverlap, test_rightRF.mostActivePos[0], test_rightRF.mostActivePos[1] + rightTemplate.img.shape[1] + noOverlap, test_rightRF.mostActivePos[0] + rightTemplate.img.shape[0]))
-    # im.show()
+    test_crf = CombinedReceptiveField(test_rightRF, test_leftRF, height, crf_width, overlap)
+    test_crf.show_img(originalImgArray)
 
     exit()
 
