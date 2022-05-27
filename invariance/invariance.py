@@ -44,23 +44,23 @@ def main():
     width = 30
     overlap = 12
     crf_width = 48
-    noOverlap = width - (width * 2 - crf_width)
+    noOverlap = crf_width - width
     test_leftRF = ReceptiveField((0,0), leftScanImgArray, leftTemplate, height, width)
-    test_leftRF.show_img(originalImgArray)
+    # test_leftRF.show_img(originalImgArray)
     test_rightRF = ReceptiveField((0,noOverlap), rightScanImgArray, rightTemplate, height, width)
-    test_rightRF.show_img(originalImgArray)
+    # test_rightRF.show_img(originalImgArray)
 
     # テスト: 一つCombinedRF
     test_crf = CombinedReceptiveField(test_rightRF, test_leftRF, height, crf_width, overlap)
-    test_crf.show_img(originalImgArray)
-
-    exit()
+    # test_crf.show_img(originalImgArray)
 
     # 全部scanしてみる
-    fciArray = scan_combinedRF(70, 110, 1, originalImgArray, rightScanImgArray, rightTemplate, leftScanImgArray, leftTemplate)
-    np.save("./fciArray", fciArray)
-    fciArray = np.load("./fciArray.npy")
+    fciArray = scan_combinedRF(height, crf_width, height, width, 10, originalImgArray, rightScanImgArray, rightTemplate, leftScanImgArray, leftTemplate)
+    np.save('./fciArray', fciArray)
+    save_image('./fciArray.png', fciArray)
+    # fciArray = np.load('./fciArray.npy')
     # print(fciArray)
+    exit()
 
     # ヒストグラム描画
     """

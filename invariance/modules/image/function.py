@@ -18,7 +18,7 @@ def scan(originalImgArray: np.ndarray, templateImgArray: np.ndarray) -> np.ndarr
 
     return scanImgArray
 
-def scan_combinedRF(cRFHeight: int, cRFWidth: int, scanStep: int, originalImgArray: np.ndarray,
+def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, scanStep: int, originalImgArray: np.ndarray,
                     rightScanImgArray: np.ndarray, rightTemplate: TemplateImage,
                     leftScanImgArray: np.ndarray, leftTemplate: TemplateImage) -> np.ndarray:
     """画像全体のfciを計算する
@@ -39,10 +39,12 @@ def scan_combinedRF(cRFHeight: int, cRFWidth: int, scanStep: int, originalImgArr
     fciArray = np.zeros(((originalImgArray.shape[0] - cRFHeight) // scanStep, (originalImgArray.shape[1] - cRFWidth) // scanStep))
     for y in range(0, originalImgArray.shape[0] - cRFHeight, scanStep):
         for x in range(0, originalImgArray.shape[1] - cRFWidth, scanStep):
-            rightRF = ReceptiveField((y, x), rightScanImgArray, rightTemplate)
-            leftRF = ReceptiveField((y, x + (cRFWidth- cRFHeight)), leftScanImgArray, leftTemplate)
-            combinedRF = CombinedReceptiveField(rightRF, leftRF)
-            fciArray[y//scanStep][x//scanStep] = combinedRF.get_fci()
+            rightRF = ReceptiveField((y, x), rightScanImgArray, rightTemplate, RFheight, RFWidth)
+            leftRF = ReceptiveField((y, x + (cRFWidth - RFWidth)), leftScanImgArray, leftTemplate, RFheight, RFWidth)
+            combinedRF = CombinedReceptiveField(rightRF, leftRF, cRFHeight, cRFWidth, (RFWidth * 2 - cRFWidth))
+            combinedRF.save_img(originalImgArray, f'./imgout/y{y:03}x{x:03}.png')
+            # combinedRF.show_img(originalImgArray)
+            # fciArray[y//scanStep][x//scanStep] = combinedRF.get_fci()
 
     # fciArray = min_max_normalize(fciArray)
     return fciArray

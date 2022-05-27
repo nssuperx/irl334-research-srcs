@@ -1,3 +1,5 @@
+import imghdr
+from tkinter.messagebox import NO
 from typing import Tuple
 import numpy as np
 from PIL import Image, ImageDraw
@@ -90,18 +92,26 @@ class CombinedReceptiveField:
         
         return self.fci
 
-    def show_img(self, originalImgArray: np.ndarray) -> None:
-        oPos = self.leftRF.originalImgPos                           # originalImgPos
+    def make_img(self, originalImgArray: np.ndarray) -> Image:
+        oPos = self.rightRF.originalImgPos                           # originalImgPos
         lAPos = self.leftRF.mostActivePos                           # lightRFmostActivePos
         rAPos = self.rightRF.mostActivePos                          # rightRFmostActivePos
         lTShape = Vector2(*self.leftRF.template.img.shape)          # leftRFtemplateShape
         rTShape = Vector2(*self.rightRF.template.img.shape)         # rightRFtemplateShape
         noOverlap = (self.width - self.overlap) // 2
-        im = Image.fromarray(min_max_normalize(originalImgArray[oPos.y:self.height, oPos.x:self.width]) * 255).convert('L')
-        draw = ImageDraw.Draw(im)
+        img = Image.fromarray(min_max_normalize(originalImgArray[oPos.y:oPos.y + self.height, oPos.x:oPos.x + self.width]) * 255).convert('L')
+        draw = ImageDraw.Draw(img)
         draw.rectangle((lAPos.x, lAPos.y, lAPos.x + lTShape.x, lAPos.y + lTShape.y))
         draw.rectangle((rAPos.x + noOverlap, rAPos.y, rAPos.x + rTShape.x + noOverlap, rAPos.y + rTShape.y))
-        im.show()
+        return img
+
+    def show_img(self, originalImgArray: np.ndarray) -> None:
+        img = self.make_img(originalImgArray)
+        img.show()
+
+    def save_img(self, originalImgArray: np.ndarray, path: str) -> None:
+        img = self.make_img(originalImgArray)
+        img.save(path)
 
     def get_fci(self) -> float:
         return self.fci
