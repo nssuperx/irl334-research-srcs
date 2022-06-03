@@ -2,15 +2,15 @@ from PIL import Image
 import numpy as np
 from ..numeric import min_max_normalize
 
-def save_image(filepath: str, scanImgArray: np.ndarray) -> None:
+def save_image(filepath: str, scanImg: np.ndarray) -> None:
     """画像を保存する
     この関数内で正規化を行うので，元画像配列の状態は気にしなくてok
 
     Args:
         filepath (str): 保存するパス
-        scanImgArray (np.ndarray): 保存したい画像配列
+        scanImg (np.ndarray): 保存したい画像配列
     """
-    img = min_max_normalize(scanImgArray)
+    img = min_max_normalize(scanImg)
     img = Image.fromarray(img * 255).convert("L")
     # img.show()
     img.save(filepath)
@@ -28,31 +28,31 @@ def load_image(setNumber: int, normalize: bool = True) -> dict:
             value: numpy.ndarray: 読み込んだ画像
     """
 
-    originalImagePath = "./dataset/" + str(setNumber) + "/in/sample.png"
-    rightEyeImagePath = "./dataset/" + str(setNumber) + "/in/right_eye.png"
-    leftEyeImagePath = "./dataset/" + str(setNumber) + "/in/left_eye.png"
+    originalImgPath = f"./dataset/{setNumber}/in/sample.png"
+    rightEyeImgPath = f"./dataset/{setNumber}/in/right_eye.png"
+    leftEyeImgPath = f"./dataset/{setNumber}/in/left_eye.png"
 
     if normalize:
-        originalImage = np.array(Image.open(originalImagePath))
-        rightEyeImage = np.array(Image.open(rightEyeImagePath))
-        leftEyeImage = np.array(Image.open(leftEyeImagePath))
+        originalImg = np.array(Image.open(originalImgPath))
+        rightEyeImg = np.array(Image.open(rightEyeImgPath))
+        leftEyeImg = np.array(Image.open(leftEyeImgPath))
 
-        originalImage = (originalImage - originalImage.mean()) / originalImage.std()
-        rightEyeImage = (rightEyeImage - rightEyeImage.mean()) / rightEyeImage.std()
-        leftEyeImage = (leftEyeImage - leftEyeImage.mean()) / leftEyeImage.std()
+        originalImg = (originalImg - originalImg.mean()) / originalImg.std()
+        rightEyeImg = (rightEyeImg - rightEyeImg.mean()) / rightEyeImg.std()
+        leftEyeImg = (leftEyeImg - leftEyeImg.mean()) / leftEyeImg.std()
 
         # (x - x.min()) / (x.max() - x.min())
-        # originalImage = (originalImage - originalImage.min()) / (originalImage.max() - originalImage.min())
-        # rightEyeImage = (rightEyeImage - rightEyeImage.min()) / (rightEyeImage.max() - rightEyeImage.min())
-        # leftEyeImage = (leftEyeImage - leftEyeImage.min()) / (leftEyeImage.max() - leftEyeImage.min())
+        # originalImg = (originalImg - originalImg.min()) / (originalImg.max() - originalImg.min())
+        # rightEyeImg = (rightEyeImg - rightEyeImg.min()) / (rightEyeImg.max() - rightEyeImg.min())
+        # leftEyeImg = (leftEyeImg - leftEyeImg.min()) / (leftEyeImg.max() - leftEyeImg.min())
 
     else:
         # 画像読み込みつつndarrayに変換，asarray()を使うとread-onlyなデータができる．
-        originalImage = np.asarray(Image.open(originalImagePath))
-        rightEyeImage = np.asarray(Image.open(rightEyeImagePath))
-        leftEyeImage = np.asarray(Image.open(leftEyeImagePath))
+        originalImg = np.asarray(Image.open(originalImgPath))
+        rightEyeImg = np.asarray(Image.open(rightEyeImgPath))
+        leftEyeImg = np.asarray(Image.open(leftEyeImgPath))
 
-    imgDic = {"original": originalImage, "right_eye": rightEyeImage, "left_eye": leftEyeImage}
+    imgDic = {"original": originalImg, "right_eye": rightEyeImg, "left_eye": leftEyeImg}
 
     return imgDic
 

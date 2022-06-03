@@ -14,10 +14,12 @@ from modules.image.function import scan, scan_combinedRF
 from modules.numeric import zscore, min_max_normalize
 from modules.test import image_read_test
 
+
 def main():
     # 以下，使用例まとめ
 
-    imgDic = load_image(2)
+    dataNumber = 2
+    imgDic = load_image(dataNumber)
     # image_read_test(imgDic)
     originalImgArray = imgDic["original"]
     rightTemplate = TemplateImage(imgDic["right_eye"])
@@ -26,12 +28,12 @@ def main():
     # 走査した画像配列を作成
     # rightScanImgArray = scan(originalImgArray, rightTemplate.img)
     # leftScanImgArray = scan(originalImgArray, leftTemplate.img)
-    # save_image("./images/out/rightScanImg.png", rightScanImgArray)
-    # save_image("./images/out/leftScanImg.png", leftScanImgArray)
+    # save_image(f"./dataset/{dataNumber}/out/rightScanImg.png", rightScanImgArray)
+    # save_image(f"./dataset/{dataNumber}/out/leftScanImg.png", leftScanImgArray)
 
     # np.save("./rightScanImgArray", rightScanImgArray)
     # np.save("./leftScanImgArray", leftScanImgArray)
-    
+
     # 入力
     rightScanImgArray = np.load("./rightScanImgArray.npy")
     leftScanImgArray = np.load("./leftScanImgArray.npy")
@@ -45,9 +47,9 @@ def main():
     overlap = 12
     crf_width = 48
     noOverlap = crf_width - width
-    test_leftRF = ReceptiveField((0,0), leftScanImgArray, leftTemplate, height, width)
+    test_leftRF = ReceptiveField((0, 0), leftScanImgArray, leftTemplate, height, width)
     # test_leftRF.show_img(originalImgArray)
-    test_rightRF = ReceptiveField((0,noOverlap), rightScanImgArray, rightTemplate, height, width)
+    test_rightRF = ReceptiveField((0, noOverlap), rightScanImgArray, rightTemplate, height, width)
     # test_rightRF.show_img(originalImgArray)
 
     # テスト: 一つCombinedRF
@@ -102,6 +104,7 @@ def main():
         # plt.show()
         plt.savefig("./dataset/" + str(i) + "/out/hist.pdf")
     """
+
 
 if __name__ == "__main__":
     main()

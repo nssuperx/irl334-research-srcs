@@ -1,11 +1,10 @@
-import imghdr
-from tkinter.messagebox import NO
 from typing import Tuple
 import numpy as np
 from PIL import Image, ImageDraw
 
 from .numeric import zscore, min_max_normalize
 from .vector2 import Vector2
+
 
 class TemplateImage:
     def __init__(self, imgArray: np.ndarray) -> None:
@@ -14,6 +13,7 @@ class TemplateImage:
         self.variance: float = self.img.var()
         self.sd: float = self.img.std()
 
+
 class ReceptiveField:
     """
     走査後の出力画像から一番興奮してる座標取れそう．
@@ -21,13 +21,15 @@ class ReceptiveField:
     テンプレート画像を持ってないとfciが計算できないので，一応持っておく．
     参照渡しであることを信じる
     """
+
     def __init__(self, originalImgPos: Tuple[int, int], scannedImgArray: np.ndarray, template: TemplateImage, height: int = 70, width: int = 70) -> None:
         self.template: TemplateImage = template
         self.originalImgPos: Vector2 = Vector2(*originalImgPos)
         self.height: int = height
         self.width: int = width
         # NOTE: RFが担当する領域内のスキャン後の画像を切り抜いて，最も興奮している場所を探す
-        scannedArray = scannedImgArray[originalImgPos[0]:originalImgPos[0] + (height - template.img.shape[0]), originalImgPos[1]:originalImgPos[1] + (width - template.img.shape[1])]
+        scannedArray = scannedImgArray[self.originalImgPos.y:self.originalImgPos.y + (
+            height - template.img.shape[0]), self.originalImgPos.x:self.originalImgPos.x + (width - template.img.shape[1])]
         self.mostActivePos: Vector2 = Vector2(*np.unravel_index(np.argmax(scannedArray), scannedArray.shape))
         self.activity: float = np.max(scannedArray)
 
@@ -41,10 +43,12 @@ class ReceptiveField:
         oPos = self.originalImgPos                        # originalImgPos
         aPos = self.mostActivePos                         # mostActivePos
         tShape = Vector2(*self.template.img.shape)        # templateShape
-        im = Image.fromarray(min_max_normalize(originalImgArray[oPos.y:oPos.y + self.height, oPos.x:oPos.x + self.width]) * 255).convert('L')
+        im = Image.fromarray(min_max_normalize(
+            originalImgArray[oPos.y:oPos.y + self.height, oPos.x:oPos.x + self.width]) * 255).convert('L')
         draw = ImageDraw.Draw(im)
         draw.rectangle((aPos.x, aPos.y, aPos.x + tShape.x, aPos.y + tShape.y))
         im.show()
+
 
 class CombinedReceptiveField:
     # TODO: ほんとはこっちでどのくらい重なるか調整できるべき
@@ -67,7 +71,7 @@ class CombinedReceptiveField:
         if(self.leftRF.mostActivePos[1] > self.overlap):
             self.fci = 0.0
             return self.fci
-        
+
         # TODO: overlap領域のサイズが違うときがある．完全にバグ．
         x = int(noOverlap + self.leftRF.mostActivePos[1] - self.rightRF.mostActivePos[1])
         # y = abs(self.leftRF.mostActivePos[1] - self.rightRF.mostActivePos[1])
@@ -75,13 +79,14 @@ class CombinedReceptiveField:
         leftOverlap: np.ndarray
         if self.rightRF.mostActivePos[0] < self.leftRF.mostActivePos[0]:
             y = int(self.leftRF.mostActivePos[0] - self.rightRF.mostActivePos[0])
-            rightOverlap = self.rightRF.template.img[0:self.rightRF.template.img.shape[0] - y , x: ]
-            leftOverlap = self.leftRF.template.img[y: , 0:self.rightRF.template.img.shape[1] - x]
+            rightOverlap = self.rightRF.template.img[0:self.rightRF.template.img.shape[0] - y, x:]
+            leftOverlap = self.leftRF.template.img[y:, 0:self.rightRF.template.img.shape[1] - x]
         else:
             y = int(self.rightRF.mostActivePos[0] - self.leftRF.mostActivePos[0])
-            rightOverlap = self.rightRF.template.img[y: , x: ]
-            leftOverlap = self.leftRF.template.img[0:self.rightRF.template.img.shape[0] - y, x:self.rightRF.template.img.shape[1] - x]
-        
+            rightOverlap = self.rightRF.template.img[y:, x:]
+            leftOverlap = self.leftRF.template.img[0:self.rightRF.template.img.shape[0] -
+                                                   y, x:self.rightRF.template.img.shape[1] - x]
+
         if rightOverlap.size == 0:
             self.fci = 0.0
         else:
@@ -89,7 +94,7 @@ class CombinedReceptiveField:
             rightOverlap = zscore(rightOverlap)
             leftOverlap = zscore(leftOverlap)
             self.fci = np.sum(np.dot(rightOverlap.T, leftOverlap))
-        
+
         return self.fci
 
     def make_img(self, originalImgArray: np.ndarray) -> Image:
@@ -99,7 +104,8 @@ class CombinedReceptiveField:
         lTShape = Vector2(*self.leftRF.template.img.shape)          # leftRFtemplateShape
         rTShape = Vector2(*self.rightRF.template.img.shape)         # rightRFtemplateShape
         noOverlap = (self.width - self.overlap) // 2
-        img = Image.fromarray(min_max_normalize(originalImgArray[oPos.y:oPos.y + self.height, oPos.x:oPos.x + self.width]) * 255).convert('L')
+        img = Image.fromarray(min_max_normalize(
+            originalImgArray[oPos.y:oPos.y + self.height, oPos.x:oPos.x + self.width]) * 255).convert('L')
         draw = ImageDraw.Draw(img)
         draw.rectangle((lAPos.x, lAPos.y, lAPos.x + lTShape.x, lAPos.y + lTShape.y))
         draw.rectangle((rAPos.x + noOverlap, rAPos.y, rAPos.x + rTShape.x + noOverlap, rAPos.y + rTShape.y))
