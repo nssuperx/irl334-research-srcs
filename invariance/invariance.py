@@ -12,7 +12,6 @@ from modules.core import TemplateImage, ReceptiveField, CombinedReceptiveField
 from modules.image.io import load_image, save_image
 from modules.image.function import scan, scan_combinedRF
 from modules.numeric import zscore, min_max_normalize
-from modules.test import image_read_test
 
 
 def main():
@@ -62,7 +61,6 @@ def main():
     save_image('./fciArray.png', fciArray)
     # fciArray = np.load('./fciArray.npy')
     # print(fciArray)
-    exit()
 
     # ヒストグラム描画
     """

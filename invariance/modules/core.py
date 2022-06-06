@@ -22,14 +22,15 @@ class ReceptiveField:
     参照渡しであることを信じる
     """
 
-    def __init__(self, originalImgPos: Tuple[int, int], scannedImgArray: np.ndarray, template: TemplateImage, height: int = 70, width: int = 70) -> None:
+    def __init__(self, originalImgPos: Tuple[int, int], scannedImgArray: np.ndarray,
+                 template: TemplateImage, height: int = 70, width: int = 70) -> None:
         self.template: TemplateImage = template
         self.originalImgPos: Vector2 = Vector2(*originalImgPos)
         self.height: int = height
         self.width: int = width
         # NOTE: RFが担当する領域内のスキャン後の画像を切り抜いて，最も興奮している場所を探す
-        scannedArray = scannedImgArray[self.originalImgPos.y:self.originalImgPos.y + (
-            height - template.img.shape[0]), self.originalImgPos.x:self.originalImgPos.x + (width - template.img.shape[1])]
+        scannedArray = scannedImgArray[self.originalImgPos.y:self.originalImgPos.y + (height - template.img.shape[0]),
+                                       self.originalImgPos.x:self.originalImgPos.x + (width - template.img.shape[1])]
         self.mostActivePos: Vector2 = Vector2(*np.unravel_index(np.argmax(scannedArray), scannedArray.shape))
         self.activity: float = np.max(scannedArray)
 
@@ -52,7 +53,8 @@ class ReceptiveField:
 
 class CombinedReceptiveField:
     # TODO: ほんとはこっちでどのくらい重なるか調整できるべき
-    def __init__(self, rightRF: ReceptiveField, leftRF: ReceptiveField, height: int = 70, width: int = 110, overlap: int = 30) -> None:
+    def __init__(self, rightRF: ReceptiveField, leftRF: ReceptiveField,
+                 height: int = 70, width: int = 110, overlap: int = 30) -> None:
         self.rightRF: ReceptiveField = rightRF
         self.leftRF: ReceptiveField = leftRF
         self.height: int = height
@@ -64,25 +66,25 @@ class CombinedReceptiveField:
     # NOTE: マイナスになってもok．抑制の入力．
     def calc_fci(self) -> float:
         noOverlap = (self.width - self.overlap) // 2
-        if(self.rightRF.mostActivePos[1] + self.rightRF.template.img.shape[1] < noOverlap):
+        if(self.rightRF.mostActivePos.x + self.rightRF.template.img.shape[1] < noOverlap):
             self.fci = 0.0
             return self.fci
 
-        if(self.leftRF.mostActivePos[1] > self.overlap):
+        if(self.leftRF.mostActivePos.x > self.overlap):
             self.fci = 0.0
             return self.fci
 
         # TODO: overlap領域のサイズが違うときがある．完全にバグ．
-        x = int(noOverlap + self.leftRF.mostActivePos[1] - self.rightRF.mostActivePos[1])
+        x = int(noOverlap + self.leftRF.mostActivePos.x - self.rightRF.mostActivePos.x)
         # y = abs(self.leftRF.mostActivePos[1] - self.rightRF.mostActivePos[1])
         rightOverlap: np.ndarray
         leftOverlap: np.ndarray
-        if self.rightRF.mostActivePos[0] < self.leftRF.mostActivePos[0]:
-            y = int(self.leftRF.mostActivePos[0] - self.rightRF.mostActivePos[0])
+        if self.rightRF.mostActivePos.y < self.leftRF.mostActivePos.y:
+            y = int(self.leftRF.mostActivePos.y - self.rightRF.mostActivePos.y)
             rightOverlap = self.rightRF.template.img[0:self.rightRF.template.img.shape[0] - y, x:]
             leftOverlap = self.leftRF.template.img[y:, 0:self.rightRF.template.img.shape[1] - x]
         else:
-            y = int(self.rightRF.mostActivePos[0] - self.leftRF.mostActivePos[0])
+            y = int(self.rightRF.mostActivePos.y - self.leftRF.mostActivePos.y)
             rightOverlap = self.rightRF.template.img[y:, x:]
             leftOverlap = self.leftRF.template.img[0:self.rightRF.template.img.shape[0] -
                                                    y, x:self.rightRF.template.img.shape[1] - x]

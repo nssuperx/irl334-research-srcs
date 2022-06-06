@@ -5,7 +5,7 @@ def zscore(x: np.ndarray) -> np.ndarray:
     """
     平均0 分散1
     """
-    return (x-x.mean()) / x.std()
+    return (x - x.mean()) / x.std()
 
 
 def min_max_normalize(x: np.ndarray) -> np.ndarray:

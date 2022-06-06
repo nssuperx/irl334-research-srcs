@@ -1,7 +1,8 @@
 import numpy as np
-from ..numeric import min_max_normalize, zscore, calc_corrcoef
+from ..numeric import zscore, calc_corrcoef
 from ..core import TemplateImage, ReceptiveField, CombinedReceptiveField
 from ..vector2 import Vector2
+
 
 def scan(originalImg: np.ndarray, templateImg: np.ndarray) -> np.ndarray:
     # 走査
@@ -12,7 +13,7 @@ def scan(originalImg: np.ndarray, templateImg: np.ndarray) -> np.ndarray:
     for y in range(scanImg.shape[0]):
         for x in range(scanImg.shape[1]):
             # 相関係数出す範囲をスライス
-            scanTargetImg = originalImg[y:y+tShape.y, x:x+tShape.x]
+            scanTargetImg = originalImg[y:y + tShape.y, x:x + tShape.x]
             # 正規化
             scanTargetImg = zscore(scanTargetImg)
             # cov = np.mean(np.multiply(scanTargetImg, templateImg))
@@ -22,6 +23,7 @@ def scan(originalImg: np.ndarray, templateImg: np.ndarray) -> np.ndarray:
             scanImg[y][x] = calc_corrcoef(scanTargetImg, templateImg)
 
     return scanImg
+
 
 def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, scanStep: int, originalImg: np.ndarray,
                     rightScanImg: np.ndarray, rightTemplate: TemplateImage,
@@ -47,7 +49,7 @@ def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, 
             rightRF = ReceptiveField((y, x), rightScanImg, rightTemplate, RFheight, RFWidth)
             leftRF = ReceptiveField((y, x + (cRFWidth - RFWidth)), leftScanImg, leftTemplate, RFheight, RFWidth)
             combinedRF = CombinedReceptiveField(rightRF, leftRF, cRFHeight, cRFWidth, (RFWidth * 2 - cRFWidth))
-            combinedRF.save_img(originalImg, f'./imgout/y{y:03}x{x:03}.png')
+            combinedRF.save_img(originalImg, f'./imgout/y{y:04}x{x:04}.png')
             # combinedRF.show_img(originalImg)
             # fci[y//scanStep][x//scanStep] = combinedRF.get_fci()
 

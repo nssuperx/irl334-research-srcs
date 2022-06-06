@@ -2,6 +2,7 @@ from PIL import Image
 import numpy as np
 from ..numeric import min_max_normalize
 
+
 def save_image(filepath: str, scanImg: np.ndarray) -> None:
     """画像を保存する
     この関数内で正規化を行うので，元画像配列の状態は気にしなくてok
@@ -10,10 +11,10 @@ def save_image(filepath: str, scanImg: np.ndarray) -> None:
         filepath (str): 保存するパス
         scanImg (np.ndarray): 保存したい画像配列
     """
-    img = min_max_normalize(scanImg)
-    img = Image.fromarray(img * 255).convert("L")
+    img = Image.fromarray(min_max_normalize(scanImg) * 255).convert("L")
     # img.show()
     img.save(filepath)
+
 
 def load_image(setNumber: int, normalize: bool = True) -> dict:
     """画像を読み込む
@@ -55,4 +56,3 @@ def load_image(setNumber: int, normalize: bool = True) -> dict:
     imgDic = {"original": originalImg, "right_eye": rightEyeImg, "left_eye": leftEyeImg}
 
     return imgDic
-
