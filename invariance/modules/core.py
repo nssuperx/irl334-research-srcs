@@ -109,8 +109,8 @@ class CombinedReceptiveField:
         img = Image.fromarray(min_max_normalize(
             originalImgArray[oPos.y:oPos.y + self.height, oPos.x:oPos.x + self.width]) * 255).convert('L')
         draw = ImageDraw.Draw(img)
-        draw.rectangle((lAPos.x, lAPos.y, lAPos.x + lTShape.x, lAPos.y + lTShape.y))
-        draw.rectangle((rAPos.x + noOverlap, rAPos.y, rAPos.x + rTShape.x + noOverlap, rAPos.y + rTShape.y))
+        draw.rectangle((lAPos.x + noOverlap, lAPos.y, lAPos.x + lTShape.x + noOverlap, lAPos.y + lTShape.y))
+        draw.rectangle((rAPos.x, rAPos.y, rAPos.x + rTShape.x, rAPos.y + rTShape.y))
         return img
 
     def show_img(self, originalImgArray: np.ndarray) -> None:

@@ -36,8 +36,8 @@ def main():
     # 入力
     rightScanImgArray = np.load("./rightScanImgArray.npy")
     leftScanImgArray = np.load("./leftScanImgArray.npy")
-    rightScanImgArray = zscore(rightScanImgArray)
-    leftScanImgArray = zscore(leftScanImgArray)
+    # rightScanImgArray = zscore(rightScanImgArray)
+    # leftScanImgArray = zscore(leftScanImgArray)
 
     # テスト: 一つReceptiveFieldを作る
     # height: 30, width: 30, overlap: 12
@@ -56,7 +56,7 @@ def main():
     # test_crf.show_img(originalImgArray)
 
     # 全部scanしてみる
-    fciArray = scan_combinedRF(height, crf_width, height, width, 10, originalImgArray, rightScanImgArray, rightTemplate, leftScanImgArray, leftTemplate)
+    fciArray = scan_combinedRF(height, crf_width, height, width, 1, originalImgArray, rightScanImgArray, rightTemplate, leftScanImgArray, leftTemplate)
     np.save('./fciArray', fciArray)
     save_image('./fciArray.png', fciArray)
     # fciArray = np.load('./fciArray.npy')

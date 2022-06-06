@@ -1,5 +1,5 @@
 import numpy as np
-from ..numeric import zscore, calc_corrcoef
+from ..numeric import zscore, corrcoef
 from ..core import TemplateImage, ReceptiveField, CombinedReceptiveField
 from ..vector2 import Vector2
 
@@ -20,7 +20,7 @@ def scan(originalImg: np.ndarray, templateImg: np.ndarray) -> np.ndarray:
             # cov = np.mean(np.multiply(scanTargetImg, templateImg)) - scanTargetImg.mean() * templateImg.mean()
             # scanImg[y][x] = np.corrcoef(scanTargetImg.flatten(), templateImg.flatten())[0][1]
             # scanImg[y][x] = cov / (scanTargetImg.std() * templateImg.std())
-            scanImg[y][x] = calc_corrcoef(scanTargetImg, templateImg)
+            scanImg[y][x] = corrcoef(scanTargetImg, templateImg)
 
     return scanImg
 
