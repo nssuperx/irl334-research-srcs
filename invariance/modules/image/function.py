@@ -1,26 +1,25 @@
 import numpy as np
-from ..numeric import zscore, corrcoef
+from ..numeric import zscore
 from ..core import TemplateImage, ReceptiveField, CombinedReceptiveField
 from ..vector2 import Vector2
 
 
-def scan(originalImg: np.ndarray, templateImg: np.ndarray) -> np.ndarray:
+def scan(originalImg: np.ndarray, template: TemplateImage) -> np.ndarray:
     # 走査
     # TODO: 遅すぎるのでなんとかする
     oShape = Vector2(*originalImg.shape)
-    tShape = Vector2(*templateImg.shape)
-    scanImg = np.empty((oShape.y - tShape.y, oShape.x - tShape.x))
+    tShape = Vector2(*template.img.shape)
+    scanImg = np.empty((oShape.y - tShape.y, oShape.x - tShape.x), dtype=np.float64)
     for y in range(scanImg.shape[0]):
         for x in range(scanImg.shape[1]):
             # 相関係数出す範囲をスライス
             scanTargetImg = originalImg[y:y + tShape.y, x:x + tShape.x]
             # 正規化
             scanTargetImg = zscore(scanTargetImg)
-            # cov = np.mean(np.multiply(scanTargetImg, templateImg))
-            # cov = np.mean(np.multiply(scanTargetImg, templateImg)) - scanTargetImg.mean() * templateImg.mean()
-            # scanImg[y][x] = np.corrcoef(scanTargetImg.flatten(), templateImg.flatten())[0][1]
-            # scanImg[y][x] = cov / (scanTargetImg.std() * templateImg.std())
-            scanImg[y][x] = corrcoef(scanTargetImg, templateImg)
+            # scanImg[y][x] = corrcoef(scanTargetImg, template.img)
+            # scanImg[y][x] = corrcoef_template(scanTargetImg, template)
+            # NOTE: 平均0 分散1なので，以下でもok．
+            scanImg[y][x] = np.mean(scanTargetImg * template.img)
 
     return scanImg
 
@@ -43,9 +42,10 @@ def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, 
     Returns:
         np.ndarray: fci配列
     """
-    fci = np.zeros(((originalImg.shape[0] - cRFHeight) // scanStep, (originalImg.shape[1] - cRFWidth) // scanStep))
-    for y in range(0, originalImg.shape[0] - cRFHeight, scanStep):
-        for x in range(0, originalImg.shape[1] - cRFWidth, scanStep):
+    oShape = Vector2(*originalImg.shape)
+    fci = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.float64)
+    for y in range(0, oShape.y - cRFHeight, scanStep):
+        for x in range(0, oShape.x - cRFWidth, scanStep):
             rightRF = ReceptiveField((y, x), rightScanImg, rightTemplate, RFheight, RFWidth)
             leftRF = ReceptiveField((y, x + (cRFWidth - RFWidth)), leftScanImg, leftTemplate, RFheight, RFWidth)
             combinedRF = CombinedReceptiveField(rightRF, leftRF, cRFHeight, cRFWidth, (RFWidth * 2 - cRFWidth))

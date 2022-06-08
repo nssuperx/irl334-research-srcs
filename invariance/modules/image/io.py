@@ -1,6 +1,6 @@
 from PIL import Image
 import numpy as np
-from ..numeric import min_max_normalize
+from ..numeric import min_max_normalize, zscore
 
 
 def save_image(filepath: str, scanImg: np.ndarray) -> None:
@@ -34,24 +34,14 @@ def load_image(setNumber: int, normalize: bool = True) -> dict:
     leftEyeImgPath = f"./dataset/{setNumber}/in/left_eye.png"
 
     if normalize:
+        originalImg = zscore(np.array(Image.open(originalImgPath)))
+        rightEyeImg = zscore(np.array(Image.open(rightEyeImgPath)))
+        leftEyeImg = zscore(np.array(Image.open(leftEyeImgPath)))
+
+    else:
         originalImg = np.array(Image.open(originalImgPath))
         rightEyeImg = np.array(Image.open(rightEyeImgPath))
         leftEyeImg = np.array(Image.open(leftEyeImgPath))
-
-        originalImg = (originalImg - originalImg.mean()) / originalImg.std()
-        rightEyeImg = (rightEyeImg - rightEyeImg.mean()) / rightEyeImg.std()
-        leftEyeImg = (leftEyeImg - leftEyeImg.mean()) / leftEyeImg.std()
-
-        # (x - x.min()) / (x.max() - x.min())
-        # originalImg = (originalImg - originalImg.min()) / (originalImg.max() - originalImg.min())
-        # rightEyeImg = (rightEyeImg - rightEyeImg.min()) / (rightEyeImg.max() - rightEyeImg.min())
-        # leftEyeImg = (leftEyeImg - leftEyeImg.min()) / (leftEyeImg.max() - leftEyeImg.min())
-
-    else:
-        # 画像読み込みつつndarrayに変換，asarray()を使うとread-onlyなデータができる．
-        originalImg = np.asarray(Image.open(originalImgPath))
-        rightEyeImg = np.asarray(Image.open(rightEyeImgPath))
-        leftEyeImg = np.asarray(Image.open(leftEyeImgPath))
 
     imgDic = {"original": originalImg, "right_eye": rightEyeImg, "left_eye": leftEyeImg}
 

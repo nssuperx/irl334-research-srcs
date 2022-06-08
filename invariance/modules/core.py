@@ -11,7 +11,7 @@ class TemplateImage:
         self.img: np.ndarray = imgArray
         self.mean: float = self.img.mean()
         self.variance: float = self.img.var()
-        self.sd: float = self.img.std()
+        self.std: float = self.img.std()
 
 
 class ReceptiveField:
