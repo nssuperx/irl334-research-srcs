@@ -1,7 +1,7 @@
 import numpy as np
 
 from modules.image.function import scan_combinedRF
-from modules.image.io import load_image
+from modules.image.io import load_image, save_image
 from modules.core import TemplateImage
 
 
@@ -25,7 +25,8 @@ def main():
     noOverlap = crf_width - width
 
     # 全部scanしてみる
-    scan_combinedRF(height, crf_width, height, width, 1, originalImgArray, rightScanImgArray, rightTemplate, leftScanImgArray, leftTemplate)
+    fci = scan_combinedRF(height, crf_width, height, width, 1, originalImgArray, rightScanImgArray, rightTemplate, leftScanImgArray, leftTemplate)
+    save_image("./fci.png", fci)
 
 
 if __name__ == "__main__":

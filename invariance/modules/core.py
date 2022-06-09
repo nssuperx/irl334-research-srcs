@@ -1,3 +1,4 @@
+from turtle import right
 from typing import Tuple
 import numpy as np
 from PIL import Image, ImageDraw
@@ -60,43 +61,27 @@ class CombinedReceptiveField:
         self.height: int = height
         self.width: int = width
         self.overlap: int = overlap
-        # self.fci: float = self.calc_fci()
+        self.fci: float = self.calc_fci()
 
     # fci を計算する
     # NOTE: マイナスになってもok．抑制の入力．
     def calc_fci(self) -> float:
         noOverlap = (self.width - self.overlap) // 2
-        if(self.rightRF.mostActivePos.x + self.rightRF.template.img.shape[1] < noOverlap):
-            self.fci = 0.0
-            return self.fci
+        # right
+        rMAPos: Vector2 = self.rightRF.mostActivePos
+        rTShape: Vector2 = Vector2(*self.rightRF.template.img.shape)
+        rField: np.ndarray = np.pad(self.rightRF.template.img,
+                                    ((rMAPos.y, self.height - (rMAPos.y + rTShape.y)),
+                                     (rMAPos.x, self.width - (rMAPos.x + rTShape.x))))
 
-        if(self.leftRF.mostActivePos.x > self.overlap):
-            self.fci = 0.0
-            return self.fci
+        # left
+        lMAPos: Vector2 = self.leftRF.mostActivePos
+        lTShape: Vector2 = Vector2(*self.leftRF.template.img.shape)
+        lField: np.ndarray = np.pad(self.leftRF.template.img,
+                                    ((lMAPos.y, self.height - (lMAPos.y + lTShape.y)),
+                                     (lMAPos.x + noOverlap, self.width - (lMAPos.x + noOverlap + lTShape.x))))
 
-        # TODO: overlap領域のサイズが違うときがある．完全にバグ．
-        x = int(noOverlap + self.leftRF.mostActivePos.x - self.rightRF.mostActivePos.x)
-        # y = abs(self.leftRF.mostActivePos[1] - self.rightRF.mostActivePos[1])
-        rightOverlap: np.ndarray
-        leftOverlap: np.ndarray
-        if self.rightRF.mostActivePos.y < self.leftRF.mostActivePos.y:
-            y = int(self.leftRF.mostActivePos.y - self.rightRF.mostActivePos.y)
-            rightOverlap = self.rightRF.template.img[0:self.rightRF.template.img.shape[0] - y, x:]
-            leftOverlap = self.leftRF.template.img[y:, 0:self.rightRF.template.img.shape[1] - x]
-        else:
-            y = int(self.rightRF.mostActivePos.y - self.leftRF.mostActivePos.y)
-            rightOverlap = self.rightRF.template.img[y:, x:]
-            leftOverlap = self.leftRF.template.img[0:self.rightRF.template.img.shape[0] -
-                                                   y, x:self.rightRF.template.img.shape[1] - x]
-
-        if rightOverlap.size == 0:
-            self.fci = 0.0
-        else:
-            # 正規化
-            rightOverlap = zscore(rightOverlap)
-            leftOverlap = zscore(leftOverlap)
-            self.fci = np.sum(np.dot(rightOverlap.T, leftOverlap))
-
+        self.fci = np.sum(rField * lField)
         return self.fci
 
     def make_img(self, originalImgArray: np.ndarray) -> Image:

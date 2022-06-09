@@ -49,9 +49,8 @@ def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, 
             rightRF = ReceptiveField((y, x), rightScanImg, rightTemplate, RFheight, RFWidth)
             leftRF = ReceptiveField((y, x + (cRFWidth - RFWidth)), leftScanImg, leftTemplate, RFheight, RFWidth)
             combinedRF = CombinedReceptiveField(rightRF, leftRF, cRFHeight, cRFWidth, (RFWidth * 2 - cRFWidth))
-            combinedRF.save_img(originalImg, f'./imgout/y{y:04}x{x:04}.png')
-            # combinedRF.show_img(originalImg)
-            # fci[y//scanStep][x//scanStep] = combinedRF.get_fci()
+            # combinedRF.save_img(originalImg, f'./imgout/y{y:04}x{x:04}.png')
+            fci[y//scanStep][x//scanStep] = combinedRF.get_fci()
 
     # fci = min_max_normalize(fci)
     return fci
