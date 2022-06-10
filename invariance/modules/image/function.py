@@ -1,3 +1,4 @@
+from typing import Tuple
 import numpy as np
 from ..numeric import zscore
 from ..core import TemplateImage, ReceptiveField, CombinedReceptiveField
@@ -26,7 +27,7 @@ def scan(originalImg: np.ndarray, template: TemplateImage) -> np.ndarray:
 
 def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, scanStep: int, originalImg: np.ndarray,
                     rightScanImg: np.ndarray, rightTemplate: TemplateImage,
-                    leftScanImg: np.ndarray, leftTemplate: TemplateImage) -> np.ndarray:
+                    leftScanImg: np.ndarray, leftTemplate: TemplateImage) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """画像全体のfciを計算する
 
     Args:
@@ -44,6 +45,8 @@ def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, 
     """
     oShape = Vector2(*originalImg.shape)
     fci = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.float64)
+    rr = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.float64)
+    lr = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.float64)
     for y in range(0, oShape.y - cRFHeight, scanStep):
         for x in range(0, oShape.x - cRFWidth, scanStep):
             rightRF = ReceptiveField((y, x), rightScanImg, rightTemplate, RFheight, RFWidth)
@@ -51,6 +54,8 @@ def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, 
             combinedRF = CombinedReceptiveField(rightRF, leftRF, cRFHeight, cRFWidth, (RFWidth * 2 - cRFWidth))
             # combinedRF.save_img(originalImg, f'./imgout/y{y:04}x{x:04}.png')
             fci[y//scanStep][x//scanStep] = combinedRF.get_fci()
+            rr[y//scanStep][x//scanStep] = combinedRF.rightRF.activity
+            lr[y//scanStep][x//scanStep] = combinedRF.leftRF.activity
 
     # fci = min_max_normalize(fci)
-    return fci
+    return fci, rr, lr
