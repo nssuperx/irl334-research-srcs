@@ -3,8 +3,38 @@ import numpy as np
 from ..numeric import min_max_normalize, zscore
 
 
+class FciDataManager:
+    def __init__(self, setNumber: int) -> None:
+        self.setNumber = setNumber
+
+    def load_image(self) -> None:
+        imgs = load_image(self.setNumber)
+        self.originalImg: np.ndarray = imgs["original"]
+        self.rightEyeImg: np.ndarray = imgs["right_eye"]
+        self.leftEyeImg: np.ndarray = imgs["left_eye"]
+
+    def load_scan_array(self) -> None:
+        self.rightScanImg: np.ndarray = np.load(f"./dataset/{self.setNumber}/array/rightScanImg.npy")
+        self.leftScanImg: np.ndarray = np.load(f"./dataset/{self.setNumber}/array/leftScanImg.npy")
+
+    def save_scan_image(self, rightScanImg: np.ndarray, leftScanImg: np.ndarray, dirpath: str = None) -> None:
+        if dirpath is None:
+            dirpath = f"./dataset/{self.setNumber}/out/"
+        rightimg = Image.fromarray(min_max_normalize(rightScanImg) * 255).convert("L")
+        leftimg = Image.fromarray(min_max_normalize(leftScanImg) * 255).convert("L")
+        rightimg.save(f"{dirpath}rightScanImg.png")
+        leftimg.save(f"{dirpath}leftScanImg.png")
+
+    def save_scan_array(self, rightScanImg: np.ndarray, leftScanImg: np.ndarray, dirpath: str = None) -> None:
+        if dirpath is None:
+            dirpath = f"./dataset/{self.setNumber}/array/"
+        np.save(f"{dirpath}rightScanImg", rightScanImg)
+        np.save(f"{dirpath}leftScanImg", leftScanImg)
+
+
 def save_image(filepath: str, scanImg: np.ndarray) -> None:
-    """画像を保存する
+    """（非推奨）
+    画像を保存する
     この関数内で正規化を行うので，元画像配列の状態は気にしなくてok
 
     Args:
@@ -29,7 +59,7 @@ def load_image(setNumber: int, normalize: bool = True) -> dict:
             value: numpy.ndarray: 読み込んだ画像
     """
 
-    originalImgPath = f"./dataset/{setNumber}/in/sample.png"
+    originalImgPath = f"./dataset/{setNumber}/in/original.png"
     rightEyeImgPath = f"./dataset/{setNumber}/in/right_eye.png"
     leftEyeImgPath = f"./dataset/{setNumber}/in/left_eye.png"
 

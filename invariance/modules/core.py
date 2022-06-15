@@ -1,9 +1,8 @@
-from turtle import right
 from typing import Tuple
 import numpy as np
 from PIL import Image, ImageDraw
 
-from .numeric import zscore, min_max_normalize
+from .numeric import min_max_normalize
 from .vector2 import Vector2
 
 

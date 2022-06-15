@@ -3,27 +3,29 @@ import pandas as pd
 
 from modules.numeric import min_max_normalize
 from modules.image.function import scan_combinedRF
-from modules.image.io import load_image, save_image
+from modules.image.io import save_image, FciDataManager
 from modules.core import TemplateImage
 
 
 def main():
-    imgDic = load_image(2)
-    originalImgArray = imgDic["original"]
-    rightTemplate = TemplateImage(imgDic["right_eye"])
-    leftTemplate = TemplateImage(imgDic["left_eye"])
+    data = FciDataManager(1)
+    data.load_image()
+    originalImgArray = data.originalImg
+    rightTemplate = TemplateImage(data.rightEyeImg)
+    leftTemplate = TemplateImage(data.leftEyeImg)
     # 入力
-    rightScanImgArray = np.load("./rightScanImgArray.npy")
-    leftScanImgArray = np.load("./leftScanImgArray.npy")
+    data.load_scan_array()
+    rightScanImgArray = data.rightScanImg
+    leftScanImgArray = data.leftScanImg
     # rightScanImgArray = zscore(rightScanImgArray)
     # leftScanImgArray = zscore(leftScanImgArray)
 
     # テスト: 一つReceptiveFieldを作る
     # height: 30, width: 30, overlap: 12
-    height = 30
-    width = 30
-    overlap = 12
-    crf_width = 48
+    height = 70
+    width = 70
+    overlap = 30
+    crf_width = 110
     noOverlap = crf_width - width
 
     # 全部scanしてみる
