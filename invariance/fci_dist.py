@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from modules.image.io import FciDataManager
+from modules.io import FciDataManager
 from modules.vector2 import Vector2
 
 

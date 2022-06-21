@@ -1,8 +1,8 @@
 import numpy as np
-from ..numeric import zscore
-from ..core import TemplateImage, ReceptiveField, CombinedReceptiveField
-from ..vector2 import Vector2
-from ..results import FciResultBlock
+from .numeric import zscore
+from .core import TemplateImage, ReceptiveField, CombinedReceptiveField
+from .vector2 import Vector2
+from .results import FciResultBlock
 from tqdm import tqdm
 
 

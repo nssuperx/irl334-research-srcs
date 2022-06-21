@@ -1,6 +1,6 @@
 from PIL import Image
 import numpy as np
-from ..numeric import min_max_normalize, zscore
+from .numeric import min_max_normalize, zscore
 
 
 class FciDataManager:

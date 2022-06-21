@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 
 from modules.numeric import min_max_normalize
-from modules.image.function import scan_combinedRF
-from modules.image.io import save_image, FciDataManager
+from modules.function import scan_combinedRF
+from modules.io import save_image, FciDataManager
 from modules.core import TemplateImage
 from modules.results import FciResultBlock
 

@@ -1,6 +1,6 @@
 from modules.core import TemplateImage
-from modules.image.io import FciDataManager
-from modules.image.function import scan
+from modules.io import FciDataManager
+from modules.function import scan
 
 
 def main():
