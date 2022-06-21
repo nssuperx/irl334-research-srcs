@@ -1,3 +1,6 @@
 # numpy array cache
 *.npy
 *.npz
+
+# result csv file
+*.csv

@@ -1,8 +1,8 @@
-from typing import Tuple
 import numpy as np
 from ..numeric import zscore
 from ..core import TemplateImage, ReceptiveField, CombinedReceptiveField
 from ..vector2 import Vector2
+from ..results import FciResultBlock
 from tqdm import tqdm
 
 
@@ -28,7 +28,7 @@ def scan(originalImg: np.ndarray, template: TemplateImage) -> np.ndarray:
 
 def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, scanStep: int, originalImg: np.ndarray,
                     rightScanImg: np.ndarray, rightTemplate: TemplateImage,
-                    leftScanImg: np.ndarray, leftTemplate: TemplateImage) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+                    leftScanImg: np.ndarray, leftTemplate: TemplateImage) -> FciResultBlock:
     """画像全体のfciを計算する
 
     Args:
@@ -42,21 +42,38 @@ def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, 
         leftTemplate (TemplateImage): 左目テンプレート
 
     Returns:
-        np.ndarray: fci配列
+        NOTE: 後で変更される可能性あり
+        FciResultBlock: 結果をまとめたもの
     """
+
+    # TODO: 冗長なのでなんとかする
+    # TODO: 並列処理はどうする？
     oShape = Vector2(*originalImg.shape)
     fci = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.float64)
     rr = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.float64)
     lr = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.float64)
-    for y in range(0, oShape.y - cRFHeight, scanStep):
-        for x in range(0, oShape.x - cRFWidth, scanStep):
-            rightRF = ReceptiveField((y, x), rightScanImg, rightTemplate, RFheight, RFWidth)
-            leftRF = ReceptiveField((y, x + (cRFWidth - RFWidth)), leftScanImg, leftTemplate, RFheight, RFWidth)
-            combinedRF = CombinedReceptiveField(rightRF, leftRF, cRFHeight, cRFWidth, (RFWidth * 2 - cRFWidth))
-            # combinedRF.save_img(originalImg, f'./imgout/y{y:04}x{x:04}.png')
-            fci[y//scanStep][x//scanStep] = combinedRF.get_fci()
-            rr[y//scanStep][x//scanStep] = combinedRF.rightRF.activity
-            lr[y//scanStep][x//scanStep] = combinedRF.leftRF.activity
+    raposy = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.uint32)
+    raposx = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.uint32)
+    laposy = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.uint32)
+    laposx = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.uint32)
 
-    # fci = min_max_normalize(fci)
-    return fci, rr, lr
+    for y in tqdm(range(0, fci.shape[0])):
+        for x in range(0, fci.shape[1]):
+            rightRF = ReceptiveField((y * scanStep, x * scanStep), rightScanImg, rightTemplate, RFheight, RFWidth)
+            leftRF = ReceptiveField((y * scanStep, x * scanStep + (cRFWidth - RFWidth)),
+                                    leftScanImg, leftTemplate, RFheight, RFWidth)
+            cRF = CombinedReceptiveField(rightRF, leftRF, cRFHeight, cRFWidth, (RFWidth * 2 - cRFWidth))
+            cRF.save_img(originalImg, f'./imgout/y{y*scanStep:04}x{x*scanStep:04}.png')
+            fci[y][x] = cRF.get_fci()
+            rr[y][x] = cRF.rightRF.activity
+            lr[y][x] = cRF.leftRF.activity
+            rpos = cRF.rightRF.originalImgPos + cRF.rightRF.mostActivePos
+            lpos = cRF.leftRF.originalImgPos + cRF.leftRF.mostActivePos
+            raposy[y][x], raposx[y][x] = rpos.y, rpos.x
+            laposy[y][x], laposx[y][x] = lpos.y, lpos.x
+
+    # まだできてない
+    crfx = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.float64)
+    crfy = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.float64)
+
+    return FciResultBlock(crfy, crfx, fci, rr, lr, raposy, raposx, laposy, laposx)
