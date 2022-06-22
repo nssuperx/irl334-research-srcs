@@ -1,4 +1,6 @@
 import numpy as np
+
+from .io import FciDataManager
 from .numeric import zscore
 from .core import TemplateImage, ReceptiveField, CombinedReceptiveField
 from .vector2 import Vector2
@@ -28,7 +30,8 @@ def scan(originalImg: np.ndarray, template: TemplateImage) -> np.ndarray:
 
 def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, scanStep: int, originalImg: np.ndarray,
                     rightScanImg: np.ndarray, rightTemplate: TemplateImage,
-                    leftScanImg: np.ndarray, leftTemplate: TemplateImage) -> FciResultBlock:
+                    leftScanImg: np.ndarray, leftTemplate: TemplateImage,
+                    dataMgr: FciDataManager, saveImage: bool = False) -> FciResultBlock:
     """画像全体のfciを計算する
 
     Args:
@@ -63,7 +66,8 @@ def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, 
             leftRF = ReceptiveField((y * scanStep, x * scanStep + (cRFWidth - RFWidth)),
                                     leftScanImg, leftTemplate, RFheight, RFWidth)
             cRF = CombinedReceptiveField(rightRF, leftRF, cRFHeight, cRFWidth, (RFWidth * 2 - cRFWidth))
-            cRF.save_img(originalImg, f'./imgout/y{y*scanStep:04}x{x*scanStep:04}.png')
+            if saveImage:
+                cRF.save_img(originalImg, f"{dataMgr.get_out_dirpath()}/crf/y{y*scanStep:04}x{x*scanStep:04}.png")
             fci[y][x] = cRF.get_fci()
             rr[y][x] = cRF.rightRF.activity
             lr[y][x] = cRF.leftRF.activity

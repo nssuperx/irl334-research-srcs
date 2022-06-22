@@ -9,15 +9,15 @@ from modules.results import FciResultBlock
 
 
 def main():
-    data = FciDataManager(1)
-    data.load_image()
-    originalImgArray = data.originalImg
-    rightTemplate = TemplateImage(data.rightEyeImg)
-    leftTemplate = TemplateImage(data.leftEyeImg)
+    dataMgr = FciDataManager(1)
+    dataMgr.load_image()
+    originalImgArray = dataMgr.originalImg
+    rightTemplate = TemplateImage(dataMgr.rightEyeImg)
+    leftTemplate = TemplateImage(dataMgr.leftEyeImg)
     # 入力
-    data.load_scan_array()
-    rightScanImgArray = data.rightScanImg
-    leftScanImgArray = data.leftScanImg
+    dataMgr.load_scan_array()
+    rightScanImgArray = dataMgr.rightScanImg
+    leftScanImgArray = dataMgr.leftScanImg
     # rightScanImgArray = zscore(rightScanImgArray)
     # leftScanImgArray = zscore(leftScanImgArray)
 
@@ -30,7 +30,8 @@ def main():
 
     # 全部scanしてみる
     res: FciResultBlock = scan_combinedRF(height, crf_width, height, width, scanStep, originalImgArray,
-                                          rightScanImgArray, rightTemplate, leftScanImgArray, leftTemplate)
+                                          rightScanImgArray, rightTemplate, leftScanImgArray, leftTemplate,
+                                          dataMgr, saveImage=False)
     print(f"fci mean: {res.fci.mean()}")
     print(f"fci std: {res.fci.std()}")
     print(f"max fci pos: {np.unravel_index(np.argmax(res.fci), res.fci.shape)}")
@@ -46,12 +47,12 @@ def main():
 
     resultData = np.vstack([fci.flatten(), res.rr.flatten(), res.lr.flatten(), rrlr.flatten(), rrlrfci.flatten(),
                             res.raposy.flatten(), res.raposx.flatten(), res.laposy.flatten(), res.laposx.flatten()]).T
-    data = pd.DataFrame(resultData, index=fciindex,
-                        columns=["fci", "cell R activity", "cell L activity", "R L", "R L fci",
-                                 "right RF most active y", "right RF most active x",
-                                 "left RF most active y", "left RF most active x"])
-    data.to_csv(f"./test_skip{scanStep}.csv")
-    save_image("./fci.png", fci)
+    df = pd.DataFrame(resultData, index=fciindex,
+                      columns=["fci", "cell R activity", "cell L activity", "R L", "R L fci",
+                               "right RF most active y", "right RF most active x",
+                               "left RF most active y", "left RF most active x"])
+    df.to_csv(f"{dataMgr.get_out_dirpath()}/crf_skip{scanStep}.csv")
+    save_image(f"{dataMgr.get_out_dirpath()}/fciImg.png", fci)
 
 
 if __name__ == "__main__":

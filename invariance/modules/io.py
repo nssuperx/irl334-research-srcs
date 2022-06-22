@@ -1,3 +1,4 @@
+import os
 from PIL import Image
 import numpy as np
 from .numeric import min_max_normalize, zscore
@@ -6,6 +7,9 @@ from .numeric import min_max_normalize, zscore
 class FciDataManager:
     def __init__(self, setNumber: int) -> None:
         self.setNumber = setNumber
+        os.makedirs(f"./dataset/{self.setNumber}/in", exist_ok=True)
+        os.makedirs(f"./dataset/{self.setNumber}/array", exist_ok=True)
+        os.makedirs(f"./dataset/{self.setNumber}/out/crf", exist_ok=True)
 
     def load_image(self) -> None:
         imgs = load_image(self.setNumber)
@@ -19,17 +23,40 @@ class FciDataManager:
 
     def save_scan_image(self, rightScanImg: np.ndarray, leftScanImg: np.ndarray, dirpath: str = None) -> None:
         if dirpath is None:
-            dirpath = f"./dataset/{self.setNumber}/out/"
+            dirpath = f"./dataset/{self.setNumber}/out"
         rightimg = Image.fromarray(min_max_normalize(rightScanImg) * 255).convert("L")
         leftimg = Image.fromarray(min_max_normalize(leftScanImg) * 255).convert("L")
-        rightimg.save(f"{dirpath}rightScanImg.png")
-        leftimg.save(f"{dirpath}leftScanImg.png")
+        rightimg.save(f"{dirpath}/rightScanImg.png")
+        leftimg.save(f"{dirpath}/leftScanImg.png")
 
     def save_scan_array(self, rightScanImg: np.ndarray, leftScanImg: np.ndarray, dirpath: str = None) -> None:
         if dirpath is None:
-            dirpath = f"./dataset/{self.setNumber}/array/"
-        np.save(f"{dirpath}rightScanImg", rightScanImg)
-        np.save(f"{dirpath}leftScanImg", leftScanImg)
+            dirpath = f"./dataset/{self.setNumber}/array"
+        np.save(f"{dirpath}/rightScanImg", rightScanImg)
+        np.save(f"{dirpath}/leftScanImg", leftScanImg)
+
+    def save_crf_image(self, crfImg: Image, filename: str, dirpath: str = None) -> None:
+        """（非推奨）
+        Combined Receptive Fieldの画像を保存する
+        NOTE: 結合度がすごいことになっているので使いたくない
+
+        Args:
+            crfImg (Image): 生成済みのcrf画像
+            filename (str): ファイル名
+            dirpath (str, optional): 保存先ディレクトリ. Defaults to None.
+        """
+        if dirpath is None:
+            dirpath = f"./dataset/{self.setNumber}/out/crf/"
+        crfImg.save(f"{dirpath}{filename}.png")
+
+    def get_out_dirpath(self) -> str:
+        """ファイルを保存してほしいディレクトリを返す
+        TODO: いい設計思いつくまでこれで妥協
+
+        Returns:
+            str: ファイルの保存先ディレクトリ
+        """
+        return f"./dataset/{self.setNumber}/out"
 
 
 def save_image(filepath: str, scanImg: np.ndarray) -> None:
