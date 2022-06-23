@@ -52,6 +52,7 @@ def main():
                                "right RF most active y", "right RF most active x",
                                "left RF most active y", "left RF most active x"])
     df.to_csv(f"{dataMgr.get_out_dirpath()}/crf_skip{scanStep}.csv")
+    df.to_pickle(f"{dataMgr.get_out_dirpath()}/results.pkl")
     save_image(f"{dataMgr.get_out_dirpath()}/fciImg.png", fci)
 
 

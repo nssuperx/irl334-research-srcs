@@ -20,3 +20,6 @@ __pycache__
 
 # tonsorboard log dir
 runs
+
+# pickle file
+*.pkl

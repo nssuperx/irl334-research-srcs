@@ -15,7 +15,7 @@ def scan(originalImg: np.ndarray, template: TemplateImage) -> np.ndarray:
     tShape = Vector2(*template.img.shape)
     scanImg = np.empty((oShape.y - tShape.y, oShape.x - tShape.x), dtype=np.float64)
     for y in tqdm(range(scanImg.shape[0])):
-        for x in tqdm(range(scanImg.shape[1]), leave=False):
+        for x in range(scanImg.shape[1]):
             # 相関係数出す範囲をスライス
             scanTargetImg = originalImg[y:y + tShape.y, x:x + tShape.x]
             # 正規化
