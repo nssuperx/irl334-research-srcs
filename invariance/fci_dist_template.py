@@ -6,7 +6,7 @@ from modules.vector2 import Vector2
 
 
 def main() -> None:
-    datas = FciDataManager(3)
+    datas = FciDataManager(1)
     datas.load_image()
     rt = datas.rightEyeImg
     lt = datas.leftEyeImg
@@ -36,9 +36,15 @@ def main() -> None:
     print(f"right pixels: {rt.size}, left pixels: {lt.size}")
     print(f"fci num: {len(fciDist)}")
 
+    hist_bins = 100
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
-    ax.hist(fciDist, bins=100)
+    _, _, patches = ax.hist(fciDist, bins=hist_bins)
+    watch_value: float = 163.719517963921
+    watch_point: int = int(watch_value * hist_bins / max(fciDist))
+    patches[watch_point].set_facecolor('orange')
+    ax.set_xlabel("raw fci")
+    ax.set_title("fci histogram (template image)")
     plt.show()
 
     fig = plt.figure()

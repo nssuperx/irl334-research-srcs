@@ -16,9 +16,11 @@ def main():
     ax = fig.add_subplot(1, 1, 1)
     _, _, patches = ax.hist(fci, bins=hist_bins)
 
-    watch_point: float = 0.884543650386626
-    watch_point_idx: int = int(watch_point * hist_bins / fci.max())
-    patches[watch_point_idx].set_facecolor('orange')
+    watch_value: float = 0.884543650386626
+    watch_point: int = int(watch_value * hist_bins / fci.max())
+    patches[watch_point].set_facecolor('orange')
+    ax.set_xlabel("raw fci")
+    ax.set_title("fci histogram")
     plt.show()
 
 

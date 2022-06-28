@@ -41,16 +41,18 @@ def main():
     # この処理は適当に思いついたもの
     res.fci[res.fci < 0.0] = 0.0
     # fci = np.where((fci < 0.0, 0.0, fci))
+    raw_fci = res.fci
     fci = min_max_normalize(res.fci)
     rrlr = res.rr * res.lr
     rrlrfci = rrlr * fci
 
     resultData = np.vstack([fci.flatten(), res.rr.flatten(), res.lr.flatten(), rrlr.flatten(), rrlrfci.flatten(),
-                            res.raposy.flatten(), res.raposx.flatten(), res.laposy.flatten(), res.laposx.flatten()]).T
+                            res.raposy.flatten(), res.raposx.flatten(), res.laposy.flatten(), res.laposx.flatten(),
+                            raw_fci.flatten()]).T
     df = pd.DataFrame(resultData, index=fciindex,
                       columns=["fci", "cell R activity", "cell L activity", "R L", "R L fci",
                                "right RF most active y", "right RF most active x",
-                               "left RF most active y", "left RF most active x"])
+                               "left RF most active y", "left RF most active x", "raw fci"])
     df.to_csv(f"{dataMgr.get_out_dirpath()}/crf_skip{scanStep}.csv")
     df.to_pickle(f"{dataMgr.get_out_dirpath()}/results.pkl")
     save_image(f"{dataMgr.get_out_dirpath()}/fciImg.png", fci)
