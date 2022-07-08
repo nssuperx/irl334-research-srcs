@@ -53,12 +53,18 @@ def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, 
     # TODO: 並列処理はどうする？
     oShape = Vector2(*originalImg.shape)
     fci = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.float64)
-    rr = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.float64)
-    lr = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.float64)
-    raposy = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.uint32)
-    raposx = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.uint32)
-    laposy = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.uint32)
-    laposx = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.uint32)
+    rr = np.empty_like(fci, dtype=np.float64)
+    lr = np.empty_like(fci, dtype=np.float64)
+    raposy = np.empty_like(fci, dtype=np.uint32)
+    raposx = np.empty_like(fci, dtype=np.uint32)
+    laposy = np.empty_like(fci, dtype=np.uint32)
+    laposx = np.empty_like(fci, dtype=np.uint32)
+
+    # NOTE: なんかしっくりこない
+    crfx = np.tile(np.arange(0, oShape.x - cRFWidth - scanStep, scanStep, dtype=np.uint32),
+                   ((oShape.y - cRFHeight) // scanStep, 1))
+    crfy = np.tile(np.arange(0, oShape.y - cRFHeight - scanStep, scanStep, dtype=np.uint32),
+                   ((oShape.x - cRFWidth) // scanStep, 1)).T
 
     for y in tqdm(range(0, fci.shape[0])):
         for x in range(0, fci.shape[1]):
@@ -75,9 +81,5 @@ def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, 
             lpos = cRF.leftRF.originalImgPos + cRF.leftRF.mostActivePos
             raposy[y][x], raposx[y][x] = rpos.y, rpos.x
             laposy[y][x], laposx[y][x] = lpos.y, lpos.x
-
-    # まだできてない
-    crfx = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.float64)
-    crfy = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.float64)
 
     return FciResultBlock(crfy, crfx, fci, rr, lr, raposy, raposx, laposy, laposx)

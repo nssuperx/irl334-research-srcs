@@ -36,6 +36,7 @@ def main():
     print(f"fci std: {res.fci.std()}")
     print(f"max fci pos: {np.unravel_index(np.argmax(res.fci), res.fci.shape)}")
 
+    # TODO: あとで書き換え
     fciindex = [f"y{y*scanStep:04}x{x*scanStep:04}" for y in range(res.fci.shape[0]) for x in range(res.fci.shape[1])]
 
     # この処理は適当に思いついたもの
@@ -46,11 +47,12 @@ def main():
     rrlr = res.rr * res.lr
     rrlrfci = rrlr * fci
 
-    resultData = np.vstack([fci.flatten(), res.rr.flatten(), res.lr.flatten(), rrlr.flatten(), rrlrfci.flatten(),
+    resultData = np.vstack([res.crfy.flatten(), res.crfx.flatten(), fci.flatten(), res.rr.flatten(), res.lr.flatten(),
+                            rrlr.flatten(), rrlrfci.flatten(),
                             res.raposy.flatten(), res.raposx.flatten(), res.laposy.flatten(), res.laposx.flatten(),
                             raw_fci.flatten()]).T
     df = pd.DataFrame(resultData, index=fciindex,
-                      columns=["fci", "cell R activity", "cell L activity", "R L", "R L fci",
+                      columns=["y", "x", "fci", "cell R activity", "cell L activity", "R L", "R L fci",
                                "right RF most active y", "right RF most active x",
                                "left RF most active y", "left RF most active x", "raw fci"])
     df.to_csv(f"{dataMgr.get_out_dirpath()}/crf_skip{scanStep}.csv")
