@@ -10,6 +10,7 @@ class FciDataManager:
         os.makedirs(f"./dataset/{self.setNumber}/in", exist_ok=True)
         os.makedirs(f"./dataset/{self.setNumber}/array", exist_ok=True)
         os.makedirs(f"./dataset/{self.setNumber}/out/crf", exist_ok=True)
+        os.makedirs(f"./dataset/{self.setNumber}/out/crf-clean", exist_ok=True)
 
     def load_image(self) -> None:
         imgs = load_image(self.setNumber)

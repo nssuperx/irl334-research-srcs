@@ -6,6 +6,7 @@ from modules.io import FciDataManager
 
 
 def main():
+    # 重複部分をなくしたcsvファイルを作る
     dataMgr: FciDataManager = FciDataManager(1)
     df: pd.DataFrame = pd.read_pickle(f"{dataMgr.get_out_dirpath()}/results.pkl")
 
@@ -25,8 +26,7 @@ def main():
         # NOTE: np.median()を使いたいが，要素がほしいので，ソートして中央の値を取る
         yxarray = np.sort(np.array(poss, dtype=np.int32), axis=0)
         yx = yxarray[yxarray.shape[0] // 2]
-        tmp = df[(df["y"] == yx[0]) & (df["x"] == yx[1])]
-        cluster_df = pd.concat([cluster_df, tmp])
+        cluster_df = pd.concat([cluster_df, df[(df["y"] == yx[0]) & (df["x"] == yx[1])]])
 
     cluster_df.to_csv(f"{dataMgr.get_out_dirpath()}/crf_cluster.csv")
 
