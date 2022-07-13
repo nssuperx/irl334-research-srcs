@@ -1,13 +1,21 @@
+import sys
 from typing import Dict, List
 import numpy as np
 import pandas as pd
 
 from modules.io import FciDataManager
 
+default_dataset = 1
+args = sys.argv
+
 
 def main():
     # 重複部分をなくしたcsvファイルを作る
-    dataMgr: FciDataManager = FciDataManager(1)
+    if(len(args) >= 2):
+        dataset_number = args[1]
+    else:
+        dataset_number = default_dataset
+    dataMgr: FciDataManager = FciDataManager(dataset_number)
     df: pd.DataFrame = pd.read_pickle(f"{dataMgr.get_out_dirpath()}/results.pkl")
 
     left_idx = df.columns.get_loc("right RF most active y")
@@ -28,7 +36,7 @@ def main():
         yx = yxarray[yxarray.shape[0] // 2]
         cluster_df = pd.concat([cluster_df, df[(df["y"] == yx[0]) & (df["x"] == yx[1])]])
 
-    cluster_df.to_csv(f"{dataMgr.get_out_dirpath()}/crf_cluster.csv")
+    cluster_df.to_csv(f"{dataMgr.get_out_dirpath()}/crf_cluster{dataset_number}.csv")
 
 
 if __name__ == "__main__":

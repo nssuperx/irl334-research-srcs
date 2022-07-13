@@ -60,11 +60,8 @@ def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, 
     laposy = np.empty_like(fci, dtype=np.uint32)
     laposx = np.empty_like(fci, dtype=np.uint32)
 
-    # NOTE: なんかしっくりこない
-    crfx = np.tile(np.arange(0, oShape.x - cRFWidth - scanStep, scanStep, dtype=np.uint32),
-                   ((oShape.y - cRFHeight) // scanStep, 1))
-    crfy = np.tile(np.arange(0, oShape.y - cRFHeight - scanStep, scanStep, dtype=np.uint32),
-                   ((oShape.x - cRFWidth) // scanStep, 1)).T
+    crfx = np.tile(np.arange(fci.shape[1], dtype=np.uint32), (fci.shape[0], 1)) * scanStep
+    crfy = np.tile(np.arange(fci.shape[0], dtype=np.uint32), (fci.shape[1], 1)).T * scanStep
 
     for y in tqdm(range(0, fci.shape[0])):
         for x in range(0, fci.shape[1]):

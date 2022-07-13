@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -5,8 +6,16 @@ from modules.io import FciDataManager
 from modules.vector2 import Vector2
 
 
-def main() -> None:
-    datas = FciDataManager(1)
+default_dataset = 1
+args = sys.argv
+
+
+def main():
+    if(len(args) >= 2):
+        dataset_number = args[1]
+    else:
+        dataset_number = default_dataset
+    datas: FciDataManager = FciDataManager(dataset_number)
     datas.load_image()
     rt = datas.rightEyeImg
     lt = datas.leftEyeImg
@@ -50,6 +59,8 @@ def main() -> None:
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
     ax.scatter(fciPixles, fciDist)
+    ax.set_ylabel("raw fci")
+    ax.set_xlabel("overlap pixel")
     plt.show()
 
 

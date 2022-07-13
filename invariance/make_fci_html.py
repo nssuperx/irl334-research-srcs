@@ -1,5 +1,7 @@
 # 参考: https://qiita.com/nshinya/items/a46ef0002284d2f77789
 
+import sys
+import json
 import pandas as pd
 from modules.io import FciDataManager
 
@@ -28,11 +30,21 @@ html_template = """
 </html>
 """
 
+default_dataset = 1
+args = sys.argv
+
 
 def main():
-    dataMgr: FciDataManager = FciDataManager(1)
+    if(len(args) >= 2):
+        dataset_number = args[1]
+    else:
+        dataset_number = default_dataset
+    dataMgr: FciDataManager = FciDataManager(dataset_number)
     df = pd.read_csv(f"{dataMgr.get_out_dirpath()}/crf_cluster.csv", index_col=0)
-    df["image"] = df.index.map(lambda s: f"<img src='./crf-clean/{s}.png' width='110' />")
+    with open(f"{dataMgr.get_dirpath()}/setting.json", "r") as f:
+        setting = json.load(f)
+    crf_width = int(setting["default"]["crf_width"])
+    df["image"] = df.index.map(lambda s: f"<img src='./crf-clean/{s}.png' width='{crf_width}' />")
     table = df.to_html(classes=["table", "table-bordered", "table-hover"], escape=False, show_dimensions=True)
     html = html_template.format(table=table)
 

@@ -59,6 +59,13 @@ class FciDataManager:
         """
         return f"./dataset/{self.setNumber}/out"
 
+    def get_dirpath(self) -> str:
+        """データセットのルートのパスを返す
+        Returns:
+            str: データセットのパス
+        """
+        return f"./dataset/{self.setNumber}"
+
 
 def save_image(filepath: str, scanImg: np.ndarray) -> None:
     """（非推奨）

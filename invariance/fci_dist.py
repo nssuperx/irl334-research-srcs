@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -5,8 +6,16 @@ import matplotlib.pyplot as plt
 from modules.io import FciDataManager
 
 
+default_dataset = 1
+args = sys.argv
+
+
 def main():
-    dataMgr: FciDataManager = FciDataManager(1)
+    if(len(args) >= 2):
+        dataset_number = args[1]
+    else:
+        dataset_number = default_dataset
+    dataMgr: FciDataManager = FciDataManager(dataset_number)
     df: pd.DataFrame = pd.read_pickle(f"{dataMgr.get_out_dirpath()}/results.pkl")
 
     fci: np.ndarray = df["fci"].to_numpy()

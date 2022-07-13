@@ -1,3 +1,5 @@
+import sys
+import json
 import numpy as np
 import pandas as pd
 
@@ -8,8 +10,16 @@ from modules.core import TemplateImage
 from modules.results import FciResultBlock
 
 
+default_dataset = 3
+args = sys.argv
+
+
 def main():
-    dataMgr = FciDataManager(1)
+    if(len(args) >= 2):
+        dataset_number = args[1]
+    else:
+        dataset_number = default_dataset
+    dataMgr: FciDataManager = FciDataManager(dataset_number)
     dataMgr.load_image()
     originalImgArray = dataMgr.originalImg
     rightTemplate = TemplateImage(dataMgr.rightEyeImg)
@@ -18,20 +28,20 @@ def main():
     dataMgr.load_scan_array()
     rightScanImgArray = dataMgr.rightScanImg
     leftScanImgArray = dataMgr.leftScanImg
-    # rightScanImgArray = zscore(rightScanImgArray)
-    # leftScanImgArray = zscore(leftScanImgArray)
 
-    # テスト: 一つReceptiveFieldを作る
-    # height: 30, width: 30, overlap: 12
-    height = 70
-    width = 70
-    crf_width = 110
-    scanStep = 4
+    with open(f"{dataMgr.get_dirpath()}/setting.json", "r") as f:
+        jsondata = json.load(f)
+
+    setting = jsondata["default"]
+    height = int(setting["height"])
+    width = int(setting["width"])
+    crf_width = int(setting["crf_width"])
+    scanStep = int(setting["scanstep"])
 
     # 全部scanしてみる
     res: FciResultBlock = scan_combinedRF(height, crf_width, height, width, scanStep, originalImgArray,
                                           rightScanImgArray, rightTemplate, leftScanImgArray, leftTemplate,
-                                          dataMgr, saveImage=False)
+                                          dataMgr, saveImage=True)
     print(f"fci mean: {res.fci.mean()}")
     print(f"fci std: {res.fci.std()}")
     print(f"max fci pos: {np.unravel_index(np.argmax(res.fci), res.fci.shape)}")
