@@ -44,9 +44,10 @@ def main():
     with open(f"{dataMgr.get_dirpath()}/setting.json", "r") as f:
         setting = json.load(f)
     crf_width = int(setting["default"]["crf_width"])
-    df["image"] = df.index.map(lambda s: f"<img src='./crf-clean/{s}.png' width='{crf_width}' />")
+    df["image"] = df.index.map(lambda s: f'<img src="./crf-clean/{s}.png" width="{crf_width}" loading="lazy" />')
     table = df.to_html(classes=["table", "table-bordered", "table-hover"], escape=False, show_dimensions=True)
     html = html_template.format(table=table)
+    html = html.replace('<thead>', '<thead class="sticky-top bg-white">')
 
     with open(f"{dataMgr.get_out_dirpath()}/fci-tables.html", "w") as f:
         f.write(html)
