@@ -1,8 +1,8 @@
 import sys
+import cv2
 
 from modules.core import TemplateImage
 from modules.io import FciDataManager
-from modules.function import scan
 
 default_dataset = 1
 args = sys.argv
@@ -21,8 +21,8 @@ def main():
     leftTemplate = TemplateImage(data.leftEyeImg)
 
     # 走査した画像配列を作成
-    rightScanImg = scan(originalImg, rightTemplate)
-    leftScanImg = scan(originalImg, leftTemplate)
+    rightScanImg = cv2.matchTemplate(originalImg, rightTemplate.img, method=cv2.TM_CCOEFF_NORMED)
+    leftScanImg = cv2.matchTemplate(originalImg, leftTemplate.img, method=cv2.TM_CCOEFF_NORMED)
 
     # 保存
     data.save_scan_image(rightScanImg, leftScanImg)

@@ -99,14 +99,14 @@ def load_image(setNumber: int, normalize: bool = True) -> dict:
     leftEyeImgPath = f"./dataset/{setNumber}/in/left_eye.png"
 
     if normalize:
-        originalImg = zscore(np.array(Image.open(originalImgPath)))
-        rightEyeImg = zscore(np.array(Image.open(rightEyeImgPath)))
-        leftEyeImg = zscore(np.array(Image.open(leftEyeImgPath)))
+        originalImg = zscore(np.array(Image.open(originalImgPath), dtype=np.float32))
+        rightEyeImg = zscore(np.array(Image.open(rightEyeImgPath), dtype=np.float32))
+        leftEyeImg = zscore(np.array(Image.open(leftEyeImgPath), dtype=np.float32))
 
     else:
-        originalImg = np.array(Image.open(originalImgPath))
-        rightEyeImg = np.array(Image.open(rightEyeImgPath))
-        leftEyeImg = np.array(Image.open(leftEyeImgPath))
+        originalImg = np.array(Image.open(originalImgPath), dtype=np.float32)
+        rightEyeImg = np.array(Image.open(rightEyeImgPath), dtype=np.float32)
+        leftEyeImg = np.array(Image.open(leftEyeImgPath), dtype=np.float32)
 
     imgDic = {"original": originalImg, "right_eye": rightEyeImg, "left_eye": leftEyeImg}
 

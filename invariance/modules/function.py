@@ -1,19 +1,28 @@
 import numpy as np
+from tqdm import tqdm
 
 from .io import FciDataManager
 from .numeric import zscore
 from .core import TemplateImage, ReceptiveField, CombinedReceptiveField
 from .vector2 import Vector2
 from .results import FciResultBlock
-from tqdm import tqdm
 
 
 def scan(originalImg: np.ndarray, template: TemplateImage) -> np.ndarray:
-    # 走査
-    # TODO: 遅すぎるのでなんとかする
+    """（非推奨）
+    テンプレートマッチングする．正規化相関係数．
+    NOTE: 遅すぎるので使わない．
+
+    Args:
+        originalImg (np.ndarray): 元の画像
+        template (TemplateImage): テンプレート画像
+
+    Returns:
+        np.ndarray: テンプレートマッチング後のnumpy配列
+    """
     oShape = Vector2(*originalImg.shape)
     tShape = Vector2(*template.img.shape)
-    scanImg = np.empty((oShape.y - tShape.y, oShape.x - tShape.x), dtype=np.float64)
+    scanImg = np.empty((oShape.y - tShape.y + 1, oShape.x - tShape.x + 1), dtype=np.float32)
     for y in tqdm(range(scanImg.shape[0])):
         for x in range(scanImg.shape[1]):
             # 相関係数出す範囲をスライス
@@ -52,16 +61,16 @@ def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, 
     # TODO: 冗長なのでなんとかする
     # TODO: 並列処理はどうする？
     oShape = Vector2(*originalImg.shape)
-    fci = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.float64)
-    rr = np.empty_like(fci, dtype=np.float64)
-    lr = np.empty_like(fci, dtype=np.float64)
+    fci = np.empty(((oShape.y - cRFHeight) // scanStep, (oShape.x - cRFWidth) // scanStep), dtype=np.float32)
+    rr = np.empty_like(fci, dtype=np.float32)
+    lr = np.empty_like(fci, dtype=np.float32)
     raposy = np.empty_like(fci, dtype=np.uint32)
     raposx = np.empty_like(fci, dtype=np.uint32)
     laposy = np.empty_like(fci, dtype=np.uint32)
     laposx = np.empty_like(fci, dtype=np.uint32)
 
-    crfx = np.tile(np.arange(fci.shape[1], dtype=np.uint32), (fci.shape[0], 1)) * scanStep
-    crfy = np.tile(np.arange(fci.shape[0], dtype=np.uint32), (fci.shape[1], 1)).T * scanStep
+    crfx = np.tile(np.arange(fci.shape[1], dtype=np.uint32) * scanStep, (fci.shape[0], 1))
+    crfy = np.tile(np.arange(fci.shape[0], dtype=np.uint32) * scanStep, (fci.shape[1], 1)).T
 
     for y in tqdm(range(0, fci.shape[0])):
         for x in range(0, fci.shape[1]):
