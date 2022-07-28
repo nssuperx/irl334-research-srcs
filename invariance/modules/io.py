@@ -8,6 +8,7 @@ class FciDataManager:
     def __init__(self, setNumber: int) -> None:
         self.setNumber = setNumber
         os.makedirs(f"./dataset/{self.setNumber}/in", exist_ok=True)
+        os.makedirs(f"./dataset/{self.setNumber}/in/color", exist_ok=True)
         os.makedirs(f"./dataset/{self.setNumber}/array", exist_ok=True)
         os.makedirs(f"./dataset/{self.setNumber}/out/crf", exist_ok=True)
         os.makedirs(f"./dataset/{self.setNumber}/out/crf-clean", exist_ok=True)

@@ -1,0 +1,8 @@
+{
+    "default":{
+        "height": 170,
+        "width": 170,
+        "crf_width": 270,
+        "scanstep": 20
+    }
+}
