@@ -39,6 +39,7 @@ def main():
         cluster_df = pd.concat([cluster_df, df[(df["y"] == yx[0]) & (df["x"] == yx[1])]])
 
     cluster_df.to_csv(f"{dataMgr.get_out_dirpath()}/crf_cluster.csv")
+    cluster_df.to_pickle(f"{dataMgr.get_out_dirpath()}/results_cluster.pkl")
 
 
 if __name__ == "__main__":

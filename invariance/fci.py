@@ -48,10 +48,9 @@ def main():
 
     fciindex = [f"y{y:04}x{x:04}" for y, x in zip(res.crfy.flatten(), res.crfx.flatten())]
 
+    raw_fci = np.copy(res.fci)
     # この処理は適当に思いついたもの
     res.fci[res.fci < 0.0] = 0.0
-    # fci = np.where((fci < 0.0, 0.0, fci))
-    raw_fci = res.fci
     fci = min_max_normalize(res.fci)
     rrlr = res.rr * res.lr
     rrlrfci = rrlr * fci

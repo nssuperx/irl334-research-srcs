@@ -49,7 +49,8 @@ def main():
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
     _, _, patches = ax.hist(fciDist, bins=hist_bins)
-    watch_value: float = 163.719517963921
+    # NOTE: なんかミスってる
+    watch_value: float = 0
     watch_point: int = int(watch_value * hist_bins / max(fciDist))
     patches[watch_point].set_facecolor('orange')
     ax.set_xlabel("raw fci")
