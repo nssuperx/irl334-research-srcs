@@ -11,7 +11,7 @@ args = sys.argv
 
 
 def main():
-    if(len(args) >= 2):
+    if (len(args) >= 2):
         dataset_number = args[1]
     else:
         dataset_number = default_dataset
@@ -50,7 +50,7 @@ def main():
     ax = fig.add_subplot(1, 1, 1)
     _, _, patches = ax.hist(fciDist, bins=hist_bins)
     # NOTE: なんかミスってる
-    watch_value: float = 0
+    watch_value: float = 163.71954345703125
     watch_point: int = int(watch_value * hist_bins / max(fciDist))
     patches[watch_point].set_facecolor('orange')
     ax.set_xlabel("raw fci")

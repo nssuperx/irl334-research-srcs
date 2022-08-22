@@ -9,7 +9,7 @@ args = sys.argv
 
 
 def main():
-    if(len(args) >= 2):
+    if (len(args) >= 2):
         dataset_number = args[1]
     else:
         dataset_number = default_dataset
