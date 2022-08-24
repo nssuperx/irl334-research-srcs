@@ -31,3 +31,4 @@ class FciResultBlock:
     raposx: np.ndarray  # right active pos x
     laposy: np.ndarray  # left active pos y
     laposx: np.ndarray  # left active pos x
+    overlapPixels: np.ndarray

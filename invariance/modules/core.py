@@ -69,18 +69,24 @@ class CombinedReceptiveField:
         # right
         rMAPos: Vector2 = self.rightRF.mostActivePos
         rTShape: Vector2 = Vector2(*self.rightRF.template.img.shape)
-        rField: np.ndarray = np.pad(self.rightRF.template.img,
-                                    ((rMAPos.y, self.height - (rMAPos.y + rTShape.y)),
-                                     (rMAPos.x, self.width - (rMAPos.x + rTShape.x))))
+        rlayer = np.zeros((self.height, self.width), dtype=np.float32)
+        rmask = np.full_like(rlayer, False, dtype=bool)
+        rlayer[rMAPos.y:rMAPos.y + rTShape.y, rMAPos.x:rMAPos.x + rTShape.x] = self.rightRF.template.img
+        rmask[rMAPos.y:rMAPos.y + rTShape.y, rMAPos.x:rMAPos.x + rTShape.x] = True
 
         # left
         lMAPos: Vector2 = self.leftRF.mostActivePos
         lTShape: Vector2 = Vector2(*self.leftRF.template.img.shape)
-        lField: np.ndarray = np.pad(self.leftRF.template.img,
-                                    ((lMAPos.y, self.height - (lMAPos.y + lTShape.y)),
-                                     (lMAPos.x + noOverlap, self.width - (lMAPos.x + noOverlap + lTShape.x))))
+        llayer = np.zeros((self.height, self.width), dtype=np.float32)
+        lmask = np.full_like(llayer, False, dtype=bool)
+        llayer[lMAPos.y:lMAPos.y + lTShape.y, lMAPos.x + noOverlap:lMAPos.x + lTShape.x + noOverlap] = self.leftRF.template.img
+        lmask[lMAPos.y:lMAPos.y + lTShape.y, lMAPos.x + noOverlap:lMAPos.x + lTShape.x + noOverlap] = True
 
-        self.fci = np.sum(rField * lField)
+        mask = rmask * lmask
+        maskedRlayer, maskedLlayer = rlayer[mask], llayer[mask]
+        self.fci = np.sum(maskedRlayer * maskedLlayer)
+        self.overlapPixels = maskedRlayer.size
+
         return self.fci
 
     def make_img(self, originalImgArray: np.ndarray) -> Image:
@@ -98,13 +104,20 @@ class CombinedReceptiveField:
         return img
 
     def show_img(self, originalImgArray: np.ndarray) -> None:
+        # TODO: 役割違うので消す
         img = self.make_img(originalImgArray)
         img.show()
 
     def save_img(self, originalImgArray: np.ndarray, path: str) -> None:
+        # TODO: 役割違うので消す
         img = self.make_img(originalImgArray)
         img.save(path)
 
     def get_fci(self) -> float:
         return self.fci
+
+    def get_overlapPixels(self) -> int:
+        # NOTE: 実験用なので，直接値を参照してもいい気がしている
+        return self.overlapPixels
+
     # NOTE: max fciが1になるように調整，でもそもそも重ならないならゼロなのでここの調整はどうすればいい？

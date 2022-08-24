@@ -68,6 +68,7 @@ def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, 
     raposx = np.empty_like(fci, dtype=np.uint32)
     laposy = np.empty_like(fci, dtype=np.uint32)
     laposx = np.empty_like(fci, dtype=np.uint32)
+    overlapPixels = np.empty_like(fci, dtype=np.uint32)
 
     crfx = np.tile(np.arange(fci.shape[1], dtype=np.uint32) * scanStep, (fci.shape[0], 1))
     crfy = np.tile(np.arange(fci.shape[0], dtype=np.uint32) * scanStep, (fci.shape[1], 1)).T
@@ -81,6 +82,7 @@ def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, 
             if saveImage:
                 cRF.save_img(originalImg, f"{dataMgr.get_out_dirpath()}/crf/y{y*scanStep:04}x{x*scanStep:04}.png")
             fci[y][x] = cRF.get_fci()
+            overlapPixels[y][x] = cRF.get_overlapPixels()
             rr[y][x] = cRF.rightRF.activity
             lr[y][x] = cRF.leftRF.activity
             rpos = cRF.rightRF.originalImgPos + cRF.rightRF.mostActivePos
@@ -88,4 +90,4 @@ def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, 
             raposy[y][x], raposx[y][x] = rpos.y, rpos.x
             laposy[y][x], laposx[y][x] = lpos.y, lpos.x
 
-    return FciResultBlock(crfy, crfx, fci, rr, lr, raposy, raposx, laposy, laposx)
+    return FciResultBlock(crfy, crfx, fci, rr, lr, raposy, raposx, laposy, laposx, overlapPixels)

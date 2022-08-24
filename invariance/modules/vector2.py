@@ -20,7 +20,7 @@ class Vector2:
     def __sub__(self, other: Vector2) -> Vector2:
         return Vector2(self.y - other.y, self.x - other.x)
 
-    def __neg__(self):
+    def __neg__(self) -> Vector2:
         return Vector2(-self.y, -self.x)
 
     def __str__(self) -> str:

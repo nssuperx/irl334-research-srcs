@@ -10,12 +10,12 @@ from modules.core import TemplateImage
 from modules.results import FciResultBlock
 
 
-default_dataset = 3
+default_dataset = 11
 args = sys.argv
 
 
 def main():
-    if(len(args) >= 2):
+    if (len(args) >= 2):
         dataset_number = args[1]
     else:
         dataset_number = default_dataset
@@ -54,13 +54,15 @@ def main():
     fci = min_max_normalize(res.fci)
     rrlr = res.rr * res.lr
     rrlrfci = rrlr * fci
+    olp = res.overlapPixels     # overlap pixels
 
-    resultData = np.vstack([res.crfy.flatten(), res.crfx.flatten(),
+    resultData = np.vstack([res.crfy.flatten(), res.crfx.flatten(), olp.flatten(),
                             raw_fci.flatten(), fci.flatten(), res.rr.flatten(), res.lr.flatten(),
                             rrlr.flatten(), rrlrfci.flatten(),
                             res.raposy.flatten(), res.raposx.flatten(), res.laposy.flatten(), res.laposx.flatten()]).T
     df = pd.DataFrame(resultData, index=fciindex,
-                      columns=["y", "x", "raw fci", "fci", "cell R activity", "cell L activity", "R L", "R L fci",
+                      columns=["y", "x", "overlap pixels", "raw fci", "fci",
+                               "cell R activity", "cell L activity", "R L", "R L fci",
                                "right RF most active y", "right RF most active x",
                                "left RF most active y", "left RF most active x"])
     df.to_csv(f"{dataMgr.get_out_dirpath()}/crf_skip{scanStep}.csv")
