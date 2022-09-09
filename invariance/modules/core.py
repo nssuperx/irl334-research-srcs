@@ -6,14 +6,6 @@ from .numeric import min_max_normalize
 from .vector2 import Vector2
 
 
-class TemplateImage:
-    def __init__(self, imgArray: np.ndarray) -> None:
-        self.img: np.ndarray = imgArray
-        self.mean: float = self.img.mean()
-        self.variance: float = self.img.var()
-        self.std: float = self.img.std()
-
-
 class ReceptiveField:
     """
     走査後の出力画像から一番興奮してる座標取れそう．
@@ -23,14 +15,14 @@ class ReceptiveField:
     """
 
     def __init__(self, originalImgPos: Tuple[int, int], scannedImgArray: np.ndarray,
-                 template: TemplateImage, height: int = 70, width: int = 70) -> None:
-        self.template: TemplateImage = template
+                 template: np.ndarray, height: int = 70, width: int = 70) -> None:
+        self.template: np.ndarray = template
         self.originalImgPos: Vector2 = Vector2(*originalImgPos)
         self.height: int = height
         self.width: int = width
         # NOTE: RFが担当する領域内のスキャン後の画像を切り抜いて，最も興奮している場所を探す
-        scannedArray = scannedImgArray[self.originalImgPos.y:self.originalImgPos.y + (height - template.img.shape[0]),
-                                       self.originalImgPos.x:self.originalImgPos.x + (width - template.img.shape[1])]
+        scannedArray = scannedImgArray[self.originalImgPos.y:self.originalImgPos.y + (height - template.shape[0]),
+                                       self.originalImgPos.x:self.originalImgPos.x + (width - template.shape[1])]
         self.mostActivePos: Vector2 = Vector2(*np.unravel_index(np.argmax(scannedArray), scannedArray.shape))
         self.activity: float = np.max(scannedArray)
 
@@ -43,7 +35,7 @@ class ReceptiveField:
         """
         oPos = self.originalImgPos                        # originalImgPos
         aPos = self.mostActivePos                         # mostActivePos
-        tShape = Vector2(*self.template.img.shape)        # templateShape
+        tShape = Vector2(*self.template.shape)        # templateShape
         im = Image.fromarray(min_max_normalize(
             originalImgArray[oPos.y:oPos.y + self.height, oPos.x:oPos.x + self.width]) * 255).convert('L')
         draw = ImageDraw.Draw(im)
@@ -68,18 +60,19 @@ class CombinedReceptiveField:
         noOverlap = (self.width - self.overlap) // 2
         # right
         rMAPos: Vector2 = self.rightRF.mostActivePos
-        rTShape: Vector2 = Vector2(*self.rightRF.template.img.shape)
+        rTShape: Vector2 = Vector2(*self.rightRF.template.shape)
         rlayer = np.zeros((self.height, self.width), dtype=np.float32)
         rmask = np.full_like(rlayer, False, dtype=bool)
-        rlayer[rMAPos.y:rMAPos.y + rTShape.y, rMAPos.x:rMAPos.x + rTShape.x] = self.rightRF.template.img
+        rlayer[rMAPos.y:rMAPos.y + rTShape.y, rMAPos.x:rMAPos.x + rTShape.x] = self.rightRF.template
         rmask[rMAPos.y:rMAPos.y + rTShape.y, rMAPos.x:rMAPos.x + rTShape.x] = True
 
         # left
         lMAPos: Vector2 = self.leftRF.mostActivePos
-        lTShape: Vector2 = Vector2(*self.leftRF.template.img.shape)
+        lTShape: Vector2 = Vector2(*self.leftRF.template.shape)
         llayer = np.zeros((self.height, self.width), dtype=np.float32)
         lmask = np.full_like(llayer, False, dtype=bool)
-        llayer[lMAPos.y:lMAPos.y + lTShape.y, lMAPos.x + noOverlap:lMAPos.x + lTShape.x + noOverlap] = self.leftRF.template.img
+        llayer[lMAPos.y:lMAPos.y + lTShape.y, lMAPos.x + noOverlap:lMAPos.x +
+               lTShape.x + noOverlap] = self.leftRF.template
         lmask[lMAPos.y:lMAPos.y + lTShape.y, lMAPos.x + noOverlap:lMAPos.x + lTShape.x + noOverlap] = True
 
         mask = rmask * lmask
@@ -93,8 +86,8 @@ class CombinedReceptiveField:
         oPos = self.rightRF.originalImgPos                           # originalImgPos
         lAPos = self.leftRF.mostActivePos                           # lightRFmostActivePos
         rAPos = self.rightRF.mostActivePos                          # rightRFmostActivePos
-        lTShape = Vector2(*self.leftRF.template.img.shape)          # leftRFtemplateShape
-        rTShape = Vector2(*self.rightRF.template.img.shape)         # rightRFtemplateShape
+        lTShape = Vector2(*self.leftRF.template.shape)          # leftRFtemplateShape
+        rTShape = Vector2(*self.rightRF.template.shape)         # rightRFtemplateShape
         noOverlap = (self.width - self.overlap) // 2
         img = Image.fromarray(min_max_normalize(
             originalImgArray[oPos.y:oPos.y + self.height, oPos.x:oPos.x + self.width]) * 255).convert('L')

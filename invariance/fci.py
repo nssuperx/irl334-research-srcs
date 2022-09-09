@@ -6,11 +6,10 @@ import pandas as pd
 from modules.numeric import min_max_normalize
 from modules.function import scan_combinedRF
 from modules.io import save_image, FciDataManager
-from modules.core import TemplateImage
 from modules.results import FciResultBlock
 
 
-default_dataset = 11
+default_dataset = 1
 args = sys.argv
 
 
@@ -22,8 +21,8 @@ def main():
     dataMgr: FciDataManager = FciDataManager(dataset_number)
     dataMgr.load_image()
     originalImgArray = dataMgr.originalImg
-    rightTemplate = TemplateImage(dataMgr.rightEyeImg)
-    leftTemplate = TemplateImage(dataMgr.leftEyeImg)
+    rightTemplate = dataMgr.rightEyeImg
+    leftTemplate = dataMgr.leftEyeImg
     # 入力
     dataMgr.load_scan_array()
     rightScanImgArray = dataMgr.rightScanImg

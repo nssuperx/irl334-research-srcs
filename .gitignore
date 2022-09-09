@@ -16,10 +16,13 @@
 env
 
 # pytorch datasets
-data
+pt_datasets
 
 # python cache file
 __pycache__
+
+# pytorch output file
+*.pth
 
 # tonsorboard log dir
 runs

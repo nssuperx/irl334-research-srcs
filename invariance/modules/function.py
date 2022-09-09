@@ -3,25 +3,25 @@ from tqdm import tqdm
 
 from .io import FciDataManager
 from .numeric import zscore
-from .core import TemplateImage, ReceptiveField, CombinedReceptiveField
+from .core import ReceptiveField, CombinedReceptiveField
 from .vector2 import Vector2
 from .results import FciResultBlock
 
 
-def scan(originalImg: np.ndarray, template: TemplateImage) -> np.ndarray:
+def scan(originalImg: np.ndarray, template: np.ndarray) -> np.ndarray:
     """（非推奨）
     テンプレートマッチングする．正規化相関係数．
     NOTE: 遅すぎるので使わない．
 
     Args:
         originalImg (np.ndarray): 元の画像
-        template (TemplateImage): テンプレート画像
+        template (np.ndarray): テンプレート画像
 
     Returns:
         np.ndarray: テンプレートマッチング後のnumpy配列
     """
     oShape = Vector2(*originalImg.shape)
-    tShape = Vector2(*template.img.shape)
+    tShape = Vector2(*template.shape)
     scanImg = np.empty((oShape.y - tShape.y + 1, oShape.x - tShape.x + 1), dtype=np.float32)
     for y in tqdm(range(scanImg.shape[0])):
         for x in range(scanImg.shape[1]):
@@ -29,17 +29,16 @@ def scan(originalImg: np.ndarray, template: TemplateImage) -> np.ndarray:
             scanTargetImg = originalImg[y:y + tShape.y, x:x + tShape.x]
             # 正規化
             scanTargetImg = zscore(scanTargetImg)
-            # scanImg[y][x] = corrcoef(scanTargetImg, template.img)
-            # scanImg[y][x] = corrcoef_template(scanTargetImg, template)
+            # scanImg[y][x] = corrcoef(scanTargetImg, template)
             # NOTE: 平均0 分散1なので，以下でもok．
-            scanImg[y][x] = np.mean(scanTargetImg * template.img)
+            scanImg[y][x] = np.mean(scanTargetImg * template)
 
     return scanImg
 
 
 def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, scanStep: int, originalImg: np.ndarray,
-                    rightScanImg: np.ndarray, rightTemplate: TemplateImage,
-                    leftScanImg: np.ndarray, leftTemplate: TemplateImage,
+                    rightScanImg: np.ndarray, rightTemplate: np.ndarray,
+                    leftScanImg: np.ndarray, leftTemplate: np.ndarray,
                     dataMgr: FciDataManager, saveImage: bool = False) -> FciResultBlock:
     """画像全体のfciを計算する
 
@@ -49,9 +48,9 @@ def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, 
         scanStep (int): スキャンするときのステップ数（スキャンをとばす幅）
         originalImg (np.ndarray): 元画像
         rightScanImg (np.ndarray): 右目でスキャンした相関係数配列
-        rightTemplate (TemplateImage): 右目テンプレート
+        rightTemplate (np.ndarray): 右目テンプレート
         leftScanImg (np.ndarray): 左目でスキャンした相関係数配列
-        leftTemplate (TemplateImage): 左目テンプレート
+        leftTemplate (np.ndarray): 左目テンプレート
 
     Returns:
         NOTE: 後で変更される可能性あり

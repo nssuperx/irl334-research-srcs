@@ -1,4 +1,4 @@
-from .core import TemplateImage, ReceptiveField, CombinedReceptiveField
+from .core import ReceptiveField, CombinedReceptiveField
 import numpy as np
 from PIL import Image
 from .numeric import min_max_normalize
@@ -25,7 +25,7 @@ def image_read_test(imgDic: dict) -> None:
 
 
 def test_one_cRF(rightScanImg: np.ndarray, leftScanImg: np.ndarray,
-                 rightTemplate: TemplateImage, leftTemplate: TemplateImage) -> None:
+                 rightTemplate: np.ndarray, leftTemplate: np.ndarray) -> None:
     rightRF = ReceptiveField((400, 700), rightScanImg, rightTemplate)
     leftRF = ReceptiveField((400, 740), leftScanImg, leftTemplate)
     combinedRF = CombinedReceptiveField(rightRF, leftRF)

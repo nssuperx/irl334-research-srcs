@@ -1,4 +1,3 @@
-from typing import Any
 import numpy as np
 
 
@@ -32,23 +31,3 @@ def corrcoef(x: np.ndarray, y: np.ndarray) -> float:
     return np.mean((x - x.mean()) * (y - y.mean())) / (x.std() * y.std())
     # return np.corrcoef(x.flatten(), y.flatten())[0][1]
     # return np.mean(x * y)
-
-
-def corrcoef_template(x: np.ndarray, t: Any) -> float:
-    """相関係数を計算（非推奨）
-    通常はnp.corrcoef()を使用．
-    TemplateImageクラスの中に事前に計算した値があるので少し速いかもしれない．
-
-    NOTE: 循環importになったのでAnyで妥協している．
-    というかそもそもこの関数いらないかもしれない．
-
-    Args:
-        x (np.ndarray): numpy配列
-        t (TemplateImage): テンプレート画像．
-
-    Returns:
-        float: 相関係数 r
-    """
-    # return (np.mean(x * t.img) - x.mean() * t.mean) / (x.std() * t.std)
-    return np.mean((x - x.mean()) * (t.img - t.mean)) / (x.std() * t.std)
-    # return np.mean(x * t.img)
