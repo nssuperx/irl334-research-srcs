@@ -1,4 +1,5 @@
 import numpy as np
+from PIL import Image
 from tqdm import tqdm
 
 from .io import FciDataManager
@@ -79,7 +80,8 @@ def scan_combinedRF(cRFHeight: int, cRFWidth: int, RFheight: int, RFWidth: int, 
                                     leftScanImg, leftTemplate, RFheight, RFWidth)
             cRF = CombinedReceptiveField(rightRF, leftRF, cRFHeight, cRFWidth, (RFWidth * 2 - cRFWidth))
             if saveImage:
-                cRF.save_img(originalImg, f"{dataMgr.get_out_dirpath()}/crf/y{y*scanStep:04}x{x*scanStep:04}.png")
+                img: Image = cRF.make_img(originalImg)
+                img.save(f"{dataMgr.out_dirpath}/crf/y{y*scanStep:04}x{x*scanStep:04}.png")
             fci[y][x] = cRF.get_fci()
             overlapPixels[y][x] = cRF.get_overlapPixels()
             rr[y][x] = cRF.rightRF.activity

@@ -13,9 +13,9 @@ def main():
     else:
         dataset_number = default_dataset
     data: FciDataManager = FciDataManager(dataset_number)
-    inoutFilePaths = ((f"{data.get_dirpath()}/in/color/original.png", f"{data.get_dirpath()}/in/original.png"),
-                      (f"{data.get_dirpath()}/in/color/right_eye.png", f"{data.get_dirpath()}/in/right_eye.png"),
-                      (f"{data.get_dirpath()}/in/color/left_eye.png", f"{data.get_dirpath()}/in/left_eye.png"))
+    inoutFilePaths = ((f"{data.dirpath}/in/color/original.png", f"{data.dirpath}/in/original.png"),
+                      (f"{data.dirpath}/in/color/right_eye.png", f"{data.dirpath}/in/right_eye.png"),
+                      (f"{data.dirpath}/in/color/left_eye.png", f"{data.dirpath}/in/left_eye.png"))
 
     for pair in inoutFilePaths:
         img = Image.open(pair[0])

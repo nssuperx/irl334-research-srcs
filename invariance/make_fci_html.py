@@ -40,8 +40,8 @@ def main():
     else:
         dataset_number = default_dataset
     dataMgr: FciDataManager = FciDataManager(dataset_number)
-    df = pd.read_csv(f"{dataMgr.get_out_dirpath()}/crf_cluster.csv", index_col=0)
-    with open(f"{dataMgr.get_dirpath()}/setting.json", "r") as f:
+    df = pd.read_csv(f"{dataMgr.out_dirpath}/crf_cluster.csv", index_col=0)
+    with open(f"{dataMgr.dirpath}/setting.json", "r") as f:
         setting = json.load(f)
     crf_width = int(setting["default"]["crf_width"])
     df["image"] = df.index.map(lambda s: f'<img src="./crf-clean/{s}.png" width="{crf_width}" loading="lazy" />')
@@ -49,7 +49,7 @@ def main():
     html = html_template.format(table=table)
     html = html.replace('<thead>', '<thead class="sticky-top bg-white">')
 
-    with open(f"{dataMgr.get_out_dirpath()}/fci-tables.html", "w") as f:
+    with open(f"{dataMgr.out_dirpath}/fci-tables.html", "w") as f:
         f.write(html)
 
 

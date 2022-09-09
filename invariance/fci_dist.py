@@ -16,7 +16,7 @@ def main():
     else:
         dataset_number = default_dataset
     dataMgr: FciDataManager = FciDataManager(dataset_number)
-    df: pd.DataFrame = pd.read_pickle(f"{dataMgr.get_out_dirpath()}/results_cluster.pkl")
+    df: pd.DataFrame = pd.read_pickle(f"{dataMgr.out_dirpath}/results_cluster.pkl")
 
     fci: np.ndarray = df["raw fci"].to_numpy()
 

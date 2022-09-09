@@ -28,7 +28,7 @@ def main():
     rightScanImgArray = dataMgr.rightScanImg
     leftScanImgArray = dataMgr.leftScanImg
 
-    with open(f"{dataMgr.get_dirpath()}/setting.json", "r") as f:
+    with open(f"{dataMgr.dirpath}/setting.json", "r") as f:
         jsondata = json.load(f)
 
     setting = jsondata["default"]
@@ -64,9 +64,9 @@ def main():
                                "cell R activity", "cell L activity", "R L", "R L fci",
                                "right RF most active y", "right RF most active x",
                                "left RF most active y", "left RF most active x"])
-    df.to_csv(f"{dataMgr.get_out_dirpath()}/crf_skip{scanStep}.csv")
-    df.to_pickle(f"{dataMgr.get_out_dirpath()}/results.pkl")
-    save_image(f"{dataMgr.get_out_dirpath()}/fciImg.png", fci)
+    df.to_csv(f"{dataMgr.out_dirpath}/crf_skip{scanStep}.csv")
+    df.to_pickle(f"{dataMgr.out_dirpath}/results.pkl")
+    save_image(f"{dataMgr.out_dirpath}/fciImg.png", fci)
 
 
 if __name__ == "__main__":

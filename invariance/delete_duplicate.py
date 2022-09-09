@@ -17,7 +17,7 @@ def main():
     else:
         dataset_number = default_dataset
     dataMgr: FciDataManager = FciDataManager(dataset_number)
-    df: pd.DataFrame = pd.read_pickle(f"{dataMgr.get_out_dirpath()}/results.pkl")
+    df: pd.DataFrame = pd.read_pickle(f"{dataMgr.out_dirpath}/results.pkl")
 
     # NOTE: 表では，right RFのほうが左側にあるので，left側のindexになる．
     left_idx = df.columns.get_loc("right RF most active y")
@@ -38,8 +38,8 @@ def main():
         yx = yxarray[yxarray.shape[0] // 2]
         cluster_df = pd.concat([cluster_df, df[(df["y"] == yx[0]) & (df["x"] == yx[1])]])
 
-    cluster_df.to_csv(f"{dataMgr.get_out_dirpath()}/crf_cluster.csv")
-    cluster_df.to_pickle(f"{dataMgr.get_out_dirpath()}/results_cluster.pkl")
+    cluster_df.to_csv(f"{dataMgr.out_dirpath}/crf_cluster.csv")
+    cluster_df.to_pickle(f"{dataMgr.out_dirpath}/results_cluster.pkl")
 
 
 if __name__ == "__main__":

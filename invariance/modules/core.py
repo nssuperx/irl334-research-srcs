@@ -26,21 +26,21 @@ class ReceptiveField:
         self.mostActivePos: Vector2 = Vector2(*np.unravel_index(np.argmax(scannedArray), scannedArray.shape))
         self.activity: float = np.max(scannedArray)
 
-    def show_img(self, originalImgArray: np.ndarray) -> None:
+    def make_img(self, originalImg: np.ndarray) -> Image:
         """受容野が担当している，最も興奮している部分に枠を囲んだ画像を表示する
 
         Args:
-            originalImgArray (np.ndarray): オリジナル画像配列
+            originalImg (np.ndarray): オリジナル画像配列
             オリジナル画像配列をこのクラスで持ちたくないので，表示するときのみスライスして使う．
         """
         oPos = self.originalImgPos                        # originalImgPos
         aPos = self.mostActivePos                         # mostActivePos
         tShape = Vector2(*self.template.shape)        # templateShape
         im = Image.fromarray(min_max_normalize(
-            originalImgArray[oPos.y:oPos.y + self.height, oPos.x:oPos.x + self.width]) * 255).convert('L')
+            originalImg[oPos.y:oPos.y + self.height, oPos.x:oPos.x + self.width]) * 255).convert('L')
         draw = ImageDraw.Draw(im)
         draw.rectangle((aPos.x, aPos.y, aPos.x + tShape.x, aPos.y + tShape.y))
-        im.show()
+        return im
 
 
 class CombinedReceptiveField:
@@ -82,7 +82,7 @@ class CombinedReceptiveField:
 
         return self.fci
 
-    def make_img(self, originalImgArray: np.ndarray) -> Image:
+    def make_img(self, originalImg: np.ndarray) -> Image:
         oPos = self.rightRF.originalImgPos                           # originalImgPos
         lAPos = self.leftRF.mostActivePos                           # lightRFmostActivePos
         rAPos = self.rightRF.mostActivePos                          # rightRFmostActivePos
@@ -90,21 +90,11 @@ class CombinedReceptiveField:
         rTShape = Vector2(*self.rightRF.template.shape)         # rightRFtemplateShape
         noOverlap = (self.width - self.overlap) // 2
         img = Image.fromarray(min_max_normalize(
-            originalImgArray[oPos.y:oPos.y + self.height, oPos.x:oPos.x + self.width]) * 255).convert('L')
+            originalImg[oPos.y:oPos.y + self.height, oPos.x:oPos.x + self.width]) * 255).convert('L')
         draw = ImageDraw.Draw(img)
         draw.rectangle((lAPos.x + noOverlap, lAPos.y, lAPos.x + lTShape.x + noOverlap, lAPos.y + lTShape.y))
         draw.rectangle((rAPos.x, rAPos.y, rAPos.x + rTShape.x, rAPos.y + rTShape.y), width=2)
         return img
-
-    def show_img(self, originalImgArray: np.ndarray) -> None:
-        # TODO: 役割違うので消す
-        img = self.make_img(originalImgArray)
-        img.show()
-
-    def save_img(self, originalImgArray: np.ndarray, path: str) -> None:
-        # TODO: 役割違うので消す
-        img = self.make_img(originalImgArray)
-        img.save(path)
 
     def get_fci(self) -> float:
         return self.fci
