@@ -21,17 +21,14 @@ def main():
     dataMgr: FciDataManager = FciDataManager(dataset_number)
     dataMgr.load_image()
     originalImgArray = dataMgr.originalImg
-    rightTemplate = dataMgr.rightEyeImg
-    leftTemplate = dataMgr.leftEyeImg
+    rightTemplate = dataMgr.rightTemplate
+    leftTemplate = dataMgr.leftTemplate
     # 入力
     dataMgr.load_scan_array()
     rightScanImgArray = dataMgr.rightScanImg
     leftScanImgArray = dataMgr.leftScanImg
 
-    with open(f"{dataMgr.dirpath}/setting.json", "r") as f:
-        jsondata = json.load(f)
-
-    setting = jsondata["default"]
+    setting = dataMgr.params
     height = int(setting["height"])
     width = int(setting["width"])
     crf_width = int(setting["crf_width"])

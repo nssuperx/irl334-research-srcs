@@ -16,8 +16,8 @@ def main():
     data = FciDataManager(dataset_number)
     data.load_image()
     originalImg = data.originalImg
-    rightTemplate = data.rightEyeImg
-    leftTemplate = data.leftEyeImg
+    rightTemplate = data.rightTemplate
+    leftTemplate = data.leftTemplate
 
     # 走査した画像配列を作成
     rightScanImg = cv2.matchTemplate(originalImg, rightTemplate, method=cv2.TM_CCOEFF_NORMED)

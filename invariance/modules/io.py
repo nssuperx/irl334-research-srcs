@@ -1,31 +1,53 @@
 import os
+import json
 from PIL import Image
 import numpy as np
 from .numeric import min_max_normalize, zscore
 
 
 class FciDataManager:
-    def __init__(self, datasetNumber: int) -> None:
+    def __init__(self, datasetNumber: int, setting: str = "default") -> None:
         self.datasetNumber = datasetNumber
+        self.setting = setting
         os.makedirs(f"./dataset/{self.datasetNumber}/in", exist_ok=True)
         os.makedirs(f"./dataset/{self.datasetNumber}/in/color", exist_ok=True)
-        os.makedirs(f"./dataset/{self.datasetNumber}/array", exist_ok=True)
-        os.makedirs(f"./dataset/{self.datasetNumber}/out/crf", exist_ok=True)
-        os.makedirs(f"./dataset/{self.datasetNumber}/out/crf-clean", exist_ok=True)
+        os.makedirs(f"./dataset/{self.datasetNumber}/array/{self.setting}", exist_ok=True)
+        os.makedirs(f"./dataset/{self.datasetNumber}/out/{self.setting}/crf", exist_ok=True)
+        os.makedirs(f"./dataset/{self.datasetNumber}/out/{self.setting}/crf-clean", exist_ok=True)
 
-    def load_image(self) -> None:
-        imgs = load_image(self.datasetNumber)
-        self.originalImg: np.ndarray = imgs["original"]
-        self.rightEyeImg: np.ndarray = imgs["right_eye"]
-        self.leftEyeImg: np.ndarray = imgs["left_eye"]
+        with open(f"./dataset/{self.datasetNumber}/setting.json", "r") as f:
+            jsondata = json.load(f)
+
+        self.params = jsondata[setting]
+
+    def load_image(self, normalize: bool = True) -> None:
+        """画像を読み込む
+
+        Args:
+            normalize (bool, optional): 正規化するかしないか. Defaults to True.
+        """
+
+        originalImgPath = f"./dataset/{self.datasetNumber}/in/original.png"
+        rightTemplatePath = f"./dataset/{self.datasetNumber}/in/{self.params['right_template']}"
+        leftTemplatePath = f"./dataset/{self.datasetNumber}/in/{self.params['left_template']}"
+
+        if normalize:
+            self.originalImg = zscore(np.array(Image.open(originalImgPath), dtype=np.float32))
+            self.rightTemplate = zscore(np.array(Image.open(rightTemplatePath), dtype=np.float32))
+            self.leftTemplate = zscore(np.array(Image.open(leftTemplatePath), dtype=np.float32))
+
+        else:
+            self.originalImg = np.array(Image.open(originalImgPath), dtype=np.float32)
+            self.rightTemplate = np.array(Image.open(rightTemplatePath), dtype=np.float32)
+            self.leftTemplate = np.array(Image.open(leftTemplatePath), dtype=np.float32)
 
     def load_scan_array(self) -> None:
-        self.rightScanImg: np.ndarray = np.load(f"./dataset/{self.datasetNumber}/array/rightScanImg.npy")
-        self.leftScanImg: np.ndarray = np.load(f"./dataset/{self.datasetNumber}/array/leftScanImg.npy")
+        self.rightScanImg: np.ndarray = np.load(f"./dataset/{self.datasetNumber}/array/{self.setting}/rightScanImg.npy")
+        self.leftScanImg: np.ndarray = np.load(f"./dataset/{self.datasetNumber}/array/{self.setting}/leftScanImg.npy")
 
     def save_scan_image(self, rightScanImg: np.ndarray, leftScanImg: np.ndarray, dirpath: str = None) -> None:
         if dirpath is None:
-            dirpath = f"./dataset/{self.datasetNumber}/out"
+            dirpath = f"./dataset/{self.datasetNumber}/out/{self.setting}"
         rightimg = Image.fromarray(min_max_normalize(rightScanImg) * 255).convert("L")
         leftimg = Image.fromarray(min_max_normalize(leftScanImg) * 255).convert("L")
         rightimg.save(f"{dirpath}/rightScanImg.png")
@@ -33,7 +55,7 @@ class FciDataManager:
 
     def save_scan_array(self, rightScanImg: np.ndarray, leftScanImg: np.ndarray, dirpath: str = None) -> None:
         if dirpath is None:
-            dirpath = f"./dataset/{self.datasetNumber}/array"
+            dirpath = f"./dataset/{self.datasetNumber}/array/{self.setting}"
         np.save(f"{dirpath}/rightScanImg", rightScanImg)
         np.save(f"{dirpath}/leftScanImg", leftScanImg)
 
@@ -45,7 +67,7 @@ class FciDataManager:
         Returns:
             str: ファイルの保存先ディレクトリ
         """
-        return f"./dataset/{self.datasetNumber}/out"
+        return f"./dataset/{self.datasetNumber}/out/{self.setting}"
 
     @property
     def dirpath(self) -> str:
@@ -57,7 +79,7 @@ class FciDataManager:
 
 
 def save_image(filepath: str, scanImg: np.ndarray) -> None:
-    """（非推奨）
+    """
     画像を保存する
     この関数内で正規化を行うので，元画像配列の状態は気にしなくてok
 
@@ -68,35 +90,3 @@ def save_image(filepath: str, scanImg: np.ndarray) -> None:
     img = Image.fromarray(min_max_normalize(scanImg) * 255).convert("L")
     # img.show()
     img.save(filepath)
-
-
-def load_image(datasetNumber: int, normalize: bool = True) -> dict:
-    """画像を読み込む
-
-    Args:
-        datasetNumber (int): データセット番号
-        normalize (bool, optional): 正規化するかしないか. Defaults to True.
-
-    Returns:
-        dict: 3種類の画像が格納されているDictionary
-            key: 画像の種類(original, right_eye, left_eye)
-            value: numpy.ndarray: 読み込んだ画像
-    """
-
-    originalImgPath = f"./dataset/{datasetNumber}/in/original.png"
-    rightEyeImgPath = f"./dataset/{datasetNumber}/in/right_eye.png"
-    leftEyeImgPath = f"./dataset/{datasetNumber}/in/left_eye.png"
-
-    if normalize:
-        originalImg = zscore(np.array(Image.open(originalImgPath), dtype=np.float32))
-        rightEyeImg = zscore(np.array(Image.open(rightEyeImgPath), dtype=np.float32))
-        leftEyeImg = zscore(np.array(Image.open(leftEyeImgPath), dtype=np.float32))
-
-    else:
-        originalImg = np.array(Image.open(originalImgPath), dtype=np.float32)
-        rightEyeImg = np.array(Image.open(rightEyeImgPath), dtype=np.float32)
-        leftEyeImg = np.array(Image.open(leftEyeImgPath), dtype=np.float32)
-
-    imgDic = {"original": originalImg, "right_eye": rightEyeImg, "left_eye": leftEyeImg}
-
-    return imgDic

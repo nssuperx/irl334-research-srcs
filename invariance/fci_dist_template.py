@@ -17,8 +17,8 @@ def main():
         dataset_number = default_dataset
     datas: FciDataManager = FciDataManager(dataset_number)
     datas.load_image()
-    rt = datas.rightEyeImg
-    lt = datas.leftEyeImg
+    rt = datas.rightTemplate
+    lt = datas.leftTemplate
     rtshape = Vector2(*rt.shape)
     ltshape = Vector2(*lt.shape)
 
