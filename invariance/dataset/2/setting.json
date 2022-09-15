@@ -3,6 +3,8 @@
         "height": 100,
         "width": 100,
         "crf_width": 150,
-        "scanstep": 15
+        "scanstep": 15,
+        "right_template": "right_eye.png",
+        "left_template": "left_eye.png"
     }
 }
