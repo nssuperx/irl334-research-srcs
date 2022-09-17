@@ -1,5 +1,5 @@
 {
-    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "terminal.integrated.defaultProfile.windows": "Command Prompt",
     "python.defaultInterpreterPath": "env/bin/python",
     "C_Cpp.clang_format_style": "{BreakBeforeBraces: Attach, SpaceBeforeParens: Never, IndentWidth: 4, ColumnLimit: 0, AllowShortIfStatementsOnASingleLine: true}",
     "files.associations": {
