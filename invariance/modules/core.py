@@ -1,5 +1,6 @@
 from typing import Tuple
 import numpy as np
+from numpy.typing import NDArray
 from PIL import Image, ImageDraw
 
 from .numeric import min_max_normalize
@@ -14,23 +15,24 @@ class ReceptiveField:
     参照渡しであることを信じる
     """
 
-    def __init__(self, originalImgPos: Tuple[int, int], scannedImgArray: np.ndarray,
-                 template: np.ndarray, height: int = 70, width: int = 70) -> None:
-        self.template: np.ndarray = template
+    def __init__(self, originalImgPos: Tuple[int, int], scannedImg: NDArray[np.float32],
+                 template: NDArray[np.float32], height: int = 70, width: int = 70) -> None:
+        self.template = template
         self.originalImgPos: Vector2 = Vector2(*originalImgPos)
         self.height: int = height
         self.width: int = width
         # NOTE: RFが担当する領域内のスキャン後の画像を切り抜いて，最も興奮している場所を探す
-        scannedArray = scannedImgArray[self.originalImgPos.y:self.originalImgPos.y + (height - template.shape[0]),
-                                       self.originalImgPos.x:self.originalImgPos.x + (width - template.shape[1])]
-        self.mostActivePos: Vector2 = Vector2(*np.unravel_index(np.argmax(scannedArray), scannedArray.shape))
-        self.activity: float = np.max(scannedArray)
+        oPos = self.originalImgPos                        # originalImgPos
+        clipImg: NDArray[np.float32] = scannedImg[oPos.y:oPos.y + (height - template.shape[0]),
+                                                  oPos.x:oPos.x + (width - template.shape[1])]
+        self.mostActivePos: Vector2 = Vector2(*np.unravel_index(np.argmax(clipImg), clipImg.shape))
+        self.activity = np.max(clipImg)
 
-    def make_img(self, originalImg: np.ndarray) -> Image:
+    def make_img(self, originalImg: NDArray[np.float32]) -> Image:
         """受容野が担当している，最も興奮している部分に枠を囲んだ画像を表示する
 
         Args:
-            originalImg (np.ndarray): オリジナル画像配列
+            originalImg (NDArray[np.float32]): オリジナル画像配列
             オリジナル画像配列をこのクラスで持ちたくないので，表示するときのみスライスして使う．
         """
         oPos = self.originalImgPos                        # originalImgPos
@@ -82,7 +84,7 @@ class CombinedReceptiveField:
 
         return self.fci
 
-    def make_img(self, originalImg: np.ndarray) -> Image:
+    def make_img(self, originalImg: NDArray[np.float32]) -> Image:
         oPos = self.rightRF.originalImgPos                           # originalImgPos
         lAPos = self.leftRF.mostActivePos                           # lightRFmostActivePos
         rAPos = self.rightRF.mostActivePos                          # rightRFmostActivePos

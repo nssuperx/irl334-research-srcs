@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -18,7 +19,7 @@ def main():
     dataMgr: FciDataManager = FciDataManager(dataset_number)
     df: pd.DataFrame = pd.read_pickle(f"{dataMgr.out_dirpath}/results_cluster.pkl")
 
-    fci: np.ndarray = df["raw fci"].to_numpy()
+    fci: NDArray[np.float32] = df["raw fci"].to_numpy()
 
     hist_bins = 100
     fig = plt.figure()

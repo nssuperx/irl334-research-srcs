@@ -2,6 +2,7 @@ import os
 import json
 from PIL import Image
 import numpy as np
+from numpy.typing import NDArray
 from .numeric import min_max_normalize, zscore
 
 
@@ -42,10 +43,13 @@ class FciDataManager:
             self.leftTemplate = np.array(Image.open(leftTemplatePath), dtype=np.float32)
 
     def load_scan_array(self) -> None:
-        self.rightScanImg: np.ndarray = np.load(f"./dataset/{self.datasetNumber}/array/{self.setting}/rightScanImg.npy")
-        self.leftScanImg: np.ndarray = np.load(f"./dataset/{self.datasetNumber}/array/{self.setting}/leftScanImg.npy")
+        self.rightScanImg: NDArray[np.number] = np.load(
+            f"./dataset/{self.datasetNumber}/array/{self.setting}/rightScanImg.npy")
+        self.leftScanImg: NDArray[np.number] = np.load(
+            f"./dataset/{self.datasetNumber}/array/{self.setting}/leftScanImg.npy")
 
-    def save_scan_image(self, rightScanImg: np.ndarray, leftScanImg: np.ndarray, dirpath: str = None) -> None:
+    def save_scan_image(self, rightScanImg: NDArray[np.number],
+                        leftScanImg: NDArray[np.number], dirpath: str = None) -> None:
         if dirpath is None:
             dirpath = f"./dataset/{self.datasetNumber}/out/{self.setting}"
         rightimg = Image.fromarray(min_max_normalize(rightScanImg) * 255).convert("L")
@@ -53,7 +57,8 @@ class FciDataManager:
         rightimg.save(f"{dirpath}/rightScanImg.png")
         leftimg.save(f"{dirpath}/leftScanImg.png")
 
-    def save_scan_array(self, rightScanImg: np.ndarray, leftScanImg: np.ndarray, dirpath: str = None) -> None:
+    def save_scan_array(self, rightScanImg: NDArray[np.uint32],
+                        leftScanImg: NDArray[np.uint32], dirpath: str = None) -> None:
         if dirpath is None:
             dirpath = f"./dataset/{self.datasetNumber}/array/{self.setting}"
         np.save(f"{dirpath}/rightScanImg", rightScanImg)
@@ -78,14 +83,14 @@ class FciDataManager:
         return f"./dataset/{self.datasetNumber}"
 
 
-def save_image(filepath: str, scanImg: np.ndarray) -> None:
+def save_image(filepath: str, scanImg: NDArray[np.float32]) -> None:
     """
     画像を保存する
     この関数内で正規化を行うので，元画像配列の状態は気にしなくてok
 
     Args:
         filepath (str): 保存するパス
-        scanImg (np.ndarray): 保存したい画像配列
+        scanImg (NDArray[np.float32]): 保存したい画像配列
     """
     img = Image.fromarray(min_max_normalize(scanImg) * 255).convert("L")
     # img.show()

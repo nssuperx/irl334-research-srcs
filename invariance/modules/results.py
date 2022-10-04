@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import numpy as np
+from numpy.typing import NDArray
 from typing import Tuple
 from .vector2 import Vector2
 
@@ -22,13 +23,13 @@ class FciResultBlock:
     2次元で持っておく意義がなくなったら使わない
     NOTE: DataFrameで代替可能
     """
-    crfy: np.ndarray
-    crfx: np.ndarray
-    fci: np.ndarray
-    rr: np.ndarray      # right RF activity
-    lr: np.ndarray      # left RF activity
-    raposy: np.ndarray  # right active pos y
-    raposx: np.ndarray  # right active pos x
-    laposy: np.ndarray  # left active pos y
-    laposx: np.ndarray  # left active pos x
-    overlapPixels: np.ndarray
+    crfy: NDArray[np.uint32]
+    crfx: NDArray[np.uint32]
+    fci: NDArray[np.floating]
+    rr: NDArray[np.floating]      # right RF activity
+    lr: NDArray[np.floating]      # left RF activity
+    raposy: NDArray[np.uint32]  # right active pos y
+    raposx: NDArray[np.uint32]  # right active pos x
+    laposy: NDArray[np.uint32]  # left active pos y
+    laposx: NDArray[np.uint32]  # left active pos x
+    overlapPixels: NDArray[np.uint32]
