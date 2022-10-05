@@ -20,6 +20,12 @@ class Vector2:
     def __sub__(self, other: Vector2) -> Vector2:
         return Vector2(self.y - other.y, self.x - other.x)
 
+    def __mul__(self, other: Vector2) -> Vector2:
+        return Vector2(self.y * other.y, self.x * other.x)
+
+    def __matmul__(self, other: Vector2):
+        return self.y * other.y + self.x * other.x
+
     def __neg__(self) -> Vector2:
         return Vector2(-self.y, -self.x)
 

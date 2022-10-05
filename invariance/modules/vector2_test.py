@@ -6,6 +6,8 @@ print(vec1)
 print(vec2)
 print(vec1 + vec2)
 print(vec1 - vec2)
+print(vec1 * vec2)
+print(vec1 @ vec2)
 
 vec1 += vec2
 vec2 -= vec1
