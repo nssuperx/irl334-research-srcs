@@ -83,7 +83,7 @@ class FciDataManager:
         return f"./dataset/{self.datasetNumber}"
 
 
-def save_image(filepath: str, scanImg: NDArray[np.float32]) -> None:
+def save_image(filepath: str, scanImg: NDArray[np.float32], heat: bool = False) -> None:
     """
     画像を保存する
     この関数内で正規化を行うので，元画像配列の状態は気にしなくてok
@@ -91,7 +91,16 @@ def save_image(filepath: str, scanImg: NDArray[np.float32]) -> None:
     Args:
         filepath (str): 保存するパス
         scanImg (NDArray[np.float32]): 保存したい画像配列
+        heat (bool): 出力画像をヒートマップ風にするフラグ
     """
-    img = Image.fromarray(min_max_normalize(scanImg) * 255).convert("L")
-    # img.show()
+
+    scanImg = min_max_normalize(scanImg) * 255
+    scanImg = scanImg.astype(np.uint8)
+
+    if heat:
+        mat = np.stack([scanImg, np.full_like(scanImg, 255), np.full_like(scanImg, 255)], axis=2)
+        img = Image.fromarray(mat, "HSV").convert("RGB")
+    else:
+        img = Image.fromarray(scanImg).convert("L")
+
     img.save(filepath)

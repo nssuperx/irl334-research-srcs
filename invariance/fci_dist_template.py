@@ -2,9 +2,8 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
-from modules.io import FciDataManager
+from modules.io import FciDataManager, save_image
 from modules.vector2 import Vector2
-
 
 default_dataset = 1
 args = sys.argv
@@ -30,7 +29,8 @@ def main():
     rmask = np.full_like(rlayer, False, dtype=bool)
     rmask[ltshape.y - 1:ltshape.y - 1 + rtshape.y, ltshape.x - 1:ltshape.x - 1 + rtshape.x] = True
 
-    fci_dist = []
+    fci_dist = np.zeros((array_size.y - ltshape.y + 1, array_size.x - ltshape.x + 1), dtype=np.float32)
+    # fci_dist = []
     fci_pixels = []
     for y in range(array_size.y - ltshape.y + 1):
         for x in range(array_size.x - ltshape.x + 1):
@@ -41,17 +41,18 @@ def main():
             mask = rmask * lmask
             maskedPixels = rlayer[mask] * llayer[mask]
             # fci_dist.append(np.sum(rlayer * llayer))
-            fci_dist.append(np.sum(maskedPixels))
+            fci_dist[y][x] = np.sum(maskedPixels)
+            # fci_dist.append(np.sum(maskedPixels))
             fci_pixels.append(maskedPixels.size)
 
     print(f"right shape: {rt.shape}, left shape: {lt.shape}")
     print(f"right pixels: {rt.size}, left pixels: {lt.size}")
-    print(f"fci num: {len(fci_dist)}")
+    print(f"fci num: {fci_dist.size}")
 
     hist_bins = 100
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
-    ax.hist(fci_dist, bins=hist_bins)
+    ax.hist(fci_dist.flatten(), bins=hist_bins)
 
     # 特定の値のビンに色つけたいとき
     # _, _, patches = ax.hist(fci_dist, bins=hist_bins)
@@ -69,6 +70,8 @@ def main():
     ax.set_ylabel("raw fci")
     ax.set_xlabel("overlap pixel")
     plt.show()
+
+    save_image(f"{datas.out_dirpath}/fci_dist_template.png", fci_dist)
 
 
 # 参考: https://www.arduino.cc/reference/en/language/functions/math/map/
