@@ -14,13 +14,14 @@ trainset = datasets.MNIST(
     download=True,
     transform=ToTensor()
 )
-trainloader = DataLoader(trainset, shuffle=True)
 testset = datasets.MNIST(
     root='../pt_datasets',
     train=False,
     download=True,
     transform=ToTensor()
 )
+
+trainloader = DataLoader(trainset, shuffle=True)
 testloader = DataLoader(testset, shuffle=False)
 
 classes = datasets.MNIST.classes
@@ -29,10 +30,11 @@ classes = datasets.MNIST.classes
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
+        self.flatten = nn.Flatten()
         self.fc1 = nn.Linear(28 * 28, len(classes))
 
     def forward(self, x):
-        x = torch.flatten(x)
+        x = self.flatten(x)
         x = self.fc1(x)
         # x = torch.flatten(x, 1)
         # x = torch.sigmoid(self.fc1(x))
@@ -44,7 +46,7 @@ class Net(nn.Module):
 def train(dataloader: DataLoader, model: nn.Module, loss_fn, optimizer: torch.optim.Optimizer):
     # writer = SummaryWriter()
     running_loss = 0.0
-    for batch, data in enumerate(dataloader, 0):
+    for batch, data in enumerate(dataloader):
         # get the inputs; data is a list of [inputs, labels]
         inputs, labels = data
         # MNIST のとき torch.Size([1, 1, 28, 28])
@@ -84,8 +86,9 @@ def test(dataloader: DataLoader, model: nn.Module, loss_fn):
 
 def main():
     net = Net()
+    print(net)
     learning_rate = 1e-3
-    loss_fn = nn.MSELoss()
+    loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)
     epochs = 10
 
