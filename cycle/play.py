@@ -63,7 +63,7 @@ class HiddenBrick(nn.Module):
         self.argmax = ArgMax()
         self.clamp = ClampArg()
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         x = self.flatten(x)
         x = self.fc1(x)
         # x = self.maxcell(x)
@@ -73,11 +73,27 @@ class HiddenBrick(nn.Module):
 
 
 class OutBrick(nn.Module):
-    def __init__(self):
+    def __init__(self, in_features: int):
         super(OutBrick, self).__init__()
+        self.fc = nn.Linear(in_features, len(MNIST_classes) + 1)
 
-    def forward(self):
-        pass
+    def forward(self, x: torch.Tensor):
+        x = self.fc(x)
+        return x
+
+
+class CycleNet(nn.Module):
+    def __init__(self):
+        super(CycleNet, self).__init__()
+        self.hidden_bricks = nn.ModuleList([HiddenBrick() for i in range(B_classes)])
+        self.out = OutBrick(B_classes)
+
+    def forward(self, x: torch.Tensor):
+        b_out = torch.empty(B_classes)
+        for i, hidden in enumerate(self.hidden_bricks):
+            b_out[i] = hidden(x)
+        x = self.out(b_out)
+        return x
 
 
 def train_loop(dataloader: DataLoader, model, loss_fn, optimizer):
@@ -114,7 +130,7 @@ def test_loop(dataloader, model, loss_fn):
 
 
 def main():
-    model = HiddenBrick()
+    model = CycleNet()
     print(model)
 
     learning_rate = 1e-3
