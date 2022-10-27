@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -107,9 +106,9 @@ def train_loop(dataloader: DataLoader, model, loss_fn, optimizer):
         # 教師ラベルをone-hotにして0番目と最後を入れ替える
         # 0番目は該当なし，最後は数字の0に割り当てられる
         # TODO: バッチ処理未対応
-        label = F.one_hot(y, len(MNIST_classes) + 1)[0].to(torch.float32)  # one-hotにする
+        label = F.one_hot(y, len(MNIST_classes) + 1)[0].to(torch.float32)
         label[0], label[len(label) - 1] = label[len(label) - 1], label[0]
-        
+
         loss = loss_fn(pred, label)
 
         # Backpropagation
@@ -117,7 +116,7 @@ def train_loop(dataloader: DataLoader, model, loss_fn, optimizer):
         loss.backward()
         optimizer.step()
 
-        if batch % 100 == 0:
+        if batch % 1000 == 0:
             loss, current = loss.item(), batch * len(X)
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
@@ -130,8 +129,10 @@ def test_loop(dataloader, model, loss_fn):
     with torch.no_grad():
         for X, y in dataloader:
             pred = model(X)
-            test_loss += loss_fn(pred, y).item()
-            correct += (pred.argmax(1) == y).type(torch.float).sum().item()
+            label = F.one_hot(y, len(MNIST_classes) + 1)[0].to(torch.float32)
+            label[0], label[len(label) - 1] = label[len(label) - 1], label[0]
+            test_loss += loss_fn(pred, label).item()
+            correct += (pred.argmax() == y).type(torch.float).sum().item()
 
     test_loss /= num_batches
     correct /= size
