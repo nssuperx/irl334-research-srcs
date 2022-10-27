@@ -1,8 +1,7 @@
-import numpy as np
 import matplotlib.pyplot as plt
 import torch
 from torch import nn
-import torchvision
+import torch.nn.functional as F
 from torchvision import datasets
 from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader
@@ -11,13 +10,13 @@ train_dataset = datasets.MNIST(
     root='../pt_datasets',
     train=True,
     download=True,
-    transform=ToTensor()
+    transform=ToTensor(),
 )
 test_dataset = datasets.MNIST(
     root='../pt_datasets',
     train=False,
     download=True,
-    transform=ToTensor()
+    transform=ToTensor(),
 )
 
 trainloader = DataLoader(train_dataset, shuffle=True)
@@ -55,6 +54,7 @@ class ClampArg(nn.Module):
 class HiddenBrick(nn.Module):
     """隠れ層の役割のBrick
     """
+
     def __init__(self):
         super(HiddenBrick, self).__init__()
         self.flatten = nn.Flatten()
@@ -76,9 +76,11 @@ class OutBrick(nn.Module):
     def __init__(self, in_features: int):
         super(OutBrick, self).__init__()
         self.fc = nn.Linear(in_features, len(MNIST_classes) + 1)
+        self.softmax = nn.Softmax()
 
     def forward(self, x: torch.Tensor):
         x = self.fc(x)
+        x = self.softmax(x)
         return x
 
 
@@ -101,7 +103,14 @@ def train_loop(dataloader: DataLoader, model, loss_fn, optimizer):
     for batch, (X, y) in enumerate(dataloader):
         # Compute prediction and loss
         pred = model(X)
-        loss = loss_fn(pred, y)
+
+        # 教師ラベルをone-hotにして0番目と最後を入れ替える
+        # 0番目は該当なし，最後は数字の0に割り当てられる
+        # TODO: バッチ処理未対応
+        label = F.one_hot(y, len(MNIST_classes) + 1)[0].to(torch.float32)  # one-hotにする
+        label[0], label[len(label) - 1] = label[len(label) - 1], label[0]
+        
+        loss = loss_fn(pred, label)
 
         # Backpropagation
         optimizer.zero_grad()
