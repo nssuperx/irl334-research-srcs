@@ -147,7 +147,7 @@ def test_loop(dataloader, model, loss_fn):
 
 def main():
     learning_rate = 1e-3
-    batch_size = 1
+    batch_size = 10
 
     trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
     testloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)

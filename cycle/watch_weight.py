@@ -4,8 +4,7 @@ import torch.nn.functional as F
 from torchvision import datasets
 from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader
-import matplotlib.pyplot as plt
-
+from modules.visualize import show_weight_all_cycle_hidden
 
 train_dataset = datasets.MNIST(
     root='../pt_datasets',
@@ -20,11 +19,10 @@ test_dataset = datasets.MNIST(
     transform=ToTensor(),
 )
 
-trainloader = DataLoader(train_dataset, shuffle=True)
-testloader = DataLoader(test_dataset, shuffle=False)
 MNIST_classes = datasets.MNIST.classes
 
 B_classes = 31
+B_Bricks = 20
 
 
 class ArgMax(nn.Module):
@@ -36,7 +34,7 @@ class ArgMax(nn.Module):
         super(ArgMax, self).__init__()
 
     def forward(self, input: torch.Tensor):
-        return input.argmax()
+        return input.argmax(dim=-1)
 
 
 class ClampArg(nn.Module):
@@ -56,18 +54,19 @@ class HiddenBrick(nn.Module):
     """隠れ層の役割のBrick
     """
 
-    def __init__(self):
+    def __init__(self, out_features: int):
         super(HiddenBrick, self).__init__()
+        self.out_features = out_features
         self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(28 * 28, B_classes)
-        # self.maxcell = nn.MaxPool1d(B_classes)
+        # NOTE: メモ参照．HiddenBrickのnn.Linearについて
+        self.fc1 = nn.Linear(28 * 28, B_classes * out_features)
         self.argmax = ArgMax()
         self.clamp = ClampArg()
 
     def forward(self, x: torch.Tensor):
         x = self.flatten(x)
         x = self.fc1(x)
-        # x = self.maxcell(x)
+        x = x.reshape(x.shape[0], self.out_features, B_classes)
         x = self.argmax(x)
         x = self.clamp(x)
         return x
@@ -77,10 +76,10 @@ class OutBrick(nn.Module):
     def __init__(self, in_features: int):
         super(OutBrick, self).__init__()
         self.fc = nn.Linear(in_features, len(MNIST_classes) + 1)
-        self.softmax = nn.Softmax()
+        self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x: torch.Tensor):
-        x = self.fc(x)
+        x = self.fc(x.to(dtype=torch.float32))
         x = self.softmax(x)
         return x
 
@@ -88,14 +87,12 @@ class OutBrick(nn.Module):
 class CycleNet(nn.Module):
     def __init__(self):
         super(CycleNet, self).__init__()
-        self.hidden_bricks = nn.ModuleList([HiddenBrick() for i in range(B_classes)])
-        self.out = OutBrick(B_classes)
+        self.hidden_brick = HiddenBrick(B_Bricks)
+        self.out = OutBrick(B_Bricks)
 
     def forward(self, x: torch.Tensor):
-        b_out = torch.empty(B_classes)
-        for i, hidden in enumerate(self.hidden_bricks):
-            b_out[i] = hidden(x)
-        x = self.out(b_out)
+        x = self.hidden_brick(x)
+        x = self.out(x)
         return x
 
 
@@ -105,11 +102,14 @@ def train_loop(dataloader: DataLoader, model, loss_fn, optimizer):
         # Compute prediction and loss
         pred = model(X)
 
-        # 教師ラベルをone-hotにして0番目と最後を入れ替える
-        # 0番目は該当なし，最後は数字の0に割り当てられる
-        # TODO: バッチ処理未対応
-        label = F.one_hot(y, len(MNIST_classes) + 1)[0].to(torch.float32)
-        label[0], label[len(label) - 1] = label[len(label) - 1], label[0]
+        # 教師ラベルをone-hotにする．0番目は該当なし，最後は数字の0に割り当てられる
+        label = F.one_hot(y, len(MNIST_classes) + 1).to(torch.float32)
+
+        slice_pattern = list(range(len(MNIST_classes) + 1))
+        slice_pattern[0], slice_pattern[-1] = slice_pattern[-1], slice_pattern[0]
+
+        # 0番目は該当なし，最後は数字の0に割り当てられるように入れ替える
+        label = label[:, slice_pattern]
 
         loss = loss_fn(pred, label)
 
@@ -118,10 +118,8 @@ def train_loop(dataloader: DataLoader, model, loss_fn, optimizer):
         loss.backward()
         optimizer.step()
 
-        if batch % 1000 == 0:
+        if batch * int(dataloader.batch_size) % 10000 == 0:
             loss, current = loss.item(), batch * len(X)
-            show_network_weight(model)
-
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
 
@@ -133,46 +131,39 @@ def test_loop(dataloader, model, loss_fn):
     with torch.no_grad():
         for X, y in dataloader:
             pred = model(X)
-            label = F.one_hot(y, len(MNIST_classes) + 1)[0].to(torch.float32)
-            label[0], label[len(label) - 1] = label[len(label) - 1], label[0]
+
+            # 教師ラベルを整形する処理
+            label = F.one_hot(y, len(MNIST_classes) + 1).to(torch.float32)
+            slice_pattern = list(range(len(MNIST_classes) + 1))
+            slice_pattern[0], slice_pattern[-1] = slice_pattern[-1], slice_pattern[0]
+            label = label[:, slice_pattern]
+
             test_loss += loss_fn(pred, label).item()
-            correct += (pred.argmax() == y).type(torch.float).sum().item()
+            correct += (pred.argmax(dim=-1) == torch.where(y == 0, 10, y)).type(torch.float32).sum().item()
 
     test_loss /= num_batches
     correct /= size
     print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
 
 
-def show_network_weight(model: CycleNet):
-    weight_flat: torch.Tensor = model.hidden_bricks[3].fc1.weight
-    weight_flat.requires_grad_(False)
-    weight = weight_flat.unflatten(dim=1, sizes=(28, 28))
-    row, col = 4, 10
-
-    fig = plt.figure()
-    for i, img in enumerate(weight):
-        ax = fig.add_subplot(row, col, i + 1)
-        ax.set_axis_off()
-        ax.imshow(img.numpy(), cmap="gray", interpolation="none")
-    plt.show()
-    return
-
-
 def main():
+    learning_rate = 1e-3
+    batch_size = 10
+
+    trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
+    testloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     model = CycleNet()
     print(model)
-
-    learning_rate = 1e-3
-    batch_size = 64
 
     loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
-    epochs = 10
+    epochs = 10000
     for t in range(epochs):
         print(f"Epoch {t+1}\n-------------------------------")
         train_loop(trainloader, model, loss_fn, optimizer)
         test_loop(testloader, model, loss_fn)
+        show_weight_cycle_hidden(model.hidden_brick.fc1, B_Bricks, B_classes, t)
     print("Done!")
 
 
