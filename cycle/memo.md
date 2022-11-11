@@ -15,3 +15,7 @@ nn.Linear自体はN次元の入力を扱えるようになっている．
 そのため，素子数 * 出力数の全結合を作ってあとからreshapeする．
 nn.ConvNdをうまく使えそうだが，今の実力ではよくわからなかった．
 もっといい実装は今後の課題とする．
+
+## 微分可能なArgmax
+
+[このコード](https://github.com/david-wb/softargmax/blob/master/softargmax.py)を使わせてもらう．

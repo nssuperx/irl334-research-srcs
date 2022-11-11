@@ -4,6 +4,8 @@ import torch.nn.functional as F
 from torchvision import datasets
 from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader
+from modules.visualize import show_weight_cycle_hidden
+import matplotlib.pyplot as plt
 
 train_dataset = datasets.MNIST(
     root='../pt_datasets',
@@ -24,18 +26,6 @@ B_classes = 31
 B_Bricks = 20
 
 
-class ArgMax(nn.Module):
-    """argmaxをnn.Module化したもの
-    NOTE: 必要ないかもしれない
-    """
-
-    def __init__(self):
-        super(ArgMax, self).__init__()
-
-    def forward(self, input: torch.Tensor):
-        return input.argmax(dim=-1)
-
-
 class ClampArg(nn.Module):
     """出力番号（要素）を0, 1の間でクランプする
     0は0，1以上は1にできる
@@ -49,6 +39,20 @@ class ClampArg(nn.Module):
         return input.clamp(min=0, max=1)
 
 
+class SoftArgmax(nn.Module):
+    def __init__(self, beta=100) -> None:
+        super(SoftArgmax, self).__init__()
+        self.softmax = nn.Softmax(dim=-1)
+        self.beta = beta
+
+    def forward(self, input: torch.Tensor):
+        *_, n = input.shape
+        input = self.softmax(self.beta * input)
+        indices = torch.linspace(0, 1, n)
+        result = torch.sum((n - 1) * input * indices, dim=-1)
+        return result
+
+
 class HiddenBrick(nn.Module):
     """隠れ層の役割のBrick
     """
@@ -59,7 +63,7 @@ class HiddenBrick(nn.Module):
         self.flatten = nn.Flatten()
         # NOTE: メモ参照．HiddenBrickのnn.Linearについて
         self.fc1 = nn.Linear(28 * 28, B_classes * out_features)
-        self.argmax = ArgMax()
+        self.argmax = SoftArgmax()
         self.clamp = ClampArg()
 
     def forward(self, x: torch.Tensor):
@@ -143,13 +147,26 @@ def test_loop(dataloader, model, loss_fn):
     test_loss /= num_batches
     correct /= size
     print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
+    return correct, test_loss
+
+
+def plot_graph(acc: list, loss: list):
+    fig = plt.figure()
+    ax1 = fig.add_subplot(211)
+    ax2 = fig.add_subplot(212)
+    ax1.plot(acc)
+    ax2.plot(loss)
+    ax1.set_title("Accuracy")
+    ax2.set_title("Avg loss")
+    fig.tight_layout()
+    fig.savefig("./out/acc.pdf")
 
 
 def main():
     learning_rate = 1e-3
     batch_size = 10
 
-    trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
+    trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     testloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     model = CycleNet()
     print(model)
@@ -157,12 +174,20 @@ def main():
     loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
-    epochs = 10000
+    accuracy = []
+    avg_loss = []
+
+    epochs = 300
     for t in range(epochs):
         print(f"Epoch {t+1}\n-------------------------------")
         train_loop(trainloader, model, loss_fn, optimizer)
-        test_loop(testloader, model, loss_fn)
+        acc, al = test_loop(testloader, model, loss_fn)
+        accuracy.append(acc)
+        avg_loss.append(al)
+        show_weight_cycle_hidden(model.hidden_brick.fc1, B_Bricks, B_classes, t)
     print("Done!")
+
+    plot_graph(accuracy, avg_loss)
 
 
 if __name__ == "__main__":
