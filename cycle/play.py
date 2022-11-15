@@ -1,3 +1,4 @@
+import datetime
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -159,7 +160,7 @@ def plot_graph(acc: list, loss: list):
     ax1.set_title("Accuracy")
     ax2.set_title("Avg loss")
     fig.tight_layout()
-    fig.savefig("./out/acc.pdf")
+    fig.savefig(f"./out/acc{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.pdf")
 
 
 def main():

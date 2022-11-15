@@ -19,3 +19,10 @@ nn.ConvNdをうまく使えそうだが，今の実力ではよくわからな�
 ## 微分可能なArgmax
 
 [このコード](https://github.com/david-wb/softargmax/blob/master/softargmax.py)を使わせてもらう．
+
+## `torchvision.utils.make_grid()`
+
+引数について
+> tensor (Tensor or list) – 4D mini-batch Tensor of shape (B x C x H x W) or a list of images all of the same size.
+
+おそらくBatch, Channel, Height, Weight．
