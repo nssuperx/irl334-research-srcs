@@ -6,6 +6,7 @@ from torchvision import datasets
 from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader
 from modules.visualize import show_weight_cycle_hidden
+import modules.self_made_nn as smnn
 import matplotlib.pyplot as plt
 
 train_dataset = datasets.MNIST(
@@ -27,72 +28,11 @@ B_classes = 31
 B_Bricks = 20
 
 
-class ClampArg(nn.Module):
-    """出力番号（要素）を0, 1の間でクランプする
-    0は0，1以上は1にできる
-    NOTE: 必要ないかもしれない
-    """
-
-    def __init__(self):
-        super(ClampArg, self).__init__()
-
-    def forward(self, input: torch.Tensor):
-        return input.clamp(min=0, max=1)
-
-
-class SoftArgmax(nn.Module):
-    def __init__(self, beta=100) -> None:
-        super(SoftArgmax, self).__init__()
-        self.softmax = nn.Softmax(dim=-1)
-        self.beta = beta
-
-    def forward(self, input: torch.Tensor):
-        *_, n = input.shape
-        input = self.softmax(self.beta * input)
-        indices = torch.linspace(0, 1, n)
-        result = torch.sum((n - 1) * input * indices, dim=-1)
-        return result
-
-
-class HiddenBrick(nn.Module):
-    """隠れ層の役割のBrick
-    """
-
-    def __init__(self, out_features: int):
-        super(HiddenBrick, self).__init__()
-        self.out_features = out_features
-        self.flatten = nn.Flatten()
-        # NOTE: メモ参照．HiddenBrickのnn.Linearについて
-        self.fc1 = nn.Linear(28 * 28, B_classes * out_features)
-        self.argmax = SoftArgmax()
-        self.clamp = ClampArg()
-
-    def forward(self, x: torch.Tensor):
-        x = self.flatten(x)
-        x = self.fc1(x)
-        x = x.reshape(x.shape[0], self.out_features, B_classes)
-        x = self.argmax(x)
-        x = self.clamp(x)
-        return x
-
-
-class OutBrick(nn.Module):
-    def __init__(self, in_features: int):
-        super(OutBrick, self).__init__()
-        self.fc = nn.Linear(in_features, len(MNIST_classes) + 1)
-        self.softmax = nn.Softmax(dim=1)
-
-    def forward(self, x: torch.Tensor):
-        x = self.fc(x.to(dtype=torch.float32))
-        x = self.softmax(x)
-        return x
-
-
 class CycleNet(nn.Module):
     def __init__(self):
         super(CycleNet, self).__init__()
-        self.hidden_brick = HiddenBrick(B_Bricks)
-        self.out = OutBrick(B_Bricks)
+        self.hidden_brick = smnn.HiddenBrick(28 * 28, B_Bricks, B_classes)
+        self.out = smnn.OutBrick(B_Bricks, len(MNIST_classes) + 1)
 
     def forward(self, x: torch.Tensor):
         x = self.hidden_brick(x)
@@ -185,7 +125,7 @@ def main():
         acc, al = test_loop(testloader, model, loss_fn)
         accuracy.append(acc)
         avg_loss.append(al)
-        show_weight_cycle_hidden(model.hidden_brick.fc1, B_Bricks, B_classes, t)
+        show_weight_cycle_hidden(model.hidden_brick.fc1, B_Bricks, B_classes, t, 8)
     print("Done!")
 
     plot_graph(accuracy, avg_loss)

@@ -2,13 +2,12 @@ from torch import nn
 import torchvision
 
 
-def show_weight_cycle_hidden(layer: nn.Linear, out_bricks: int, classes: int, epoch_times: int):
+def show_weight_cycle_hidden(layer: nn.Linear, out_bricks: int, classes: int, epoch_times: int, target: int = 1):
     """
     cyclenetの結合の重みを見る．MNIST用．
     Args:
         layer (nn.Linear)
     """
-    target = 6
     weight_flat = layer.weight.detach().clone()
     weight = weight_flat.reshape((out_bricks, classes, 28, 28))
     target_weight = weight[target]
