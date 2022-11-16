@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from torchvision import datasets
 from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader
-from modules.visualize import show_weight_cycle_hidden
+from modules.visualize import show_weight_cycle_hidden, show_weight_allInOnePicture_cycle_hidden
 import modules.self_made_nn as smnn
 import matplotlib.pyplot as plt
 
@@ -125,7 +125,8 @@ def main():
         acc, al = test_loop(testloader, model, loss_fn)
         accuracy.append(acc)
         avg_loss.append(al)
-        show_weight_cycle_hidden(model.hidden_brick.fc1, B_Bricks, B_classes, t, 8)
+        # show_weight_cycle_hidden(model.hidden_brick.fc1, B_Bricks, B_classes, t, 8)
+        show_weight_allInOnePicture_cycle_hidden(model.hidden_brick.fc1, B_Bricks, B_classes, t)
     print("Done!")
 
     plot_graph(accuracy, avg_loss)
