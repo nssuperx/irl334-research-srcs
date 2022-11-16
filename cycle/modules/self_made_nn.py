@@ -8,20 +8,21 @@ class TSigmoid(nn.Module):
         T (float, optional): 歪ませる度合い. Defaults to 1.0.
         center (float, optional): 真ん中の位置(出力が0.5になる点). Defaults to 0.0.
     """
-    def __init__(self, T: float = 1.0, center: float = 0.0) -> None:
 
+    def __init__(self, T: float = 1.0, center: float = 0.0) -> None:
         super(TSigmoid, self).__init__()
-        self.T = T
+        self.Ti = 1.0 / T  # T inverse
         self.center = center
 
     def forward(self, input: torch.Tensor):
-        return torch.sigmoid((input - self.center) / self.T)
+        return torch.sigmoid((input - self.center) * self.Ti)
 
 
 class SoftArgmax(nn.Module):
     """微分可能なArgmax
     NOTE: 参考元 https://github.com/david-wb/softargmax/blob/master/softargmax.py
     """
+
     def __init__(self, beta=100) -> None:
         super(SoftArgmax, self).__init__()
         self.softmax = nn.Softmax(dim=-1)
