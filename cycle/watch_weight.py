@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torchvision import datasets
 from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader
-from modules.visualize import show_weight_all_cycle_hidden
+from modules.visualize import show_brick_weight_all
 
 train_dataset = datasets.MNIST(
     root='../pt_datasets',

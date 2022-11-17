@@ -49,12 +49,12 @@ class ClampArg(nn.Module):
         return input.clamp(min=0, max=1)
 
 
-class HiddenBrick(nn.Module):
+class MultiValueBrick(nn.Module):
     """隠れ層の役割のBrick
     """
 
     def __init__(self, in_features: int, out_features: int, classes: int):
-        super(HiddenBrick, self).__init__()
+        super(MultiValueBrick, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.classes = classes

@@ -3,9 +3,9 @@ from torch import nn
 import torchvision
 
 
-def show_weight_cycle_hidden(layer: nn.Linear, out_bricks: int, classes: int, epoch_times: int, target: int = 1):
+def show_brick_weight(layer: nn.Linear, out_bricks: int, classes: int, epoch_times: int, target: int = 1):
     """
-    cyclenetの結合の重みを見る．MNIST用．
+    MultiValueNetの結合の重みを見る．MNIST用．
     Args:
         layer (nn.Linear)
     """
@@ -16,9 +16,9 @@ def show_weight_cycle_hidden(layer: nn.Linear, out_bricks: int, classes: int, ep
     torchvision.utils.save_image(img[0], f"./out/w{target:02}epoch{epoch_times:06}.png")
 
 
-def show_weight_all_cycle_hidden(layer: nn.Linear, out_bricks: int, classes: int, epoch_times: int):
+def show_brick_weight_all(layer: nn.Linear, out_bricks: int, classes: int, epoch_times: int):
     """
-    cyclenetの結合の重み全部見る．MNIST用．
+    MultiValueNetの結合の重み全部見る．MNIST用．
     Args:
         layer (nn.Linear)
     """
@@ -30,9 +30,9 @@ def show_weight_all_cycle_hidden(layer: nn.Linear, out_bricks: int, classes: int
         torchvision.utils.save_image(img[0], f"./out/w{target:02}epoch{epoch_times:06}.png")
 
 
-def show_weight_allInOnePicture_cycle_hidden(layer: nn.Linear, out_bricks: int, classes: int, epoch_times: int):
+def show_brick_weight_allInOnePicture(layer: nn.Linear, out_bricks: int, classes: int, epoch_times: int):
     """
-    cyclenetの結合の重み全部を1枚の画像にして出力．MNIST用．
+    MultiValueNetの結合の重み全部を1枚の画像にして出力．MNIST用．
     Args:
         layer (nn.Linear)
     """

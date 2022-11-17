@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from torchvision import datasets
 from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader
-from modules.visualize import show_weight_cycle_hidden, show_weight_allInOnePicture_cycle_hidden
+from modules.visualize import show_brick_weight_allInOnePicture
 import modules.self_made_nn as smnn
 import matplotlib.pyplot as plt
 
@@ -28,14 +28,14 @@ B_classes = 31
 B_Bricks = 20
 
 
-class CycleNet(nn.Module):
+class MultiValueNet(nn.Module):
     def __init__(self):
-        super(CycleNet, self).__init__()
-        self.hidden_brick = smnn.HiddenBrick(28 * 28, B_Bricks, B_classes)
+        super(MultiValueNet, self).__init__()
+        self.mvbrick = smnn.MultiValueBrick(28 * 28, B_Bricks, B_classes)
         self.out = smnn.OutBrick(B_Bricks, len(MNIST_classes) + 1)
 
     def forward(self, x: torch.Tensor):
-        x = self.hidden_brick(x)
+        x = self.mvbrick(x)
         x = self.out(x)
         return x
 
@@ -109,7 +109,7 @@ def main():
 
     trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     testloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-    model = CycleNet()
+    model = MultiValueNet()
     print(model)
 
     loss_fn = nn.CrossEntropyLoss()
@@ -125,8 +125,7 @@ def main():
         acc, al = test_loop(testloader, model, loss_fn)
         accuracy.append(acc)
         avg_loss.append(al)
-        # show_weight_cycle_hidden(model.hidden_brick.fc1, B_Bricks, B_classes, t, 8)
-        show_weight_allInOnePicture_cycle_hidden(model.hidden_brick.fc1, B_Bricks, B_classes, t)
+        show_brick_weight_allInOnePicture(model.mvbrick.fc1, B_Bricks, B_classes, t)
     print("Done!")
 
     plot_graph(accuracy, avg_loss)
