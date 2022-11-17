@@ -1,4 +1,6 @@
+import os
 import datetime
+import json
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -8,6 +10,9 @@ from torch.utils.data import DataLoader
 from modules.visualize import show_brick_weight_allInOnePicture
 import modules.self_made_nn as smnn
 import matplotlib.pyplot as plt
+
+SEED = 2022
+torch.manual_seed(SEED)
 
 train_dataset = datasets.MNIST(
     root='../pt_datasets',
@@ -24,15 +29,19 @@ test_dataset = datasets.MNIST(
 
 MNIST_classes = datasets.MNIST.classes
 
+# Hyperparameter
 B_classes = 31
-B_Bricks = 20
+B_bricks = 20
+learning_rate = 1e-3
+batch_size = 10
+epochs = 300
 
 
 class MultiValueNet(nn.Module):
     def __init__(self):
         super(MultiValueNet, self).__init__()
-        self.mvbrick = smnn.MultiValueBrick(28 * 28, B_Bricks, B_classes)
-        self.out = smnn.OutBrick(B_Bricks, len(MNIST_classes) + 1)
+        self.mvbrick = smnn.MultiValueBrick(28 * 28, B_bricks, B_classes)
+        self.out = smnn.OutBrick(B_bricks, len(MNIST_classes) + 1)
 
     def forward(self, x: torch.Tensor):
         x = self.mvbrick(x)
@@ -91,7 +100,7 @@ def test_loop(dataloader, model, loss_fn):
     return correct, test_loss
 
 
-def plot_graph(acc: list, loss: list):
+def plot_graph(acc: list, loss: list, path: str):
     fig = plt.figure()
     ax1 = fig.add_subplot(211)
     ax2 = fig.add_subplot(212)
@@ -100,15 +109,33 @@ def plot_graph(acc: list, loss: list):
     ax1.set_title("Accuracy")
     ax2.set_title("Avg loss")
     fig.tight_layout()
-    fig.savefig(f"./out/acc{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.pdf")
+    fig.savefig(f"{path}/acc.pdf")
+
+
+def experiment_setup():
+    workdir = f"./out/{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
+    os.makedirs(workdir)
+
+    info = {
+        "SEED": SEED,
+        "B_classes": B_classes,
+        "B_bricks": B_bricks,
+        "learning_rate": learning_rate,
+        "batch_size": batch_size,
+        "epochs": epochs
+    }
+
+    with open(f"{workdir}/info.json", "w") as f:
+        json.dump(info, f, indent=4)
+
+    return workdir
 
 
 def main():
-    learning_rate = 1e-3
-    batch_size = 10
+    workdir = experiment_setup()
 
-    trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    testloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    trainloader = DataLoader(train_dataset, batch_size, shuffle=True)
+    testloader = DataLoader(test_dataset, batch_size, shuffle=False)
     model = MultiValueNet()
     print(model)
 
@@ -118,17 +145,16 @@ def main():
     accuracy = []
     avg_loss = []
 
-    epochs = 300
     for t in range(epochs):
         print(f"Epoch {t+1}\n-------------------------------")
         train_loop(trainloader, model, loss_fn, optimizer)
         acc, al = test_loop(testloader, model, loss_fn)
         accuracy.append(acc)
         avg_loss.append(al)
-        show_brick_weight_allInOnePicture(model.mvbrick.fc1, B_Bricks, B_classes, t)
+        show_brick_weight_allInOnePicture(model.mvbrick.fc1, B_bricks, B_classes, t, workdir)
     print("Done!")
 
-    plot_graph(accuracy, avg_loss)
+    plot_graph(accuracy, avg_loss, workdir)
 
 
 if __name__ == "__main__":
