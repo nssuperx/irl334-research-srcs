@@ -60,14 +60,14 @@ class MultiValueBrick(nn.Module):
         self.classes = classes
         self.flatten = nn.Flatten()
         # NOTE: メモ参照．HiddenBrickのnn.Linearについて
-        self.fc1 = nn.Linear(self.in_features, self.classes * self.out_features)
+        self.fc = nn.Linear(self.in_features, self.classes * self.out_features)
         self.argmax = SoftArgmax()
         # self.clamp = ClampArg()
         self.tsigmoid = TSigmoid(T=0.1, center=0.5)
 
     def forward(self, x: torch.Tensor):
         x = self.flatten(x)
-        x = self.fc1(x)
+        x = self.fc(x)
         x = x.reshape(x.shape[0], self.out_features, self.classes)
         x = self.argmax(x)
         # x = self.clamp(x)

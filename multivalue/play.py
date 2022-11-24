@@ -1,6 +1,7 @@
 import os
 import datetime
 import json
+from typing import NamedTuple
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -11,8 +12,19 @@ from modules.visualize import show_brick_weight_allInOnePicture
 import modules.self_made_nn as smnn
 import matplotlib.pyplot as plt
 
-SEED = 2022
-torch.manual_seed(SEED)
+
+class HyperParameter(NamedTuple):
+    seed: int
+    B_classes: int
+    B_bricks: int
+    learning_rate: float
+    batch_size: int
+    epochs: int
+
+
+hp = HyperParameter(2022, 15, 10, 1e-2, 50, 100)
+
+torch.manual_seed(hp.seed)
 
 train_dataset = datasets.MNIST(
     root='../pt_datasets',
@@ -29,19 +41,17 @@ test_dataset = datasets.MNIST(
 
 MNIST_classes = datasets.MNIST.classes
 
-# Hyperparameter
-B_classes = 31
-B_bricks = 20
-learning_rate = 1e-3
-batch_size = 10
-epochs = 300
+# 教師ラベルを整形するときに使う
+sp_list = list(range(len(MNIST_classes) + 1))
+sp_list[0], sp_list[-1] = sp_list[-1], sp_list[0]
+slice_pattern = tuple(sp_list)
 
 
 class MultiValueNet(nn.Module):
     def __init__(self):
         super(MultiValueNet, self).__init__()
-        self.mvbrick = smnn.MultiValueBrick(28 * 28, B_bricks, B_classes)
-        self.out = smnn.OutBrick(B_bricks, len(MNIST_classes) + 1)
+        self.mvbrick = smnn.MultiValueBrick(28 * 28, hp.B_bricks, hp.B_classes)
+        self.out = smnn.OutBrick(hp.B_bricks, len(MNIST_classes) + 1)
 
     def forward(self, x: torch.Tensor):
         x = self.mvbrick(x)
@@ -51,15 +61,13 @@ class MultiValueNet(nn.Module):
 
 def train_loop(dataloader: DataLoader, model, loss_fn, optimizer):
     size = len(dataloader.dataset)
+
     for batch, (X, y) in enumerate(dataloader):
         # Compute prediction and loss
         pred = model(X)
 
-        # 教師ラベルをone-hotにする．0番目は該当なし，最後は数字の0に割り当てられる
+        # 教師ラベルをone-hotにする．
         label = F.one_hot(y, len(MNIST_classes) + 1).to(torch.float32)
-
-        slice_pattern = list(range(len(MNIST_classes) + 1))
-        slice_pattern[0], slice_pattern[-1] = slice_pattern[-1], slice_pattern[0]
 
         # 0番目は該当なし，最後は数字の0に割り当てられるように入れ替える
         label = label[:, slice_pattern]
@@ -87,8 +95,6 @@ def test_loop(dataloader, model, loss_fn):
 
             # 教師ラベルを整形する処理
             label = F.one_hot(y, len(MNIST_classes) + 1).to(torch.float32)
-            slice_pattern = list(range(len(MNIST_classes) + 1))
-            slice_pattern[0], slice_pattern[-1] = slice_pattern[-1], slice_pattern[0]
             label = label[:, slice_pattern]
 
             test_loss += loss_fn(pred, label).item()
@@ -116,17 +122,8 @@ def experiment_setup():
     workdir = f"./out/{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
     os.makedirs(workdir)
 
-    info = {
-        "SEED": SEED,
-        "B_classes": B_classes,
-        "B_bricks": B_bricks,
-        "learning_rate": learning_rate,
-        "batch_size": batch_size,
-        "epochs": epochs
-    }
-
     with open(f"{workdir}/info.json", "w") as f:
-        json.dump(info, f, indent=4)
+        json.dump(hp._asdict(), f, indent=4)
 
     return workdir
 
@@ -134,24 +131,24 @@ def experiment_setup():
 def main():
     workdir = experiment_setup()
 
-    trainloader = DataLoader(train_dataset, batch_size, shuffle=True)
-    testloader = DataLoader(test_dataset, batch_size, shuffle=False)
+    trainloader = DataLoader(train_dataset, hp.batch_size, shuffle=True)
+    testloader = DataLoader(test_dataset, hp.batch_size, shuffle=False)
     model = MultiValueNet()
     print(model)
 
     loss_fn = nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+    optimizer = torch.optim.SGD(model.parameters(), lr=hp.learning_rate)
 
     accuracy = []
     avg_loss = []
 
-    for t in range(epochs):
+    for t in range(hp.epochs):
         print(f"Epoch {t+1}\n-------------------------------")
         train_loop(trainloader, model, loss_fn, optimizer)
         acc, al = test_loop(testloader, model, loss_fn)
         accuracy.append(acc)
         avg_loss.append(al)
-        show_brick_weight_allInOnePicture(model.mvbrick.fc1, B_bricks, B_classes, t, workdir)
+        show_brick_weight_allInOnePicture(model.mvbrick.fc, hp.B_bricks, hp.B_classes, t, workdir)
     print("Done!")
 
     plot_graph(accuracy, avg_loss, workdir)
