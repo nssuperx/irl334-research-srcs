@@ -13,6 +13,11 @@ import modules.self_made_nn as smnn
 import matplotlib.pyplot as plt
 
 
+class ExperimentInfo(NamedTuple):
+    title: str
+    description: str
+
+
 class HyperParameter(NamedTuple):
     seed: int
     B_classes: int
@@ -22,6 +27,7 @@ class HyperParameter(NamedTuple):
     epochs: int
 
 
+ei = ExperimentInfo("MultiValue", "none")
 hp = HyperParameter(2022, 15, 10, 1e-2, 50, 100)
 
 torch.manual_seed(hp.seed)
@@ -123,7 +129,7 @@ def experiment_setup():
     os.makedirs(workdir)
 
     with open(f"{workdir}/info.json", "w") as f:
-        json.dump(hp._asdict(), f, indent=4)
+        json.dump(ei._asdict() | hp._asdict(), f, indent=4)
 
     return workdir
 
