@@ -148,13 +148,16 @@ def main():
     accuracy = []
     avg_loss = []
 
+    # 何もしていない最初の状態
+    show_brick_weight_allInOnePicture(model.mvbrick.fc, hp.B_bricks, hp.B_classes, 28, 28, 0, workdir)
+
     for t in range(hp.epochs):
         print(f"Epoch {t+1}\n-------------------------------")
         train_loop(trainloader, model, loss_fn, optimizer)
         acc, al = test_loop(testloader, model, loss_fn)
         accuracy.append(acc)
         avg_loss.append(al)
-        show_brick_weight_allInOnePicture(model.mvbrick.fc, hp.B_bricks, hp.B_classes, t, workdir)
+        show_brick_weight_allInOnePicture(model.mvbrick.fc, hp.B_bricks, hp.B_classes, 28, 28, t+1, workdir)
     print("Done!")
 
     plot_graph(accuracy, avg_loss, workdir)

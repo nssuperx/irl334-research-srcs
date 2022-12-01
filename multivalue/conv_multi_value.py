@@ -20,17 +20,15 @@ class ExperimentInfo(NamedTuple):
 
 class HyperParameter(NamedTuple):
     seed: int
-    in_brick_classes: int
-    in_bricks: int
-    hidden_brick_classes: int
-    hidden_bricks: int
+    B_classes: int
+    B_bricks: int
     learning_rate: float
     batch_size: int
     epochs: int
 
 
-ei = ExperimentInfo("MultiValue MultiLayer", "two multivalue layer")
-hp = HyperParameter(2022, 31, 15, 30, 10, 1e-3, 50, 1000)
+ei = ExperimentInfo("ConvMultiValue", "none")
+hp = HyperParameter(2022, 15, 10, 1e-1, 10, 100)
 
 torch.manual_seed(hp.seed)
 
@@ -55,16 +53,18 @@ sp_list[0], sp_list[-1] = sp_list[-1], sp_list[0]
 slice_pattern = tuple(sp_list)
 
 
-class MultiValueTwoLayerNet(nn.Module):
+class ConvMultiValueNet(nn.Module):
     def __init__(self):
-        super(MultiValueTwoLayerNet, self).__init__()
-        self.in_mvbrick = smnn.MultiValueBrick(28 * 28, hp.in_bricks, hp.in_brick_classes)
-        self.hidden_mvbrick = smnn.MultiValueBrick(hp.in_bricks, hp.hidden_bricks, hp.hidden_brick_classes)
-        self.out = smnn.OutBrick(hp.hidden_bricks, len(MNIST_classes) + 1)
+        super(ConvMultiValueNet, self).__init__()
+        # TODO: マジックナンバー残ってる！！！
+        self.conv = nn.Conv2d(1, 1, 2)
+        self.mvbrick = smnn.MultiValueBrick(27 * 27, hp.B_bricks, hp.B_classes)
+        self.out = smnn.OutBrick(hp.B_bricks, len(MNIST_classes) + 1)
 
     def forward(self, x: torch.Tensor):
-        x = self.in_mvbrick(x)
-        x = self.hidden_mvbrick(x)
+        x = self.conv(x)
+        x = torch.sigmoid(x)
+        x = self.mvbrick(x)
         x = self.out(x)
         return x
 
@@ -143,7 +143,7 @@ def main():
 
     trainloader = DataLoader(train_dataset, hp.batch_size, shuffle=True)
     testloader = DataLoader(test_dataset, hp.batch_size, shuffle=False)
-    model = MultiValueTwoLayerNet()
+    model = ConvMultiValueNet()
     print(model)
 
     loss_fn = nn.CrossEntropyLoss()
@@ -153,7 +153,7 @@ def main():
     avg_loss = []
 
     # 何もしていない最初の状態
-    show_brick_weight_allInOnePicture(model.in_mvbrick.fc, hp.in_bricks, hp.in_brick_classes, 28, 28, 0, workdir)
+    show_brick_weight_allInOnePicture(model.mvbrick.fc, hp.B_bricks, hp.B_classes, 27, 27, 0, workdir)
 
     for t in range(hp.epochs):
         print(f"Epoch {t+1}\n-------------------------------")
@@ -161,7 +161,7 @@ def main():
         acc, al = test_loop(testloader, model, loss_fn)
         accuracy.append(acc)
         avg_loss.append(al)
-        show_brick_weight_allInOnePicture(model.in_mvbrick.fc, hp.in_bricks, hp.in_brick_classes, 28, 28, t+1, workdir)
+        show_brick_weight_allInOnePicture(model.mvbrick.fc, hp.B_bricks, hp.B_classes, 27, 27, t+1, workdir)
     print("Done!")
 
     plot_graph(accuracy, avg_loss, workdir)

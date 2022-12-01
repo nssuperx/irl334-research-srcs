@@ -30,14 +30,15 @@ def show_brick_weight_all(layer: nn.Linear, out_bricks: int, classes: int, epoch
         torchvision.utils.save_image(img[0], f"{path}/w{target:02}epoch{epoch_times:06}.png")
 
 
-def show_brick_weight_allInOnePicture(layer: nn.Linear, out_bricks: int, classes: int, epoch_times: int, path: str):
+def show_brick_weight_allInOnePicture(layer: nn.Linear, out_bricks: int, classes: int,
+                                      height: int, width: int, epoch_times: int, path: str):
     """
     MultiValueNetの結合の重み全部を1枚の画像にして出力．MNIST用．
     Args:
         layer (nn.Linear)
     """
     weight_flat = layer.weight.detach().clone()
-    weight = weight_flat.reshape((out_bricks, classes, 28, 28))
+    weight = weight_flat.reshape((out_bricks, classes, height, width))
     imgs = []
 
     for target, target_weight in enumerate(weight):
