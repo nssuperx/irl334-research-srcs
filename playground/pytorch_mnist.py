@@ -21,8 +21,8 @@ testset = datasets.MNIST(
     transform=ToTensor()
 )
 
-trainloader = DataLoader(trainset, shuffle=True)
-testloader = DataLoader(testset, shuffle=False)
+trainloader = DataLoader(trainset, shuffle=True, batch_size=10)
+testloader = DataLoader(testset, shuffle=False, batch_size=100)
 
 classes = datasets.MNIST.classes
 
@@ -30,16 +30,18 @@ classes = datasets.MNIST.classes
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
+        self.conv2d = nn.Conv2d(1, 5, 2)
+        self.pool = nn.MaxPool2d(2, 2)
         self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(28 * 28, len(classes))
+        # self.fc1 = nn.Linear(28 * 28, len(classes))
+        self.fc1 = nn.Linear(5 * 13 * 13, len(classes))
 
     def forward(self, x):
+        x = self.conv2d(x)
+        x = torch.sigmoid(x)
+        x = self.pool(x)
         x = self.flatten(x)
         x = self.fc1(x)
-        # x = torch.flatten(x, 1)
-        # x = torch.sigmoid(self.fc1(x))
-        # x = F.relu(self.fc1(x))
-        # x = self.fc1(x)
         return x
 
 
@@ -60,7 +62,7 @@ def train(dataloader: DataLoader, model: nn.Module, loss_fn, optimizer: torch.op
 
         # print statistics
         running_loss += loss.item()
-        if batch % 2000 == 1999:    # print every 2000 mini-batches
+        if batch * int(dataloader.batch_size) % 10000 == 0:    # print every 2000 mini-batches
             loss, current = loss.item(), batch * len(inputs)
             print(f"loss: {loss:>7f}  [{current:>5d}/{len(dataloader.dataset):>5d}]")
 
