@@ -6,9 +6,10 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 from torchvision import datasets
+import torchvision.utils
 from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader
-from modules.visualize import show_brick_weight_allInOnePicture
+from modules.visualize import show_parted_brick_weight_allInOnePicture
 import modules.self_made_nn as smnn
 import matplotlib.pyplot as plt
 
@@ -31,7 +32,7 @@ class HyperParameter(NamedTuple):
 
 
 ei = ExperimentInfo("PartedMultiValue", "none")
-hp = HyperParameter(2022, 8, 4, 15, 10, 5, 1e-2, 1, 100)
+hp = HyperParameter(2022, 8, 4, 15, 10, 5, 1e-2, 10, 100)
 
 torch.manual_seed(hp.seed)
 
@@ -58,22 +59,26 @@ slice_pattern = tuple(sp_list)
 
 class PartedMultiValueNet(nn.Module):
     def __init__(self):
-        """部分で見ていく．バッチ処理未対応
+        """部分で見ていく．
         """
         super(PartedMultiValueNet, self).__init__()
-        self.mvbrick = smnn.MultiValueBrick(hp.kernel_size * hp.kernel_size, hp.MV_bricks, hp.MV_classes)
-        kernel_num = (28 - hp.kernel_size + hp.stride) // hp.stride
-        self.fc1 = nn.Linear(kernel_num**2 * hp.MV_bricks, hp.bricks_out)
-        self.fc2 = nn.Linear(hp.bricks_out, len(MNIST_classes) + 1)
+        self.kernel_row = (28 - hp.kernel_size + hp.stride) // hp.stride
+        self.mvbricks = nn.ModuleList([smnn.MultiValueBrick(hp.kernel_size * hp.kernel_size, 1, hp.MV_classes)
+                                      for i in range(self.kernel_row**2)])
+        self.fc1 = nn.Linear(self.kernel_row**2, len(MNIST_classes) + 1)
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x: torch.Tensor):
         x = x.unfold(2, hp.kernel_size, hp.stride).unfold(3, hp.kernel_size, hp.stride)
-        x = x.permute([0, 2, 3, 1, 4, 5]).reshape(-1, 1, hp.kernel_size, hp.kernel_size)
-        x = self.mvbrick(x)
-        x = x.flatten().reshape(hp.batch_size, -1)
+        # x = x.permute([0, 2, 3, 1, 4, 5]).reshape(hp.batch_size, self.kernel_row**2, hp.kernel_size, hp.kernel_size)
+        # x = x.permute([1, 0, 2, 3])
+        x = x.permute([1, 2, 3, 0, 4, 5]).reshape(self.kernel_row**2, hp.batch_size, hp.kernel_size, hp.kernel_size)
+        # torchvision.utils.save_image(x[:, 0].unsqueeze(dim=1), "test.png", nrow=self.kernel_row, normalize=True)
+        xlt = torch.empty((self.kernel_row**2, hp.batch_size, 1))
+        for i, l in enumerate(self.mvbricks):
+            xlt[i] = l(x[i])
+        x = xlt.reshape(self.kernel_row**2, hp.batch_size).permute([1, 0])
         x = self.fc1(x)
-        x = self.fc2(x)
         x = self.softmax(x)
         return x
 
@@ -162,8 +167,8 @@ def main():
     avg_loss = []
 
     # 何もしていない最初の状態
-    show_brick_weight_allInOnePicture(model.mvbrick.fc, hp.MV_bricks, hp.MV_classes,
-                                      hp.kernel_size, hp.kernel_size, 0, workdir)
+    show_parted_brick_weight_allInOnePicture(model.mvbricks, hp.MV_bricks, hp.MV_classes,
+                                             hp.kernel_size, hp.kernel_size, 0, workdir)
 
     for t in range(hp.epochs):
         print(f"Epoch {t+1}\n-------------------------------")
@@ -171,8 +176,8 @@ def main():
         acc, al = test_loop(testloader, model, loss_fn)
         accuracy.append(acc)
         avg_loss.append(al)
-        show_brick_weight_allInOnePicture(model.mvbrick.fc, hp.MV_bricks, hp.MV_classes,
-                                          hp.kernel_size, hp.kernel_size, t + 1, workdir)
+        show_parted_brick_weight_allInOnePicture(model.mvbricks, hp.MV_bricks, hp.MV_classes,
+                                                 hp.kernel_size, hp.kernel_size, t + 1, workdir)
     print("Done!")
 
     plot_graph(accuracy, avg_loss, workdir)
