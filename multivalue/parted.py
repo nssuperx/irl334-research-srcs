@@ -6,7 +6,6 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 from torchvision import datasets
-import torchvision.utils
 from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader
 from modules.visualize import show_parted_brick_weight_allInOnePicture
@@ -24,15 +23,13 @@ class HyperParameter(NamedTuple):
     kernel_size: int
     stride: int
     MV_classes: int
-    MV_bricks: int
-    bricks_out: int
     learning_rate: float
     batch_size: int
     epochs: int
 
 
 ei = ExperimentInfo("PartedMultiValue", "none")
-hp = HyperParameter(2022, 8, 4, 15, 10, 5, 1e-2, 10, 100)
+hp = HyperParameter(2022, 8, 4, 15, 1e-2, 100, 500)
 
 torch.manual_seed(hp.seed)
 
@@ -70,14 +67,12 @@ class PartedMultiValueNet(nn.Module):
 
     def forward(self, x: torch.Tensor):
         x = x.unfold(2, hp.kernel_size, hp.stride).unfold(3, hp.kernel_size, hp.stride)
-        # x = x.permute([0, 2, 3, 1, 4, 5]).reshape(hp.batch_size, self.kernel_row**2, hp.kernel_size, hp.kernel_size)
-        # x = x.permute([1, 0, 2, 3])
-        x = x.permute([1, 2, 3, 0, 4, 5]).reshape(self.kernel_row**2, hp.batch_size, hp.kernel_size, hp.kernel_size)
-        # torchvision.utils.save_image(x[:, 0].unsqueeze(dim=1), "test.png", nrow=self.kernel_row, normalize=True)
-        xlt = torch.empty((self.kernel_row**2, hp.batch_size, 1))
+        # unfoldした画像をバッチ枚数分を重ねて，重ねたままカットして，それを区画ごとにまとめるイメージ
+        x = x.permute((1, 2, 3, 0, 4, 5)).reshape(self.kernel_row**2, hp.batch_size, hp.kernel_size, hp.kernel_size)
+        xt = torch.empty((self.kernel_row**2, hp.batch_size, 1))
         for i, l in enumerate(self.mvbricks):
-            xlt[i] = l(x[i])
-        x = xlt.reshape(self.kernel_row**2, hp.batch_size).permute([1, 0])
+            xt[i] = l(x[i])
+        x = xt.squeeze().permute((1, 0))
         x = self.fc1(x)
         x = self.softmax(x)
         return x
@@ -167,7 +162,7 @@ def main():
     avg_loss = []
 
     # 何もしていない最初の状態
-    show_parted_brick_weight_allInOnePicture(model.mvbricks, hp.MV_bricks, hp.MV_classes,
+    show_parted_brick_weight_allInOnePicture(model.mvbricks, hp.MV_classes,
                                              hp.kernel_size, hp.kernel_size, 0, workdir)
 
     for t in range(hp.epochs):
@@ -176,7 +171,7 @@ def main():
         acc, al = test_loop(testloader, model, loss_fn)
         accuracy.append(acc)
         avg_loss.append(al)
-        show_parted_brick_weight_allInOnePicture(model.mvbricks, hp.MV_bricks, hp.MV_classes,
+        show_parted_brick_weight_allInOnePicture(model.mvbricks, hp.MV_classes,
                                                  hp.kernel_size, hp.kernel_size, t + 1, workdir)
     print("Done!")
 

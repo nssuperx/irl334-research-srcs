@@ -49,7 +49,7 @@ def show_brick_weight_allInOnePicture(layer: nn.Linear, out_bricks: int, classes
     torchvision.utils.save_image(grid_imgs, f"{path}/epoch{epoch_times:06}.png")
 
 
-def show_parted_brick_weight_allInOnePicture(ml: nn.ModuleList, out_bricks: int, classes: int,
+def show_parted_brick_weight_allInOnePicture(ml: nn.ModuleList, classes: int,
                                              height: int, width: int, epoch_times: int, path: str):
     """
     MultiValueNetの結合の重み全部を1枚の画像にして出力．MNIST用．
