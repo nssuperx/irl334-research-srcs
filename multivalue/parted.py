@@ -29,7 +29,7 @@ class HyperParameter(NamedTuple):
 
 
 ei = ExperimentInfo("PartedMultiValue", "none")
-hp = HyperParameter(2022, 8, 4, 15, 1e-2, 100, 500)
+hp = HyperParameter(2022, 8, 4, 6, 1e-2, 100, 300)
 
 torch.manual_seed(hp.seed)
 
