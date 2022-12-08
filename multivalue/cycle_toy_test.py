@@ -5,11 +5,9 @@ from typing import NamedTuple
 import torch
 from torch import nn
 import torch.nn.functional as F
-from torchvision import datasets
-from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader
-from modules.visualize import show_parted_brick_weight_allInOnePicture
 import modules.self_made_nn as smnn
+from modules.cycle_toy_datasets import VerticalLine
 import matplotlib.pyplot as plt
 
 
@@ -20,61 +18,30 @@ class ExperimentInfo(NamedTuple):
 
 class HyperParameter(NamedTuple):
     seed: int
-    kernel_size: int
-    stride: int
-    MV_classes: int
+    B_classes: int
+    B_bricks: int
     learning_rate: float
     batch_size: int
     epochs: int
 
 
-ei = ExperimentInfo("PartedMultiValue", "none")
-hp = HyperParameter(2022, 8, 4, 4, 1e-2, 100, 300)
+ei = ExperimentInfo("MultiValue", "none")
+hp = HyperParameter(2022, 15, 10, 1e-2, 1, 100)
 
 torch.manual_seed(hp.seed)
 
-train_dataset = datasets.MNIST(
-    root='../pt_datasets',
-    train=True,
-    download=True,
-    transform=ToTensor(),
-)
-test_dataset = datasets.MNIST(
-    root='../pt_datasets',
-    train=False,
-    download=True,
-    transform=ToTensor(),
-)
-
-MNIST_classes = datasets.MNIST.classes
-
-# 教師ラベルを整形するときに使う
-sp_list = list(range(len(MNIST_classes) + 1))
-sp_list[0], sp_list[-1] = sp_list[-1], sp_list[0]
-slice_pattern = tuple(sp_list)
+toy_datasets = VerticalLine()
 
 
-class PartedMultiValueNet(nn.Module):
+class MultiValueNet(nn.Module):
     def __init__(self):
-        """部分で見ていく．
-        """
-        super(PartedMultiValueNet, self).__init__()
-        self.kernel_row = (28 - hp.kernel_size + hp.stride) // hp.stride
-        self.mvbricks = nn.ModuleList([smnn.MultiValueBrick(hp.kernel_size * hp.kernel_size, 1, hp.MV_classes)
-                                      for i in range(self.kernel_row**2)])
-        self.fc1 = nn.Linear(self.kernel_row**2, len(MNIST_classes) + 1)
-        self.softmax = nn.Softmax(dim=1)
+        super(MultiValueNet, self).__init__()
+        self.mvbrick = smnn.MultiValueBrick(9, hp.B_bricks, hp.B_classes)
+        self.out = smnn.OutBrick(hp.B_bricks, 2)
 
     def forward(self, x: torch.Tensor):
-        x = x.unfold(2, hp.kernel_size, hp.stride).unfold(3, hp.kernel_size, hp.stride)
-        # unfoldした画像をバッチ枚数分を重ねて，重ねたままカットして，それを区画ごとにまとめるイメージ
-        x = x.permute((1, 2, 3, 0, 4, 5)).reshape(self.kernel_row**2, hp.batch_size, hp.kernel_size, hp.kernel_size)
-        xt = torch.empty((self.kernel_row**2, hp.batch_size, 1))
-        for i, l in enumerate(self.mvbricks):
-            xt[i] = l(x[i])
-        x = xt.squeeze().permute((1, 0))
-        x = self.fc1(x)
-        x = self.softmax(x)
+        x = self.mvbrick(x)
+        x = self.out(x)
         return x
 
 
@@ -86,11 +53,7 @@ def train_loop(dataloader: DataLoader, model, loss_fn, optimizer):
         pred = model(X)
 
         # 教師ラベルをone-hotにする．
-        label = F.one_hot(y, len(MNIST_classes) + 1).to(torch.float32)
-
-        # 0番目は該当なし，最後は数字の0に割り当てられるように入れ替える
-        label = label[:, slice_pattern]
-
+        label = F.one_hot(y, 2).to(torch.float32)
         loss = loss_fn(pred, label)
 
         # Backpropagation
@@ -112,9 +75,7 @@ def test_loop(dataloader, model, loss_fn):
         for X, y in dataloader:
             pred = model(X)
 
-            # 教師ラベルを整形する処理
-            label = F.one_hot(y, len(MNIST_classes) + 1).to(torch.float32)
-            label = label[:, slice_pattern]
+            label = F.one_hot(y, 2).to(torch.float32)
 
             test_loss += loss_fn(pred, label).item()
             correct += (pred.argmax(dim=-1) == torch.where(y == 0, 10, y)).type(torch.float32).sum().item()
@@ -150,9 +111,9 @@ def experiment_setup():
 def main():
     workdir = experiment_setup()
 
-    trainloader = DataLoader(train_dataset, hp.batch_size, shuffle=True)
-    testloader = DataLoader(test_dataset, hp.batch_size, shuffle=False)
-    model = PartedMultiValueNet()
+    trainloader = DataLoader(toy_datasets, hp.batch_size, shuffle=True)
+    testloader = DataLoader(toy_datasets, hp.batch_size, shuffle=False)
+    model = MultiValueNet()
     print(model)
 
     loss_fn = nn.CrossEntropyLoss()
@@ -161,18 +122,12 @@ def main():
     accuracy = []
     avg_loss = []
 
-    # 何もしていない最初の状態
-    show_parted_brick_weight_allInOnePicture(model.mvbricks, hp.MV_classes,
-                                             hp.kernel_size, hp.kernel_size, 0, workdir)
-
     for t in range(hp.epochs):
         print(f"Epoch {t+1}\n-------------------------------")
         train_loop(trainloader, model, loss_fn, optimizer)
         acc, al = test_loop(testloader, model, loss_fn)
         accuracy.append(acc)
         avg_loss.append(al)
-        show_parted_brick_weight_allInOnePicture(model.mvbricks, hp.MV_classes,
-                                                 hp.kernel_size, hp.kernel_size, t + 1, workdir)
     print("Done!")
 
     plot_graph(accuracy, avg_loss, workdir)
