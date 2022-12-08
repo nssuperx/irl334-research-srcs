@@ -20,7 +20,7 @@ class VerticalLine(Dataset):
             array_tmp = []
             for i in c:
                 array_tmp.append(pattern[i])
-            self.data.append([torch.Tensor(array_tmp), torch.Tensor([1 if c in correct_pattern_choice else 0]).to(torch.int32)])
+            self.data.append([torch.Tensor(array_tmp), 1 if c in correct_pattern_choice else 0])
 
     def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
         return self.data[index][0], self.data[index][1]

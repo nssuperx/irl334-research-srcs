@@ -25,8 +25,8 @@ class HyperParameter(NamedTuple):
     epochs: int
 
 
-ei = ExperimentInfo("MultiValue", "none")
-hp = HyperParameter(2022, 15, 10, 1e-2, 1, 100)
+ei = ExperimentInfo("MultiValue", "Cycle test")
+hp = HyperParameter(2022, 3, 3, 1e-1, 1, 1000)
 
 torch.manual_seed(hp.seed)
 
@@ -36,12 +36,35 @@ toy_datasets = VerticalLine()
 class MultiValueNet(nn.Module):
     def __init__(self):
         super(MultiValueNet, self).__init__()
-        self.mvbrick = smnn.MultiValueBrick(9, hp.B_bricks, hp.B_classes)
+        self.mvbrick1 = smnn.MultiValueBrick(3, 1, hp.B_classes)
+        self.mvbrick2 = smnn.MultiValueBrick(3, 1, hp.B_classes)
+        self.mvbrick3 = smnn.MultiValueBrick(3, 1, hp.B_classes)
         self.out = smnn.OutBrick(hp.B_bricks, 2)
 
     def forward(self, x: torch.Tensor):
-        x = self.mvbrick(x)
+        x1 = self.mvbrick1(x[:, 0, :])
+        x2 = self.mvbrick2(x[:, 1, :])
+        x3 = self.mvbrick3(x[:, 2, :])
+        x = torch.cat((x1, x2, x3)).reshape(hp.batch_size, 3)
         x = self.out(x)
+        return x
+
+
+class TestFullyConnectNet(nn.Module):
+    def __init__(self, in_features: int, out_features: int):
+        super(TestFullyConnectNet, self).__init__()
+        self.flatten = nn.Flatten()
+        self.fc1 = nn.Linear(in_features, 20)
+        self.hidden_softmax = nn.Softmax(dim=1)
+        self.fc2 = nn.Linear(20, out_features)
+        self.softmax = nn.Softmax(dim=1)
+
+    def forward(self, x: torch.Tensor):
+        x = self.flatten(x.to(dtype=torch.float32))
+        x = self.fc1(x)
+        x = self.hidden_softmax(x)
+        x = self.fc2(x)
+        x = self.softmax(x)
         return x
 
 
