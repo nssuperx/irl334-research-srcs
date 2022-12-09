@@ -4,10 +4,9 @@ import json
 from typing import NamedTuple
 import torch
 from torch import nn
-import torch.nn.functional as F
 from torch.utils.data import DataLoader
 import modules.self_made_nn as smnn
-from modules.cycle_toy_datasets import VerticalLine
+from modules.cycle_toy_datasets import VerticalLine, XORProblem
 import matplotlib.pyplot as plt
 
 
@@ -20,17 +19,19 @@ class HyperParameter(NamedTuple):
     seed: int
     B_classes: int
     B_bricks: int
+    linear_hidden: int
     learning_rate: float
     batch_size: int
     epochs: int
 
 
 ei = ExperimentInfo("MultiValue", "Cycle test")
-hp = HyperParameter(2022, 3, 3, 1e-1, 1, 1000)
+hp = HyperParameter(2022, 3, 3, 20, 1e-2, 1, 100000)
 
 torch.manual_seed(hp.seed)
 
 toy_datasets = VerticalLine()
+xor_datasets = XORProblem()
 
 
 class MultiValueNet(nn.Module):
@@ -54,17 +55,15 @@ class TestFullyConnectNet(nn.Module):
     def __init__(self, in_features: int, out_features: int):
         super(TestFullyConnectNet, self).__init__()
         self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(in_features, 20)
+        self.fc1 = nn.Linear(in_features, hp.linear_hidden)
         self.hidden_softmax = nn.Softmax(dim=1)
-        self.fc2 = nn.Linear(20, out_features)
-        self.softmax = nn.Softmax(dim=1)
+        self.fc2 = nn.Linear(hp.linear_hidden, out_features)
 
     def forward(self, x: torch.Tensor):
         x = self.flatten(x.to(dtype=torch.float32))
         x = self.fc1(x)
         x = self.hidden_softmax(x)
         x = self.fc2(x)
-        x = self.softmax(x)
         return x
 
 
@@ -75,9 +74,7 @@ def train_loop(dataloader: DataLoader, model, loss_fn, optimizer):
         # Compute prediction and loss
         pred = model(X)
 
-        # 教師ラベルをone-hotにする．
-        label = F.one_hot(y, 2).to(torch.float32)
-        loss = loss_fn(pred, label)
+        loss = loss_fn(pred, y)
 
         # Backpropagation
         optimizer.zero_grad()
@@ -97,11 +94,8 @@ def test_loop(dataloader, model, loss_fn):
     with torch.no_grad():
         for X, y in dataloader:
             pred = model(X)
-
-            label = F.one_hot(y, 2).to(torch.float32)
-
-            test_loss += loss_fn(pred, label).item()
-            correct += (pred.argmax(dim=-1) == torch.where(y == 0, 10, y)).type(torch.float32).sum().item()
+            test_loss += loss_fn(pred, y).item()
+            correct += (pred.argmax(dim=-1) == y).type(torch.float32).sum().item()
 
     test_loss /= num_batches
     correct /= size
@@ -137,6 +131,7 @@ def main():
     trainloader = DataLoader(toy_datasets, hp.batch_size, shuffle=True)
     testloader = DataLoader(toy_datasets, hp.batch_size, shuffle=False)
     model = MultiValueNet()
+    # model = TestFullyConnectNet(9, 2)
     print(model)
 
     loss_fn = nn.CrossEntropyLoss()
