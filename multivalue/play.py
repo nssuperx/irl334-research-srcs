@@ -134,6 +134,15 @@ def experiment_setup():
     return workdir
 
 
+def out_result(accuracy: float, avg_loss: float, workdir: str):
+    result = {
+        "accuracy": accuracy,
+        "avg_loss": avg_loss
+    }
+    with open(f"{workdir}/result.json", "w") as f:
+        json.dump(result, f, indent=4)
+
+
 def main():
     workdir = experiment_setup()
 
@@ -157,10 +166,11 @@ def main():
         acc, al = test_loop(testloader, model, loss_fn)
         accuracy.append(acc)
         avg_loss.append(al)
-        show_brick_weight_allInOnePicture(model.mvbrick.fc, hp.B_bricks, hp.B_classes, 28, 28, t+1, workdir)
+        show_brick_weight_allInOnePicture(model.mvbrick.fc, hp.B_bricks, hp.B_classes, 28, 28, t + 1, workdir)
     print("Done!")
 
     plot_graph(accuracy, avg_loss, workdir)
+    out_result(accuracy[-1], avg_loss[-1], workdir)
 
 
 if __name__ == "__main__":

@@ -147,6 +147,15 @@ def experiment_setup():
     return workdir
 
 
+def out_result(accuracy: float, avg_loss: float, workdir: str):
+    result = {
+        "accuracy": accuracy,
+        "avg_loss": avg_loss
+    }
+    with open(f"{workdir}/result.json", "w") as f:
+        json.dump(result, f, indent=4)
+
+
 def main():
     workdir = experiment_setup()
 
@@ -176,6 +185,7 @@ def main():
     print("Done!")
 
     plot_graph(accuracy, avg_loss, workdir)
+    out_result(accuracy[-1], avg_loss[-1], workdir)
 
 
 if __name__ == "__main__":
