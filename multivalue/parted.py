@@ -28,25 +28,26 @@ class HyperParameter(NamedTuple):
     epochs: int
 
 
-ei = ExperimentInfo("PartedMultiValue", "none")
-hp = HyperParameter(2022, 8, 4, 4, 1e-2, 100, 300)
+hp = HyperParameter(2022, 8, 4, 4, 1e-2, 100, 1000)
 
 torch.manual_seed(hp.seed)
 
-train_dataset = datasets.MNIST(
+train_dataset = datasets.KMNIST(
     root='../pt_datasets',
     train=True,
     download=True,
     transform=ToTensor(),
 )
-test_dataset = datasets.MNIST(
+test_dataset = datasets.KMNIST(
     root='../pt_datasets',
     train=False,
     download=True,
     transform=ToTensor(),
 )
 
-MNIST_classes = datasets.MNIST.classes
+MNIST_classes = datasets.KMNIST.classes
+
+ei = ExperimentInfo("PartedMultiValue", str(train_dataset))
 
 # 教師ラベルを整形するときに使う
 sp_list = list(range(len(MNIST_classes) + 1))
