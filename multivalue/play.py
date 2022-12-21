@@ -27,24 +27,24 @@ class HyperParameter(NamedTuple):
     epochs: int
 
 
-hp = HyperParameter(2022, 15, 10, 1e-2, 50, 1000)
+hp = HyperParameter(2022, 8, 12, 1e-2, 50, 1000)
 
 torch.manual_seed(hp.seed)
 
-train_dataset = datasets.KMNIST(
+train_dataset = datasets.MNIST(
     root='../pt_datasets',
     train=True,
     download=True,
     transform=ToTensor(),
 )
-test_dataset = datasets.KMNIST(
+test_dataset = datasets.MNIST(
     root='../pt_datasets',
     train=False,
     download=True,
     transform=ToTensor(),
 )
 
-MNIST_classes = datasets.KMNIST.classes
+MNIST_classes = datasets.MNIST.classes
 
 ei = ExperimentInfo("MultiValue", str(train_dataset))
 

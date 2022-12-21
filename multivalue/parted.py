@@ -26,26 +26,27 @@ class HyperParameter(NamedTuple):
     learning_rate: float
     batch_size: int
     epochs: int
+    patch_normalize: bool
 
 
-hp = HyperParameter(2022, 8, 4, 4, 1e-2, 100, 1000)
+hp = HyperParameter(2022, 8, 4, 9, 1e-2, 100, 1000, True)
 
 torch.manual_seed(hp.seed)
 
-train_dataset = datasets.KMNIST(
+train_dataset = datasets.MNIST(
     root='../pt_datasets',
     train=True,
     download=True,
     transform=ToTensor(),
 )
-test_dataset = datasets.KMNIST(
+test_dataset = datasets.MNIST(
     root='../pt_datasets',
     train=False,
     download=True,
     transform=ToTensor(),
 )
 
-MNIST_classes = datasets.KMNIST.classes
+MNIST_classes = datasets.MNIST.classes
 
 ei = ExperimentInfo("PartedMultiValue", str(train_dataset))
 
@@ -70,6 +71,10 @@ class PartedMultiValueNet(nn.Module):
         x = x.unfold(2, hp.kernel_size, hp.stride).unfold(3, hp.kernel_size, hp.stride)
         # unfoldした画像をバッチ枚数分を重ねて，重ねたままカットして，それを区画ごとにまとめるイメージ
         x = x.permute((1, 2, 3, 0, 4, 5)).reshape(self.kernel_row**2, hp.batch_size, hp.kernel_size, hp.kernel_size)
+        if hp.patch_normalize:
+            xmaxmin = 1 / (torch.amax(x, dim=(2, 3)) - torch.amin(x, dim=(2, 3)) + 1e-3)
+            # NOTE: 気合で変形してる．動くのでとりあえず良しとする．時間があればリファクタリングする．
+            x = x * xmaxmin.flatten().repeat(hp.kernel_size**2, 1).T.reshape(self.kernel_row**2, hp.batch_size, hp.kernel_size, hp.kernel_size)
         xt = torch.empty((self.kernel_row**2, hp.batch_size, 1))
         for i, l in enumerate(self.mvbricks):
             xt[i] = l(x[i])

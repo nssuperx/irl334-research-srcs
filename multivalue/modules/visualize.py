@@ -42,11 +42,11 @@ def show_brick_weight_allInOnePicture(layer: nn.Linear, out_bricks: int, classes
     weight = weight_flat.reshape((out_bricks, classes, height, width))
     imgs = []
 
-    for target, target_weight in enumerate(weight):
+    for target_weight in weight:
         img = torchvision.utils.make_grid(target_weight.unsqueeze(dim=1), normalize=True)
-        imgs.append(img[0])
+        imgs.append(img)
 
-    grid_imgs = torchvision.utils.make_grid(torch.stack(imgs).unsqueeze(dim=1), nrow=4)
+    grid_imgs = torchvision.utils.make_grid(torch.stack(imgs), nrow=4)
     torchvision.utils.save_image(grid_imgs, f"{path}/epoch{epoch_times:06}.png")
 
 
@@ -65,7 +65,7 @@ def show_parted_brick_weight_allInOnePicture(ml: nn.ModuleList, classes: int,
         weight = weight.reshape(classes, height, width)
         img = torchvision.utils.make_grid(weight.unsqueeze(dim=1), normalize=True,
                                           nrow=int(math.ceil(math.sqrt(classes))))
-        imgs.append(img[0])
+        imgs.append(img)
 
-    grid_imgs = torchvision.utils.make_grid(torch.stack(imgs).unsqueeze(dim=1), nrow=int(math.sqrt(len(ml))))
+    grid_imgs = torchvision.utils.make_grid(torch.stack(imgs), nrow=int(math.sqrt(len(ml))))
     torchvision.utils.save_image(grid_imgs, f"{path}/epoch{epoch_times:06}.png")
