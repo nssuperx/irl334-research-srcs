@@ -29,7 +29,7 @@ class HyperParameter(NamedTuple):
     patch_normalize: bool
 
 
-hp = HyperParameter(2022, 8, 4, 9, 1e-2, 100, 1000, True)
+hp = HyperParameter(2023, 8, 4, 4, 1e-2, 50, 1000, True)
 
 torch.manual_seed(hp.seed)
 
@@ -144,7 +144,7 @@ def plot_graph(acc: list, loss: list, path: str):
 
 
 def experiment_setup():
-    workdir = f"./out/{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
+    workdir = f"./out/parted-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
     os.makedirs(workdir)
 
     with open(f"{workdir}/info.json", "w") as f:

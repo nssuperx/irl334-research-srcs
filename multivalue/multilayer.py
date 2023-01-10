@@ -129,7 +129,7 @@ def plot_graph(acc: list, loss: list, path: str):
 
 
 def experiment_setup():
-    workdir = f"./out/{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
+    workdir = f"./out/multilayer-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
     os.makedirs(workdir)
 
     with open(f"{workdir}/info.json", "w") as f:

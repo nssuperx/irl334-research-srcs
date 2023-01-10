@@ -27,7 +27,7 @@ class HyperParameter(NamedTuple):
     epochs: int
 
 
-hp = HyperParameter(2022, 8, 24, 1e-2, 50, 1000)
+hp = HyperParameter(2022, 16, 12, 1e-2, 50, 1000)
 
 torch.manual_seed(hp.seed)
 
