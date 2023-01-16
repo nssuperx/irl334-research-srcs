@@ -3,6 +3,7 @@ import torchvision
 from torchvision import datasets
 from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader
+from PIL import Image
 
 train_dataset = datasets.MNIST(
     root='../pt_datasets',
@@ -36,6 +37,11 @@ miniimg: torch.Tensor = image.unfold(2, kernel_size, stride).unfold(3, kernel_si
 # 直感でわかりやすいUnfoldした画像の作り方．オリジナル画像1枚を単位としてまとめたもの
 miniimg = miniimg.permute((0, 2, 3, 1, 4, 5))
 miniimg = miniimg.reshape(batch_size, kernel_row**2, kernel_size, kernel_size)
+
+for i, mi in enumerate(miniimg[0]):
+    img = Image.fromarray(mi.numpy() * 255).convert("L")
+    img.save(f"unfold-{i}.png")
+
 torchvision.utils.save_image(miniimg[0].unsqueeze(dim=1), "test.png", nrow=kernel_row, normalize=True)
 test = miniimg.detach().clone()[1]
 
