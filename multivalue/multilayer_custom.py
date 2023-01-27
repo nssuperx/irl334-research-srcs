@@ -27,7 +27,7 @@ class HyperParameter(NamedTuple):
     epochs: int
 
 
-hp = HyperParameter(2022, 16, 12, 1e-2, 50, 1000)
+hp = HyperParameter(2022, 16, 11, 1e-2, 50, 1000)
 
 torch.manual_seed(hp.seed)
 
@@ -54,11 +54,33 @@ sp_list[0], sp_list[-1] = sp_list[-1], sp_list[0]
 slice_pattern = tuple(sp_list)
 
 
+class MultiValueBrick_OutState(nn.Module):
+    """隠れ層の役割のBrick
+    """
+
+    def __init__(self, in_features: int, out_features: int, classes: int):
+        super(MultiValueBrick_OutState, self).__init__()
+        self.in_features = in_features
+        self.out_features = out_features
+        self.classes = classes
+        self.flatten = nn.Flatten()
+        # NOTE: メモ参照．HiddenBrickのnn.Linearについて
+        self.fc = nn.Linear(self.in_features, self.classes * self.out_features)
+        self.argmax = smnn.SoftArgmax()
+
+    def forward(self, x: torch.Tensor):
+        x = self.flatten(x)
+        x = self.fc(x)
+        x = x.reshape(x.shape[0], self.out_features, self.classes)
+        x = self.argmax(x)
+        return x
+
+
 class MultiValueNet(nn.Module):
     def __init__(self):
         super(MultiValueNet, self).__init__()
         self.mvbrick = smnn.MultiValueBrick(28 * 28, hp.B_bricks, hp.B_classes)
-        self.out = smnn.OutBrick(hp.B_bricks, len(MNIST_classes) + 1)
+        self.out = MultiValueBrick_OutState(hp.B_bricks, 1, len(MNIST_classes) + 1)
 
     def forward(self, x: torch.Tensor):
         x = self.mvbrick(x)
@@ -73,11 +95,11 @@ def train_loop(dataloader: DataLoader, model, loss_fn, optimizer):
         # Compute prediction and loss
         pred = model(X)
 
-        # 教師ラベルをone-hotにする．
-        label = F.one_hot(y, len(MNIST_classes) + 1).to(torch.float32)
+        label = y.to(torch.float32)
+        pred = pred.flatten()
 
         # 0番目は該当なし，最後は数字の0に割り当てられるように入れ替える
-        label = label[:, slice_pattern]
+        # label = label[:, slice_pattern]
 
         loss = loss_fn(pred, label)
 
@@ -100,9 +122,8 @@ def test_loop(dataloader, model, loss_fn):
         for X, y in dataloader:
             pred = model(X)
 
-            # 教師ラベルを整形する処理
-            label = F.one_hot(y, len(MNIST_classes) + 1).to(torch.float32)
-            label = label[:, slice_pattern]
+            label = y.to(torch.float32)
+            pred = pred.flatten()
 
             test_loss += loss_fn(pred, label).item()
             correct += (pred.argmax(dim=-1) == torch.where(y == 0, 10, y)).type(torch.float32).sum().item()
@@ -126,7 +147,7 @@ def plot_graph(acc: list, loss: list, path: str):
 
 
 def experiment_setup():
-    workdir = f"./out/multivalue-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
+    workdir = f"./out/multivalue-multilayer-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
     os.makedirs(workdir)
 
     with open(f"{workdir}/info.json", "w") as f:
